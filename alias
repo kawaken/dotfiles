@@ -1,0 +1,22 @@
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias crontab='crontab -i'
+
+alias df='df -h'
+alias du='du -h'
+
+alias gi=git
+alias gs='gi st'
+alias wl='wc -l'
+
+#alias -g M='| more'
+#alias -g H='| head'
+#alias -g T='| tail'
+
+alias vi=/usr/bin/vim
+if [ -f /usr/local/git/bin/git ]; then
+  alias git=/usr/local/git/bin/git
+fi
+
+# vim: ft=sh

@@ -1,0 +1,11 @@
+*.py[co]
+*.sw[po]
+*~
+Thumbs.db
+.DS_Store
+virtualenv/
+tmp/
+logs/
+log/
+data/
+.pjrc

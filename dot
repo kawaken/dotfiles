@@ -1,0 +1,61 @@
+#!/bin/sh
+
+# functions
+function main_loop() {
+    func="$1"; shift
+    if [ $# -lt 0 ]; then
+        files=$@
+    else
+        files=`ls _*`
+    fi
+    for underfile in ${files[@]}; do
+        dotfile=`echo $underfile | sed -e s/_/./`
+        $func
+    done
+}
+
+function status() {
+    if [ $HOME/$dotfile -nt $underfile ]; then
+        status="newer"
+    elif [ $HOME/$dotfile -ot $underfile ]; then
+        status="older"
+    fi
+    printf "%-15s is %s than %-15s\n" $dotfile $status $underfile
+}
+function copy() {
+    cp -i -v $underfile $HOME/$dotfile
+}
+
+function merge() {
+    if ! diff -q $underfile $HOME/$dotfile; then
+        vimdiff $underfile $HOME/$dotfile
+    fi
+}
+
+cd `dirname $0`
+case $1 in
+    status|copy|merge)
+        main_loop "$@"
+        ;;
+    st)
+        shift;
+        main_loop status "$@"
+        ;;
+    *)
+        echo "Usage: $0 {copy|status|merge}"
+        ;;
+esac
+
+if [ "$1" == "copy" ]; then
+  # install neobundle
+  mkdir -p ~/.vim/bundle
+  if [ ! -d "~/.vim/bundle/neobundle" ]; then
+    git clone git://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim
+  fi
+
+  # install other vim plugin
+  vim doc/vimreadme
+
+  # make projects dir
+  mkdir -p ~/projects
+fi

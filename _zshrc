@@ -1,0 +1,181 @@
+export MY_DOTFILES_DIR=$HOME/dotfiles
+
+autoload -U compinit
+compinit
+
+autoload colors
+colors
+
+autoload -Uz vcs_info
+zstyle ':vcs_info:*' enable hg git
+zstyle ':vcs_info:*' formats '%F{white}%r (%s)-%F{cyan}[%b]%f'
+zstyle ':vcs_info:*' actionformats '%F{white}%r (%s)-%F{cyan}[%b|%a]%f'
+
+zstyle ':vcs_info:(hg*|git*):*' get-revision true
+zstyle ':vcs_info:git:*' check-for-changes true
+
+zstyle ':vcs_info:git:*' stagedstr " *"
+zstyle ':vcs_info:git:*' unstagedstr " *"
+zstyle ':vcs_info:git:*' formats '%F{white}(%s) - %F{cyan}[%b]%F{green}%c%F{red}%u%f'
+zstyle ':vcs_info:git:*' actionformats '%F{white}(%s) - %F{cyan}[%b|%a]%F{green}%c%F{red}%u%f'
+
+# color setting
+export LSCOLORS=ExFxCxdxBxegedabagacad
+export LS_COLORS='di=01;34:ln=01;35:so=01;32:ex=01;31:bd=46;34:cd=43;34:su=41;30:sg=46;30:tw=42;30:ow=43;30'
+zstyle ':completion:*' list-colors 'di=;34;1' 'ln=;35;1' 'so=;32;1' 'ex=31;1' 'bd=46;34' 'cd=43;34'
+
+export EDITOR=/usr/bin/vim
+
+PR_FULLPATH="%F{yellow}%d%f"
+PR_USR="%n"
+PR_SEP="%#"
+
+if [ ${UID} -eq 0 ]; then
+    PR_USR="%F{red}%n%f"
+fi
+
+RPR_HOST="%m"
+if [ -n "${SSH_CONNECTION}" ]; then
+    RPR_HOST="%B${HOST}%b"
+    PR_USR="%U${PR_USR}%u"
+
+    watch="all"
+    log
+    setopt ignore_eof
+fi
+
+function _update_prompt() {
+    RPROMPT=""
+
+    PR_VCS=""
+    vcs_info
+    if [ -n "${vcs_info_msg_0_}" ]; then
+        PR_VCS="
+${vcs_info_msg_0_}"
+    fi
+
+    PR_SEP="%(1j,%F{magenta}%#%f,%#)"
+
+    PROMPT="
+$PR_FULLPATH$PR_VCS
+$PR_USR $PR_SEP "
+    RPROMPT="$RPR_HOST"
+}
+
+PROMPT="
+$PR_FULLPATH
+$PR_USR $PR_SEP "
+
+PROMPT2="%_ %# "
+
+HISTFILE=~/.zsh_history
+HISTSIZE=100000
+SAVEHIST=100000
+setopt hist_ignore_dups
+setopt share_history
+
+setopt auto_cd
+setopt auto_pushd
+setopt nolistbeep
+setopt magic_equal_subst
+setopt long_list_jobs
+
+setopt prompt_subst
+setopt prompt_percent
+setopt transient_rprompt
+
+case "${TERM}" in
+    xterm*)
+        function _update_term_title() {
+            echo -ne "\033]0;${USER}@${HOST}\007"
+        }
+        ;;
+    screen)
+        preexec() {
+            echo -ne "\ek${1%% *}\e\\"
+        }
+        ;;
+esac
+
+#functions
+export PROJECT_DIR=$HOME/projects
+function activate_python() {
+  if [ -f ./bin/activate ]; then
+    source ./bin/activate
+  fi
+  if [ -f ./virtualenv/bin/activate ]; then
+    source ./virtualenv/bin/activate
+  fi
+
+  echo "Python info"
+  which python
+  python -V
+}
+function show_projects() {
+    echo "\033[34mProjects list :\033[0m" 
+    ls $PROJECT_DIR
+}
+function move_project_directory() {
+    cur_dir=`pwd`
+    cd $PROJECT_DIR
+    if [ ! -e $1 ]; then
+        echo "$1 does not exist."
+        cd $cur_dir
+
+        return 1
+    else
+        cd $1
+
+        return 0
+    fi
+}
+# command: cd to project dir or ls project dir
+function pjd() {
+    if [ $# -eq 0 ]; then
+        cd $PROJECT_DIR
+        show_projects
+    else
+        move_project_directory $1
+    fi
+}
+# command: virtualenvwrapper like command
+function workon () {
+    if [ $# -eq 1 ]; then
+        move_project_directory $1
+        if [ $? -eq 1 ]; then
+            return 1
+        fi
+    fi
+    if [ -f ./.pjrc ]; then
+        source ./.pjrc
+    fi
+}
+# command: print colors
+function print_colors() {
+    for color in `seq 0 255`; do
+        printf "\e[38;5;%dm %3d\e[m" $color $color
+        if [ `expr $color % 8` -eq 7 ]; then
+            printf "\n"
+        fi
+    done
+    echo
+}
+
+# Common Alias
+if [ -f $MY_DOTFILES_DIR/alias ]; then
+    source $MY_DOTFILES_DIR/alias
+fi
+
+# source OS setting
+if [ -f $MY_DOTFILES_DIR/default.d/`uname`.zshrc ]; then
+    source $MY_DOTFILES_DIR/default.d/`uname`.zshrc
+fi
+
+precmd() {
+    _update_term_title
+    _update_prompt
+}
+
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
+
+# vim: ft=sh

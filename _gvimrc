@@ -1,0 +1,16 @@
+if has('gui_macvim')
+	colorscheme desert
+"	set transparency=5
+	set guifont=Panic\ Sans:h12
+	set lines=60
+	set columns=155
+	set guioptions-=T
+
+	set mouse=a
+"	set mousemodel=popup
+"	set nomousefocus
+"	set mousehide
+
+	let macvim_hig_hift_movement = 1
+
+endif

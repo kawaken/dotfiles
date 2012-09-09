@@ -1,0 +1,13 @@
+syntax: glob
+.DS_Store
+.project
+.pydevproject
+.settings
+.buildpath
+*.class
+*.pyc
+.classpath
+*.swp
+Thumbs.db
+*~
+.pj
