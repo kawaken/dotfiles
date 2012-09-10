@@ -32,21 +32,7 @@ function merge() {
     fi
 }
 
-cd `dirname $0`
-case $1 in
-    status|copy|merge)
-        main_loop "$@"
-        ;;
-    st)
-        shift;
-        main_loop status "$@"
-        ;;
-    *)
-        echo "Usage: $0 {copy|status|merge}"
-        ;;
-esac
-
-if [ "$1" == "copy" ]; then
+function init() {
   # install neobundle
   mkdir -p ~/.vim/bundle
   if [ ! -d "~/.vim/bundle/neobundle" ]; then
@@ -58,4 +44,25 @@ if [ "$1" == "copy" ]; then
 
   # make projects dir
   mkdir -p ~/projects
-fi
+
+  # git ignore global
+  git config --global core.excludesfile $HOME/.gitignore-global
+}
+
+cd `dirname $0`
+case $1 in
+    status|copy|merge)
+        main_loop "$@"
+        ;;
+    install)
+        main_loop "copy"
+        init
+        ;;
+    st)
+        shift;
+        main_loop status "$@"
+        ;;
+    *)
+        echo "Usage: $0 {copy|status|merge}"
+        ;;
+esac
