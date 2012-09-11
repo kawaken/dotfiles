@@ -19,4 +19,6 @@ if [ -f /usr/local/git/bin/git ]; then
   alias git=/usr/local/git/bin/git
 fi
 
+alias regen='rake db:drop db:create db:migrate db:seed'
+
 # vim: ft=sh
