@@ -12,9 +12,9 @@ Remane "\_" to ".", and copy $HOME.
 If a file exists, ask you to overwrite or not.
 
 And, initialize environment.
-1. vim plugins
-2. projects directory
-3. git config
+* vim plugins
+* projects directory
+* git config
 
 Copy
 -------
