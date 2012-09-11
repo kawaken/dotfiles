@@ -47,6 +47,12 @@ function init() {
 
   # git ignore global
   git config --global core.excludesfile $HOME/.gitignore-global
+
+  # install rvm
+  read -p "Install rvm now? [y/N]: " answer
+  if [ "$answer" = 'y' ]; then
+    curl -L https://get.rvm.io | bash -s stable --ruby
+  fi
 }
 
 cd `dirname $0`
@@ -66,3 +72,5 @@ case $1 in
         echo "Usage: $0 {copy|status|merge}"
         ;;
 esac
+
+# vim: ft=sh
