@@ -31,7 +31,7 @@ zstyle ':completion:*' list-colors 'di=;34;1' 'ln=;35;1' 'so=;32;1' 'ex=31;1' 'b
 
 # vcs関連の設定
 autoload -Uz vcs_info
-zstyle ':vcs_info:*' enable hg git
+zstyle ':vcs_info:*' enable hg git svn
 zstyle ':vcs_info:*' formats '%F{white}%r (%s)-%F{cyan}[%b]%f'
 zstyle ':vcs_info:*' actionformats '%F{white}%r (%s)-%F{cyan}[%b|%a]%f'
 
