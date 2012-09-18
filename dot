@@ -33,6 +33,25 @@ function merge() {
 }
 
 function init() {
+  # git ignore global
+  git config --global core.excludesfile $HOME/.gitignore-global
+
+  # config git default
+  read -p "Enter you git username: " username
+  if [ -n $username ]; then
+    git config --global user.name $username
+  fi
+
+  read -p "Enter you git email: " email
+  if [ -n $email ]; then
+    git config --global user.email $email
+  fi
+
+  read -p "Enter you GITHUB username: " gh_username
+  if [ -n $gh_username ]; then
+    git config --global github.user $gh_username
+  fi
+
   # install neobundle
   mkdir -p ~/.vim/bundle
   if [ ! -d "~/.vim/bundle/neobundle" ]; then
@@ -44,9 +63,6 @@ function init() {
 
   # make projects dir
   mkdir -p ~/projects
-
-  # git ignore global
-  git config --global core.excludesfile $HOME/.gitignore-global
 
   # install rvm
   read -p "Install rvm now? [y/N]: " answer
