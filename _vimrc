@@ -12,6 +12,8 @@ NeoBundle 'Shougo/vimshell.git'
 NeoBundle 'Shougo/vimproc.git'
 NeoBundle 'QuickBuf'
 NeoBundle 'altercation/vim-colors-solarized.git'
+NeoBundle 'mattn/webapi-vim'
+NeoBundle 'mattn/gist-vim'
 
 filetype plugin indent on
 
@@ -127,3 +129,6 @@ inoremap <expr><BS> pumvisible() ? neocomplcache#cancel_popup()."\<C-h>" : "\<C-
 inoremap <expr><CR> pumvisible() ? "\<C-y>" : "\<CR>"
 
 let g:qb_hotkey = "<C-TAB>" 
+
+let g:gist_show_privates = 1
+let g:gist_post_private = 1
