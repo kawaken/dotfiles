@@ -14,6 +14,7 @@ NeoBundle 'QuickBuf'
 NeoBundle 'altercation/vim-colors-solarized.git'
 NeoBundle 'mattn/webapi-vim'
 NeoBundle 'mattn/gist-vim'
+NeoBundle 'vim-scripts/VimRepress'
 
 filetype plugin indent on
 

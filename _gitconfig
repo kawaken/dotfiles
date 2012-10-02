@@ -8,18 +8,20 @@
 	ui = true
 [alias]
 
-	ad = add
-	br = branch
-	ci = commit
-	cl = config --list
-	co = checkout
-	hist = log --pretty=oneline --graph --date=short
-	in = fetch --dry-run
-	last = log -1 HEAD
-	lg = log --pretty=short --graph
-	log-all = log --graph --all --decorate
-	out = push -n -v
-	pul = pull
-	pus = push
-	st = status -s
+    ad = add
+    br = branch
+    ci = commit
+    cl = config --list
+    co = checkout
+    hist = log --pretty=oneline --graph --date=short
+    in = fetch --dry-run
+    last = log -1 HEAD
+    lg = log --pretty=short --graph
+    log-all = log --graph --all --decorate
+    out = push -n -v
+    pul = pull
+    pus = push
+    rv = remote -v
+    st = status -s
+    us = reset HEAD # unstage
 
