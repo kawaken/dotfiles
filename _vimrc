@@ -99,6 +99,7 @@ autocmd FileType python setl expandtab tabstop=4 shiftwidth=4 softtabstop=4
 autocmd FileType ruby setl autoindent
 autocmd FileType ruby setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
 autocmd BufNewFile,BufRead *.rhtml setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
+autocmd BufNewFile,BufRead *.rb setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
 autocmd BufNewFile,BufRead *.yml setl tabstop=2 shiftwidth=2 softtabstop=2
 
 " sh settings

@@ -155,6 +155,8 @@ function workon () {
     fi
     if [ -f ./.pjrc ]; then
         source ./.pjrc
+    else
+        echo "no .pjrc"
     fi
 }
 # command: print colors
@@ -183,6 +185,10 @@ precmd() {
     _update_prompt
 }
 
+export rvm_project_rvmrc=0
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
+
+# clean up unneeded directories
+rm -fr Videos/ Templates/ Public/ Pictures/ Music/ Downloads/ Documents/ Desktop/
 
 # vim: ft=sh

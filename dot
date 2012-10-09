@@ -59,7 +59,7 @@ function init() {
   fi
 
   # install other vim plugin
-  vim doc/vimreadme
+  vim template/vimreadme
 
   # make projects dir
   mkdir -p ~/projects

@@ -25,3 +25,5 @@
     st = status -s
     us = reset HEAD # unstage
 
+[branch]
+    autosetuprebase = always
