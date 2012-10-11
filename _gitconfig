@@ -2,8 +2,9 @@
 	name = 
 	email = 
 [core]
-	pager = less -R
-	excludesfile = 
+    pager = less -R
+    excludesfile = /home/kawaken/.gitignore-global
+	autocrlf = input
 [color]
 	ui = true
 [alias]
@@ -18,6 +19,7 @@
     last = log -1 HEAD
     lg = log --pretty=short --graph
     log-all = log --graph --all --decorate
+    ls = ls-files
     out = push -n -v
     pul = pull
     pus = push

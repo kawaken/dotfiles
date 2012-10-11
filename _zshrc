@@ -66,6 +66,10 @@ if [ -n "${SSH_CONNECTION}" ]; then
     setopt ignore_eof
 fi
 
+function _update_term_title() {
+  :
+}
+
 function _update_prompt() {
     RPROMPT=""
 
