@@ -1,7 +1,3 @@
-#export LANG=ja_JP.UTF-8
+export LANG=ja_JP.UTF-8
 exec startxfce4
 
-# key configuration
-xset -r 49  # HHK Hankaku_Zenkaku
-xset -r 101 # HHK Hiragana_Katakana
-xmodmap ~/.xmodmaprc
