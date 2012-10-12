@@ -3,7 +3,7 @@
 # functions
 function main_loop() {
     func="$1"; shift
-    if [ $# -lt 0 ]; then
+    if [ $# -gt 0 ]; then
         files=$@
     else
         files=`ls _*`
