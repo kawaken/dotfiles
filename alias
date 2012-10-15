@@ -1,3 +1,4 @@
+alias ls="ls -l --time-style=+'%Y/%m/%d %H:%M:%S'"
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
