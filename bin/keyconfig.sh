@@ -15,3 +15,4 @@ KEYMAPPINGS
 # No key repeat
 xset -r 49  # HHK Hankaku_Zenkaku
 xset -r 101 # HHK Hiragana_Katakana
+xset -r 22  # HHK modifiered BackSpace
