@@ -11,6 +11,9 @@ alias gi=git
 alias gs='gi st'
 alias wl='wc -l'
 
+alias today="LANG=C date '+%F'"
+alias now="LANG=C date '+%F %T'"
+
 #alias -g M='| more'
 #alias -g H='| head'
 #alias -g T='| tail'
