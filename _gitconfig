@@ -5,6 +5,7 @@
     pager = less -R
     excludesfile = /home/kawaken/.gitignore-global
 	autocrlf = input
+	quotepath = false
 [color]
 	ui = true
 [alias]
