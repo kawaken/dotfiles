@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Keyboard remapping
-cat <<KEYMAPPINGS | xmodmap -
+xmodmap - <<KEYMAPPINGS
 ! Muhenkan -> Escape
 keycode 102 = Escape
 ! Henkan -> Return
