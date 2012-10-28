@@ -85,7 +85,7 @@ case $1 in
         main_loop status "$@"
         ;;
     *)
-        echo "Usage: $0 {copy|status|merge}"
+        echo "Usage: $0 {install|copy|status|merge}"
         ;;
 esac
 
