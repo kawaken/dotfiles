@@ -3,7 +3,7 @@
 	email = 
 [core]
     pager = less -R
-    excludesfile = /home/kawaken/.gitignore-global
+    excludesfile = ~/.gitignore-global
 	autocrlf = input
 	quotepath = false
 [color]
