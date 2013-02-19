@@ -6,6 +6,7 @@ function main_loop() {
     if [ $# -gt 0 ]; then
         files=$@
     else
+        cd `git rev-parse --show-toplevel`
         files=`ls _*`
     fi
     for underfile in ${files[@]}; do
