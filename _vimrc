@@ -13,8 +13,8 @@ NeoBundle 'Shougo/vimproc.git'
 NeoBundle 'Shougo/vimshell.git'
 NeoBundle 'altercation/vim-colors-solarized.git'
 NeoBundle 'jnwhiteh/vim-golang'
+NeoBundle 'kawaken/vimplenote-vim'
 NeoBundle 'mattn/gist-vim'
-NeoBundle 'mattn/vimplenote-vim'
 NeoBundle 'mattn/webapi-vim'
 NeoBundle 'pangloss/vim-javascript'
 NeoBundle 'vim-scripts/VimRepress'
@@ -97,6 +97,9 @@ set noswapfile
 "タブ幅をリセット
 au BufNewFile,BufRead * setl expandtab tabstop=4 shiftwidth=4 softtabstop=4
 
+" vim settings
+autocmd FileType vim setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
+
 " python settings
 autocmd FileType python setl autoindent
 autocmd FileType python setl smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
@@ -107,6 +110,7 @@ autocmd FileType ruby setl autoindent
 autocmd FileType ruby setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
 autocmd BufNewFile,BufRead *.rhtml setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
 autocmd BufNewFile,BufRead *.rb setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
+autocmd BufNewFile,BufRead *.erb setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
 autocmd BufNewFile,BufRead *.yml setl tabstop=2 shiftwidth=2 softtabstop=2
 
 " sh settings
