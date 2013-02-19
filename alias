@@ -1,4 +1,5 @@
-alias ls="ls -l --time-style=+'%Y/%m/%d %H:%M:%S'"
+alias ll="ls -l --time-style=+'%Y/%m/%d %H:%M:%S'"
+alias lrt='ls -lrt'
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
@@ -13,6 +14,8 @@ alias wl='wc -l'
 
 alias today="LANG=C date '+%F'"
 alias now="LANG=C date '+%F %T'"
+
+alias chx="chmod +x"
 
 #alias -g M='| more'
 #alias -g H='| head'

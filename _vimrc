@@ -5,16 +5,23 @@ if has('vim_starting')
   call neobundle#rc(expand('~/.vim/bundle/'))
 endif
 
-NeoBundle 'Shougo/neocomplcache.git'
-NeoBundle 'Shougo/neobundle.vim.git'
-NeoBundle 'Shougo/unite.vim.git'
-NeoBundle 'Shougo/vimshell.git'
-NeoBundle 'Shougo/vimproc.git'
 NeoBundle 'QuickBuf'
+NeoBundle 'Shougo/neobundle.vim.git'
+NeoBundle 'Shougo/neocomplcache.git'
+NeoBundle 'Shougo/unite.vim.git'
+NeoBundle 'Shougo/vimproc.git'
+NeoBundle 'Shougo/vimshell.git'
 NeoBundle 'altercation/vim-colors-solarized.git'
-NeoBundle 'mattn/webapi-vim'
+NeoBundle 'jnwhiteh/vim-golang'
 NeoBundle 'mattn/gist-vim'
+NeoBundle 'mattn/vimplenote-vim'
+NeoBundle 'mattn/webapi-vim'
+NeoBundle 'pangloss/vim-javascript'
 NeoBundle 'vim-scripts/VimRepress'
+
+if isdirectory("$GOROOT/misc/vim")
+  set rtp+=$GOROOT/misc/vim
+endif
 
 filetype plugin indent on
 
@@ -107,6 +114,10 @@ autocmd FileType sh setl autoindent
 autocmd FileType sh setl smartindent
 autocmd FileType sh setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
 
+autocmd FileType go setl autoindent
+autocmd FileType go setl smartindent
+autocmd FileType go setl expandtab tabstop=4 shiftwidth=4 softtabstop=4
+
 set completeopt=menuone
 let g:neocomplcache_enable_at_startup = 1
 let g:neocomplcache_max_list = 20
@@ -135,3 +146,8 @@ let g:qb_hotkey = "<C-TAB>"
 let g:gist_show_privates = 1
 let g:gist_post_private = 1
 let g:gist_detect_filetype = 1
+
+" load private settings
+if filereadable("$HOME/.vim/private")
+    source "$HOME/.vim/private"
+endif
