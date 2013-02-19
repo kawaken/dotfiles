@@ -10,6 +10,7 @@ alias du='du -h'
 
 alias gi=git
 alias gs='gi st'
+alias gicd='cd `git rev-parse --show-toplevel`'
 alias wl='wc -l'
 
 alias today="LANG=C date '+%F'"
