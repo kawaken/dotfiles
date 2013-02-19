@@ -1,13 +1,13 @@
 [user]
-	name = 
-	email = 
+    name = 
+    email = 
 [core]
     pager = less -R
     excludesfile = ~/.gitignore-global
-	autocrlf = input
-	quotepath = false
+    autocrlf = input
+    quotepath = false
 [color]
-	ui = true
+    ui = true
 [alias]
 
     ad = add
@@ -27,6 +27,9 @@
     rv = remote -v
     st = status -s
     us = reset HEAD # unstage
+    ex = exclude
 
 [branch]
     autosetuprebase = always
+[github]
+    user = kawaken
