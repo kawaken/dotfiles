@@ -192,7 +192,4 @@ precmd() {
 export rvm_project_rvmrc=0
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
 
-# clean up unneeded directories
-rm -fr Videos/ Templates/ Public/ Pictures/ Music/ Downloads/ Documents/ Desktop/
-
 # vim: ft=sh
