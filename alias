@@ -16,6 +16,8 @@ alias wl='wc -l'
 alias today="LANG=C date '+%F'"
 alias now="LANG=C date '+%F %T'"
 
+alias be='bundle exec'
+
 alias chx="chmod +x"
 
 #alias -g M='| more'
