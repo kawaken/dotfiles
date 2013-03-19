@@ -10,6 +10,8 @@
     quotepath = false
 [color]
     ui = true
+[push]
+    default = traking
 [alias]
 
     ad = add
@@ -32,7 +34,5 @@
     us = reset HEAD # unstage
     ex = exclude
 
-[branch]
-    autosetuprebase = always
 [github]
     user = kawaken
