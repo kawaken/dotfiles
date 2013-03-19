@@ -89,7 +89,7 @@ augroup cch
 augroup END
 
 :hi clear CursorLine
-highlight CursorLine cterm=underline gui=underline
+"highlight CursorLine cterm=underline gui=underline
 highlight CursorLine ctermbg=black guibg=black
 
 set noswapfile
