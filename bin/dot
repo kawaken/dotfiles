@@ -3,10 +3,11 @@
 # functions
 function main_loop() {
     func="$1"; shift
+
+    cd `git rev-parse --show-toplevel`
     if [ $# -gt 0 ]; then
         files=$@
     else
-        cd `git rev-parse --show-toplevel`
         files=`ls _*`
     fi
     for underfile in ${files[@]}; do
