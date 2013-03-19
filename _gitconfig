@@ -15,6 +15,7 @@
     ci = commit
     cl = config --list
     co = checkout
+    df = diff
     hist = log --pretty=oneline --graph --date=short
     in = fetch --dry-run
     last = log -1 HEAD
@@ -22,7 +23,7 @@
     log-all = log --graph --all --decorate
     ls = ls-files
     out = push -n -v
-    pul = pull
+    pul = pull --ff-only
     pus = push
     rv = remote -v
     st = status -s
