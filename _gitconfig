@@ -8,13 +8,14 @@
     excludesfile = ~/.gitignore-global
     autocrlf = input
     quotepath = false
+    filemode = false
 [color]
     ui = true
 [push]
-    default = traking
+    default = upstream
 [alias]
-
     ad = add
+    au = add -u
     br = branch
     ci = commit
     cl = config --list
