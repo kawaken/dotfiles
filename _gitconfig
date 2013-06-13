@@ -32,6 +32,8 @@
     pus = push
     rv = remote -v
     st = status -s
+    sh = show
+    shh = show HEAD
     us = reset HEAD # unstage
     ex = exclude
 
