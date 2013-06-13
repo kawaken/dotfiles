@@ -112,6 +112,7 @@ autocmd BufNewFile,BufRead *.rhtml setl expandtab tabstop=2 shiftwidth=2 softtab
 autocmd BufNewFile,BufRead *.rb setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
 autocmd BufNewFile,BufRead *.erb setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
 autocmd BufNewFile,BufRead *.yml setl tabstop=2 shiftwidth=2 softtabstop=2
+autocmd BufNewFile,BufRead *.rake setl tabstop=2 shiftwidth=2 softtabstop=2
 
 " sh settings
 autocmd FileType sh setl autoindent

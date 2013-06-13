@@ -36,6 +36,8 @@
     shh = show HEAD
     us = reset HEAD # unstage
     ex = exclude
+    sts = stash
+    stsu = stash -u
 
 [github]
     user = kawaken
