@@ -35,33 +35,42 @@ function merge() {
 }
 
 function init() {
+  # check git version
+
+  if `git --version | grep -c -e ' 1.8'`; then
+    echo "git version is required over 1.8"
+    git --version
+    return 1
+  fi
+
   # git ignore global
   git config --global core.excludesfile $HOME/.gitignore-global
 
   # config git default
   read -p "Enter you git username: " username
-  if [ -n $username ]; then
-    git config --global user.name $username
+  if [ -n "$username" ]; then
+    git config --global user.name "$username"
   fi
 
   read -p "Enter you git email: " email
-  if [ -n $email ]; then
+  if [ -n "$email" ]; then
     git config --global user.email $email
   fi
 
   read -p "Enter you GITHUB username: " gh_username
-  if [ -n $gh_username ]; then
-    git config --global github.user $gh_username
+  if [ -n "$gh_username" ]; then
+    git config --global github.user "$gh_username"
   fi
 
   # install neobundle
   mkdir -p ~/.vim/bundle
   if [ ! -d "~/.vim/bundle/neobundle" ]; then
-    git clone git://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim
+    # download neobundle
+    if `git clone git://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim`; then
+      # install other vim plugin
+      vim template/vimreadme
+    fi
   fi
-
-  # install other vim plugin
-  vim template/vimreadme
 
   # make projects dir
   mkdir -p ~/projects
@@ -69,7 +78,7 @@ function init() {
   # install rvm
   read -p "Install rvm now? [y/N]: " answer
   if [ "$answer" = 'y' ]; then
-    curl -L https://get.rvm.io | bash -s stable --ruby
+    \curl -L https://get.rvm.io | bash
   fi
 }
 
