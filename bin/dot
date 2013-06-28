@@ -37,7 +37,7 @@ function merge() {
 function init() {
   # check git version
 
-  if `git --version | grep -c -e ' 1.8'`; then
+  if ( git --version | grep -q -v -e " 1.8" ); then
     echo "git version is required over 1.8"
     git --version
     return 1
@@ -66,7 +66,7 @@ function init() {
   mkdir -p ~/.vim/bundle
   if [ ! -d "~/.vim/bundle/neobundle" ]; then
     # download neobundle
-    if `git clone git://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim`; then
+    if git clone git://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim; then
       # install other vim plugin
       vim template/vimreadme
     fi
@@ -79,6 +79,12 @@ function init() {
   read -p "Install rvm now? [y/N]: " answer
   if [ "$answer" = 'y' ]; then
     \curl -L https://get.rvm.io | bash
+  fi
+
+  # remove bashrc
+  read -p "Remove bash profiles? [y/N]: " answer
+  if [ "$answer" = 'y' ]; then
+    remove -f ~/.bash*
   fi
 }
 
