@@ -43,6 +43,8 @@ zstyle ':vcs_info:git:*' unstagedstr " *"
 zstyle ':vcs_info:git:*' formats '%F{white}(%s) - %F{cyan}[%b]%F{green}%c%F{red}%u%f'
 zstyle ':vcs_info:git:*' actionformats '%F{white}(%s) - %F{cyan}[%b|%a]%F{green}%c%F{red}%u%f'
 
+zstyle ':vcs_info:svn:*' branchformat '%b:r%r'
+zstyle ':vcs_info:svn:*' formats '%F{white}(%s) - %F{cyan}[%b]%f'
 
 # dotfilesの場所を変数に設定
 export MY_DOTFILES_DIR=$HOME/dotfiles
@@ -74,7 +76,7 @@ function _update_prompt() {
     RPROMPT=""
 
     PR_VCS=""
-    vcs_info
+    LANG=en_US.UTF-8 vcs_info
     if [ -n "${vcs_info_msg_0_}" ]; then
         PR_VCS="
 ${vcs_info_msg_0_}"
