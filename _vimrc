@@ -18,6 +18,8 @@ NeoBundle 'mattn/gist-vim'
 NeoBundle 'mattn/webapi-vim'
 NeoBundle 'pangloss/vim-javascript'
 NeoBundle 'vim-scripts/VimRepress'
+NeoBundle 'vim-scripts/surround.vim.git'
+NeoBundle 'yuratomo/w3m.vim'
 
 if isdirectory("$GOROOT/misc/vim")
   set rtp+=$GOROOT/misc/vim
