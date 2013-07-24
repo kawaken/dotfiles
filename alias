@@ -28,6 +28,7 @@ alias vi=/usr/bin/vim
 if [ -f /usr/local/git/bin/git ]; then
   alias git=/usr/local/git/bin/git
 fi
+alias visjis='vi -c ":e ++enc=cp932"'
 
 alias regen='rake db:drop db:create db:migrate db:seed'
 
