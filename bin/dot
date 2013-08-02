@@ -84,7 +84,7 @@ function init() {
   # remove bashrc
   read -p "Remove bash profiles? [y/N]: " answer
   if [ "$answer" = 'y' ]; then
-    remove -f ~/.bash*
+    rm -f ~/.bash*
   fi
 }
 
