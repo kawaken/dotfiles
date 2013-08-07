@@ -24,6 +24,7 @@ NeoBundle 'yuratomo/w3m.vim'
 if isdirectory("$GOROOT/misc/vim")
   set rtp+=$GOROOT/misc/vim
 endif
+exe "set rtp+=".globpath($GOPATH, "src/github.com/nsf/gocode/vim")
 
 filetype plugin indent on
 
@@ -97,7 +98,7 @@ highlight CursorLine ctermbg=black guibg=black
 set noswapfile
 
 "タブ幅をリセット
-au BufNewFile,BufRead * setl expandtab tabstop=4 shiftwidth=4 softtabstop=4
+au FileType * setl expandtab tabstop=4 shiftwidth=4 softtabstop=4
 
 " vim settings
 autocmd FileType vim setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
@@ -125,7 +126,9 @@ autocmd FileType sh setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
 
 autocmd FileType go setl autoindent
 autocmd FileType go setl smartindent
-autocmd FileType go setl expandtab tabstop=4 shiftwidth=4 softtabstop=4
+autocmd FileType go setl tabstop=4 shiftwidth=4 softtabstop=0
+autocmd FileType go setl noexpandtab
+auto BufWritePre *.go Fmt
 
 set completeopt=menuone
 let g:neocomplcache_enable_at_startup = 1
@@ -149,6 +152,10 @@ inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
 inoremap <expr><C-h> pumvisible() ? neocomplcache#cancel_popup()."\<C-h>" : "\<C-h>"
 inoremap <expr><BS> pumvisible() ? neocomplcache#cancel_popup()."\<C-h>" : "\<C-h>"
 inoremap <expr><CR> pumvisible() ? "\<C-y>" : "\<CR>"
+if !exists('g:neocomplcache_omni_patterns')
+  let g:neocomplcache_omni_patterns = {}
+endif
+let g:neocomplcache_omni_patterns.go = '\h\w*\.\?'
 
 let g:qb_hotkey = "<C-TAB>" 
 
