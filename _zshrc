@@ -41,10 +41,19 @@ zstyle ':vcs_info:*' actionformats '%F{white}%r (%s)-%F{cyan}[%b|%a]%f'
 zstyle ':vcs_info:(hg*|git*):*' get-revision true
 zstyle ':vcs_info:git:*' check-for-changes true
 
-zstyle ':vcs_info:git:*' stagedstr " *"
-zstyle ':vcs_info:git:*' unstagedstr " *"
-zstyle ':vcs_info:git:*' formats '%F{white}(%s) - %F{cyan}[%b]%f' '%F{green}%c%F{red}%u%f'
+zstyle ':vcs_info:git:*' stagedstr "%F{green}*"
+zstyle ':vcs_info:git:*' unstagedstr "%F{red}*"
+zstyle ':vcs_info:git:*' formats '%F{white}(%s) - %F{cyan}[%b]%f' ' %c%u%m%f'
 zstyle ':vcs_info:git:*' actionformats '%F{white}(%s) - %F{cyan}[%b|%a]%f' '%F{green}%c%F{red}%u%f'
+zstyle ':vcs_info:git+set-message:*' hooks git-extra-info
+function +vi-git-extra-info() {
+  if [[ "$1" != "1" ]]; then
+    return 0
+  fi
+
+  hook_com[unstaged]+=`check_git_untracked`
+  hook_com[misc]+=`count_git_st`
+}
 
 zstyle ':vcs_info:svn:*' branchformat '%b:r%r'
 zstyle ':vcs_info:svn:*' formats '%F{white}(%s) - %F{cyan}[%b]%f' '%F{red}%u%f'
@@ -88,6 +97,16 @@ function count_svn_st() {
     svn st | sort | awk '{ c[$1] += 1; } END{for (k in c) {printf "%s:%s ", k, c[k]}}'
 }
 
+function check_git_untracked() {
+    if [[ -n $(git ls-files --other --exclude-standard 2> /dev/null) ]]; then
+      echo -e "%F{yellow}*"
+    fi
+}
+
+function count_git_st() {
+    git status -s | sort | awk '{ c[$1] += 1; } END{for (k in c) {printf "%s:%s ", k, c[k]}}'
+}
+
 function _update_vcs_info_msg() {
     local -a messages
     local prompt
@@ -95,12 +114,8 @@ function _update_vcs_info_msg() {
     LANG=en_US.UTF-8 vcs_info
 
     if [[ -z ${vcs_info_msg_0_} ]]; then
-        # vcs_info で何も取得していない場合はプロンプトを表示しない
         prompt=""
     else
-        # vcs_info で情報を取得した場合
-        # $vcs_info_msg_0_ , $vcs_info_msg_1_ , $vcs_info_msg_2_ を
-        # それぞれ緑、黄色、赤で表示する
         [[ -n "$vcs_info_msg_0_" ]] && messages+=( "${vcs_info_msg_0_}" )
         [[ -n "$vcs_info_msg_1_" ]] && messages+=( "${vcs_info_msg_1_}" )
         [[ -n "$vcs_info_msg_2_" ]] && messages+=( "${vcs_info_msg_2_}" )
@@ -113,24 +128,47 @@ ${(j: :)messages}"
     echo "$prompt"
 }
 
+function _update_pr_usr() {
+  local prompt
+  prompt="%n"
+  if [ ${UID} -eq 0 ]; then
+    prompt="%F{red}%n%f"
+  fi
+  if [ -n "${SSH_CONNECTION}" ]; then
+    prompt="%U${prompt}%u"
+  fi
+
+  if [ $SHLVL -gt 1 ]; then
+    local bc
+    bc=$(($SHLVL - 1))
+    prompt="$(printf '%.1s' '>'{1..$bc})$prompt"
+  fi
+
+  echo "$prompt"
+}
+
+function _update_rpr_host() {
+  local prompt
+  prompt="%m"
+  if [ -n "${SSH_CONNECTION}" ]; then
+      prompt="%B${HOST}%b"
+  fi
+  echo "$prompt"
+}
+
 function _update_prompt() {
     RPROMPT=""
 
+    PR_FULLPATH="%F{yellow}%d%f"
     PR_VCS=`_update_vcs_info_msg`
+    PR_USR=`_update_pr_usr`
     PR_SEP="%(1j,%F{magenta}%#%f,%#)"
 
     PROMPT="
 $PR_FULLPATH$PR_VCS
 $PR_USR $PR_SEP "
-    RPROMPT="$RPR_HOST"
+    RPROMPT=`_update_rpr_host`
 }
-
-PROMPT="
-$PR_FULLPATH
-$PR_USR $PR_SEP "
-
-PROMPT2="%_ %# "
-
 
 case "${TERM}" in
     xterm*)
