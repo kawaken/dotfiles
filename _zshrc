@@ -259,10 +259,7 @@ if [ -f $MY_DOTFILES_DIR/default.d/`uname`.zshrc ]; then
     source $MY_DOTFILES_DIR/default.d/`uname`.zshrc
 fi
 
-precmd() {
-    _update_term_title
-    _update_prompt
-}
+add-zsh-hook precmd _update_prompt
 
 export rvm_project_rvmrc=0
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
