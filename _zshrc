@@ -43,8 +43,8 @@ zstyle ':vcs_info:git:*' check-for-changes true
 
 zstyle ':vcs_info:git:*' stagedstr "%F{green}*"
 zstyle ':vcs_info:git:*' unstagedstr "%F{red}*"
-zstyle ':vcs_info:git:*' formats '%F{white}(%s) - %F{cyan}[%b]%f' ' %c%u%m%f'
-zstyle ':vcs_info:git:*' actionformats '%F{white}(%s) - %F{cyan}[%b|%a]%f' '%F{green}%c%F{red}%u%f'
+zstyle ':vcs_info:git:*' formats '%F{white}(%s) - %F{cyan}[%b]%f' '%c%u%f %m%f'
+zstyle ':vcs_info:git:*' actionformats '%F{white}(%s) - %F{cyan}[%b|%a]%f' '%c%u%f %m%f'
 zstyle ':vcs_info:git+set-message:*' hooks git-extra-info
 function +vi-git-extra-info() {
   if [[ "$1" != "1" ]]; then
@@ -56,7 +56,7 @@ function +vi-git-extra-info() {
 }
 
 zstyle ':vcs_info:svn:*' branchformat '%b:r%r'
-zstyle ':vcs_info:svn:*' formats '%F{white}(%s) - %F{cyan}[%b]%f' '%F{red}%u%f'
+zstyle ':vcs_info:svn:*' formats '%F{white}(%s) - %F{cyan}[%b]%f' '%u%f'
 #zstyle ':vcs_info:*+*:*' debug true
 zstyle ':vcs_info:svn+set-message:*' hooks svn-extra-info
 function +vi-svn-extra-info() {
