@@ -24,7 +24,7 @@ alias chx="chmod +x"
 #alias -g H='| head'
 #alias -g T='| tail'
 
-alias vi=/usr/bin/vim
+alias vi=vim
 if [ -f /usr/local/git/bin/git ]; then
   alias git=/usr/local/git/bin/git
 fi
