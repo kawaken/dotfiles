@@ -71,19 +71,7 @@ function +vi-svn-extra-info() {
 export MY_DOTFILES_DIR=$HOME/dotfiles
 export EDITOR=/usr/bin/vim
 
-PR_FULLPATH="%F{yellow}%d%f"
-PR_USR="%n"
-PR_SEP="%#"
-
-if [ ${UID} -eq 0 ]; then
-    PR_USR="%F{red}%n%f"
-fi
-
-RPR_HOST="%m"
 if [ -n "${SSH_CONNECTION}" ]; then
-    RPR_HOST="%B${HOST}%b"
-    PR_USR="%U${PR_USR}%u"
-
     watch="all"
     log
     setopt ignore_eof
