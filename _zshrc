@@ -69,7 +69,7 @@ function +vi-svn-extra-info() {
 
 # dotfilesの場所を変数に設定
 export MY_DOTFILES_DIR=$HOME/dotfiles
-export EDITOR=/usr/bin/vim
+export EDITOR=vim
 
 PR_FULLPATH="%F{yellow}%d%f"
 PR_USR="%n"
