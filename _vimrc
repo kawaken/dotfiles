@@ -5,21 +5,26 @@ if has('vim_starting')
   call neobundle#rc(expand('~/.vim/bundle/'))
 endif
 
-NeoBundle 'QuickBuf'
-NeoBundle 'Shougo/neobundle.vim.git'
-NeoBundle 'Shougo/neocomplcache.git'
-NeoBundle 'Shougo/unite.vim.git'
-NeoBundle 'Shougo/vimproc.git'
-NeoBundle 'Shougo/vimshell.git'
+NeoBundle 'alpaca-tc/alpaca_tags'
+NeoBundle 'alpaca-tc/neorspec.vim'
+NeoBundle 'alpaca-tc/vim-endwise.git'
 NeoBundle 'altercation/vim-colors-solarized.git'
+NeoBundle 'AndrewRadev/switch.vim'
+NeoBundle 'ecomba/vim-ruby-refactoring'
 NeoBundle 'jnwhiteh/vim-golang'
-NeoBundle 'kawaken/vimplenote-vim'
 NeoBundle 'mattn/gist-vim'
 NeoBundle 'mattn/webapi-vim'
 NeoBundle 'pangloss/vim-javascript'
-NeoBundle 'vim-scripts/VimRepress'
+NeoBundle 'QuickBuf'
+NeoBundle 'Shougo/neobundle.vim.git'
+NeoBundle 'Shougo/neocomplete.git'
+NeoBundle 'Shougo/neosnippet'
+NeoBundle 'Shougo/unite.vim.git'
+NeoBundle 'Shougo/vimproc.git'
+NeoBundle 'taka84u9/vim-ref-ri'
+NeoBundle 'tpope/vim-rails'
+NeoBundle 'tsaleh/vim-matchit'
 NeoBundle 'vim-scripts/surround.vim.git'
-NeoBundle 'yuratomo/w3m.vim'
 
 if isdirectory("$GOROOT/misc/vim")
   set rtp+=$GOROOT/misc/vim
@@ -131,32 +136,24 @@ autocmd FileType go setl noexpandtab
 auto BufWritePre *.go Fmt
 
 set completeopt=menuone
-let g:neocomplcache_enable_at_startup = 1
-let g:neocomplcache_max_list = 20
-let g:neocomplcache_auto_completion_start_length = 2
-let g:neocomplcache_manual_completion_start_length = 0
-let g:neocomplcache_min_keyword_length = 3
-let g:neocomplcache_min_syntax_length = 3
-let g:neocomplcache_enable_smart_case = 1
-let g:neocomplcache_cursor_hold_i_time = 500
-"let g:neocomplcache_omni_patterns = {}
-"let g:neocomplcache_enable_cursor_hold_i = 1
-inoremap <expr><C-x><C-f> neocomplcache#filename_complete()
-inoremap <expr><C-CR> neocomplcache#manual_omni_complete()
-inoremap <expr><C-n> pumvisible() ? "\<C-n>" : neocomplcache#manual_keyword_complete()
-inoremap <expr><C-y>  neocomplcache#close_popup()
-inoremap <expr><C-e>  neocomplcache#cancel_popup()
-inoremap <expr><C-g> neocomplcache#undo_completion()
-imap <C-s> <Plug>(neocomplcache_snippets_expand) 
+let g:neocomplete#enable_at_startup = 1
+let g:neocomplete#max_list = 20
+let g:neocomplete#auto_completion_start_length = 2
+let g:neocomplete#manual_completion_start_length = 0
+let g:neocomplete#min_keyword_length = 3
+let g:neocomplete#min_syntax_length = 3
+let g:neocomplete#enable_smart_case = 1
+let g:neocomplete#cursor_hold_i_time = 500
+inoremap <expr><C-y>  neocomplete#close_popup()
+inoremap <expr><C-e>  neocomplete#cancel_popup()
+inoremap <expr><C-g> neocomplete#undo_completion()
 inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-inoremap <expr><C-h> pumvisible() ? neocomplcache#cancel_popup()."\<C-h>" : "\<C-h>"
-inoremap <expr><BS> pumvisible() ? neocomplcache#cancel_popup()."\<C-h>" : "\<C-h>"
-inoremap <expr><Space> pumvisible() ? neocomplete#close_popup() : "\<Space>"
-
-if !exists('g:neocomplcache_omni_patterns')
-  let g:neocomplcache_omni_patterns = {}
+inoremap <expr><C-h> pumvisible() ? neocomplete#cancel_popup()."\<C-h>" : "\<C-h>"
+inoremap <expr><BS> pumvisible() ? neocomplete#cancel_popup()."\<C-h>" : "\<C-h>"
+if !exists('g:neocomplete#omni_patterns')
+  let g:neocomplete#omni_patterns = {}
 endif
-let g:neocomplcache_omni_patterns.go = '\h\w*\.\?'
+let g:neocomplete#omni_patterns.go = '\h\w*\.\?'
 
 let g:qb_hotkey = "<C-TAB>" 
 
