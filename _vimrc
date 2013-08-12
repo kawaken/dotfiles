@@ -142,7 +142,7 @@ let g:neocomplcache_cursor_hold_i_time = 500
 "let g:neocomplcache_omni_patterns = {}
 "let g:neocomplcache_enable_cursor_hold_i = 1
 inoremap <expr><C-x><C-f> neocomplcache#filename_complete()
-inoremap <expr><C-Space> neocomplcache#manual_omni_complete()
+inoremap <expr><C-CR> neocomplcache#manual_omni_complete()
 inoremap <expr><C-n> pumvisible() ? "\<C-n>" : neocomplcache#manual_keyword_complete()
 inoremap <expr><C-y>  neocomplcache#close_popup()
 inoremap <expr><C-e>  neocomplcache#cancel_popup()
@@ -151,7 +151,8 @@ imap <C-s> <Plug>(neocomplcache_snippets_expand)
 inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
 inoremap <expr><C-h> pumvisible() ? neocomplcache#cancel_popup()."\<C-h>" : "\<C-h>"
 inoremap <expr><BS> pumvisible() ? neocomplcache#cancel_popup()."\<C-h>" : "\<C-h>"
-inoremap <expr><CR> pumvisible() ? "\<C-y>" : "\<CR>"
+inoremap <expr><Space> pumvisible() ? neocomplete#close_popup() : "\<Space>"
+
 if !exists('g:neocomplcache_omni_patterns')
   let g:neocomplcache_omni_patterns = {}
 endif
