@@ -51,12 +51,13 @@ set fencs=utf-8,sjis,euc-jp,iso-2022-jp
 
 set statusline=%F%m%r%h%w\ POS=%04l,%04v[%p%%]\ L=%L
 set laststatus=2
+set scrolloff=5
 
 set number
 set autoindent
 set ruler
-set shiftwidth=4
-set tabstop=4
+set shiftwidth=2
+set tabstop=2
 set list
 set listchars=tab:>\ ,trail:-,nbsp:%,extends:>,precedes:<
 set nobackup
@@ -72,8 +73,6 @@ inoremap <C-k> <Up>
 inoremap <C-l> <Right>
 inoremap <C-h> <Left>
 
-inoremap <C-Space> <C-x><C-o>
-
 map <C-CR> g<C-]>
 map <C-BS> <C-t>
 
@@ -84,9 +83,9 @@ map <C-BS> <C-t>
 "inoremap '' ''<Left>
 "inoremap <> <><Left>
 
-
 " search
-set ignorecase
+set hlsearch
+set smartcase
 nmap <ESC><ESC> :nohlsearch<CR><ESC>
 
 set cursorline
@@ -103,7 +102,7 @@ highlight CursorLine ctermbg=black guibg=black
 set noswapfile
 
 "タブ幅をリセット
-au FileType * setl expandtab tabstop=4 shiftwidth=4 softtabstop=4
+au FileType * setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
 
 " vim settings
 autocmd FileType vim setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
@@ -115,25 +114,23 @@ autocmd FileType python setl expandtab tabstop=4 shiftwidth=4 softtabstop=4
 
 " ruby settings
 autocmd FileType ruby setl autoindent
-autocmd FileType ruby setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
-autocmd BufNewFile,BufRead *.rhtml setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
-autocmd BufNewFile,BufRead *.rb setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
-autocmd BufNewFile,BufRead *.erb setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
-autocmd BufNewFile,BufRead *.yml setl tabstop=2 shiftwidth=2 softtabstop=2
-autocmd BufNewFile,BufRead *.rake setl tabstop=2 shiftwidth=2 softtabstop=2
-autocmd BufNewFile,BufRead Gemfile setl tabstop=2 shiftwidth=2 softtabstop=2 filetype=ruby
-
+autocmd BufNewFile,BufRead Gemfile setl filetype=ruby
 
 " sh settings
 autocmd FileType sh setl autoindent
 autocmd FileType sh setl smartindent
-autocmd FileType sh setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
 
 autocmd FileType go setl autoindent
 autocmd FileType go setl smartindent
 autocmd FileType go setl tabstop=4 shiftwidth=4 softtabstop=0
 autocmd FileType go setl noexpandtab
 auto BufWritePre *.go Fmt
+
+autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
 set completeopt=menuone
 let g:neocomplete#enable_at_startup = 1
@@ -150,12 +147,14 @@ inoremap <expr><C-g> neocomplete#undo_completion()
 inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
 inoremap <expr><C-h> pumvisible() ? neocomplete#cancel_popup()."\<C-h>" : "\<C-h>"
 inoremap <expr><BS> pumvisible() ? neocomplete#cancel_popup()."\<C-h>" : "\<C-h>"
+inoremap <expr><Space> pumvisible() ? neocomplete#close_popup() : "\<Space>"
+
 if !exists('g:neocomplete#omni_patterns')
   let g:neocomplete#omni_patterns = {}
 endif
 let g:neocomplete#omni_patterns.go = '\h\w*\.\?'
 
-let g:qb_hotkey = "<C-TAB>" 
+let g:qb_hotkey = "<C-T>"
 
 let g:gist_show_privates = 1
 let g:gist_post_private = 1
