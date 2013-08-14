@@ -11,6 +11,7 @@ NeoBundle 'alpaca-tc/vim-endwise.git'
 NeoBundle 'altercation/vim-colors-solarized.git'
 NeoBundle 'AndrewRadev/switch.vim'
 NeoBundle 'ecomba/vim-ruby-refactoring'
+NeoBundle 'gregsexton/gitv'
 NeoBundle 'jnwhiteh/vim-golang'
 NeoBundle 'mattn/gist-vim'
 NeoBundle 'mattn/webapi-vim'
@@ -25,6 +26,8 @@ NeoBundle 'taka84u9/vim-ref-ri'
 NeoBundle 'tpope/vim-rails'
 NeoBundle 'tsaleh/vim-matchit'
 NeoBundle 'vim-scripts/surround.vim.git'
+NeoBundle 'thinca/vim-ref'
+NeoBundle 'skwp/vim-rspec'
 
 if isdirectory("$GOROOT/misc/vim")
   set rtp+=$GOROOT/misc/vim
@@ -64,18 +67,6 @@ set nobackup
 
 set ww=b,s,h,l,<,>,[,]
 
-" Key mapping
-inoremap <C-^> <Home>
-inoremap <C-\> <End>
-inoremap <C-d> <Del>
-inoremap <C-j> <Down>
-inoremap <C-k> <Up>
-inoremap <C-l> <Right>
-inoremap <C-h> <Left>
-
-map <C-CR> g<C-]>
-map <C-BS> <C-t>
-
 "inoremap {} {}<Left>
 "inoremap [] []<Left>
 "inoremap () ()<Left>
@@ -100,6 +91,7 @@ augroup END
 highlight CursorLine ctermbg=black guibg=black
 
 set noswapfile
+set tw=0
 
 "タブ幅をリセット
 au FileType * setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
@@ -159,6 +151,72 @@ let g:qb_hotkey = "<C-T>"
 let g:gist_show_privates = 1
 let g:gist_post_private = 1
 let g:gist_detect_filetype = 1
+
+let g:alpaca_update_tags_config = {
+      \ '_' : '-R --sort=yes',
+      \ 'js' : '--languages=+js',
+      \ '-js' : '--languages=-js,JavaScript',
+      \ 'vim' : '--languages=+Vim,vim',
+      \ '-vim' : '--languages=-Vim,vim',
+      \ '-style': '--languages=-css,sass,scss,js,JavaScript,html',
+      \ 'scss' : '--languages=+scss --languages=-css,sass',
+      \ 'sass' : '--languages=+sass --languages=-css,scss',
+      \ 'css' : '--languages=+css',
+      \ 'java' : '--languages=+java $JAVA_HOME/src',
+      \ 'ruby': '--languages=+Ruby',
+      \ 'coffee': '--languages=+coffee',
+      \ '-coffee': '--languages=-coffee',
+      \ 'bundle': '--languages=+Ruby --languages=-css,sass,scss,js,JavaScript,coffee',
+      \ }
+
+aug AlpacaUpdateTags
+  au!
+  au FileWritePost,BufWritePost * AlpacaTagsUpdate -style
+  " bundleのオプションは自動で追加して実行します。
+  au FileWritePost,BufWritePost Gemfile AlpacaTagsUpdateBundle
+  au FileReadPost,BufEnter * AlpacaTagsSet
+aug END
+
+let g:endwise_no_mappings=1
+
+" switch
+let b:switch_custom_definitions = [
+      \   ["describe", "context", "specific", "example"],
+      \   ['before', 'after'],
+      \   ['be_true', 'be_false'],
+      \   ['get', 'post', 'put', 'delete'],
+      \   ['==', 'eql', 'equal'],
+      \   { '\.should_not': '\.should' },
+      \   ['\.to_not', '\.to'],
+      \   { '\([^. ]\+\)\.should\(_not\|\)': 'expect(\1)\.to\2' },
+      \   { 'expect(\([^. ]\+\))\.to\(_not\|\)': '\1.should\2' },
+      \ ]
+
+let g:rails_default_file='config/database.yml'
+let g:rails_level = 4
+let g:rails_mappings=1
+let g:rails_modelines=0
+function! SetUpRailsSetting()
+  nnoremap <buffer><Space>r :R<CR>
+  nnoremap <buffer><Space>a :A<CR>
+  nnoremap <buffer><Space>m :Rmodel<Space>
+  nnoremap <buffer><Space>c :Rcontroller<Space>
+  nnoremap <buffer><Space>v :Rview<Space>
+  nnoremap <buffer><Space>p :Rpreview<CR>
+endfunction
+ 
+aug MyAutoCmd
+  au User Rails call SetUpRailsSetting()
+aug END
+
+aug RailsDictSetting
+  au!
+aug END
+
+let g:ref_open = 'split'
+let g:ref_refe_cmd = expand('~/.rvm/gems/ruby-1.9.3-p429/bin/refe')
+
+imap <silent><C-F> <Plug>(neosnippet_expand_or_jump)
 
 " load private settings
 if filereadable("$HOME/.vim/private")
