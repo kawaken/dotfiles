@@ -252,4 +252,6 @@ add-zsh-hook precmd _update_prompt
 export rvm_project_rvmrc=0
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
 
+fpath=($HOME/.zsh-completions $fpath)
+
 # vim: ft=sh
