@@ -15,12 +15,12 @@
     default = simple
 [alias]
     ad = add
-    au = add -u
     br = branch
     ci = commit
     cl = config --list
     co = checkout
     df = diff
+    dif = diff
     hist = log --pretty=oneline --graph --date=short
     in = fetch --dry-run
     last = log -1 HEAD
