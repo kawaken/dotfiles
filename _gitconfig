@@ -24,8 +24,7 @@
     hist = log --pretty=format:'%C(yellow)%h %C(blue)%ad%Creset %s' --graph --date=short
     in = fetch --dry-run
     last = show HEAD
-    lg = log --pretty=short --graph
-    lga = log --decorate --stat --all --graph --date=iso
+    lg = log --decorate --stat --all --graph --date=iso
     ls = ls-files
     mg = merge
     out = push -n -v
