@@ -20,20 +20,21 @@
     cl = config --list
     co = checkout
     df = diff
-    dif = diff
-    hist = log --pretty=oneline --graph --date=short
+    fe = fetch
+    hist = log --pretty=format:'%C(yellow)%h %C(blue)%ad%Creset %s' --graph --date=short
     in = fetch --dry-run
-    last = log -1 HEAD
+    last = show HEAD
     lg = log --pretty=short --graph
-    log-all = log --graph --all --decorate
+    lga = log --decorate --stat --all --graph --date=iso
     ls = ls-files
+    mg = merge
     out = push -n -v
     pul = pull --ff-only
     pus = push
     rv = remote -v
     st = status -s
     sh = show
-    shh = show HEAD
+    today = log --oneline --since='12 hour ago'
     us = reset HEAD # unstage
     ex = exclude
     sts = stash

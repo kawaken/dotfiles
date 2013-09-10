@@ -76,6 +76,7 @@ set ww=b,s,h,l,<,>,[,]
 
 " search
 set hlsearch
+set ignorecase
 set smartcase
 nmap <ESC><ESC> :nohlsearch<CR><ESC>
 
