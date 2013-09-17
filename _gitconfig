@@ -40,4 +40,6 @@
     stsu = stash -u
 
 [github]
-    user = kawaken
+	user = kawaken
+[init]
+	templatedir = ~/.git-hooks
