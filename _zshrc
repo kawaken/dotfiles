@@ -16,6 +16,7 @@ setopt long_list_jobs
 setopt prompt_subst
 setopt prompt_percent
 setopt transient_rprompt
+setopt extendedhistory
 
 # hook を有効にする
 autoload -Uz add-zsh-hook
