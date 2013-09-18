@@ -36,19 +36,20 @@ zstyle ':completion:*' list-colors 'di=;34;1' 'ln=;35;1' 'so=;32;1' 'ex=31;1' 'b
 # vcs関連の設定
 autoload -Uz vcs_info
 zstyle ':vcs_info:*' enable hg git svn
-zstyle ':vcs_info:*' formats '%F{white}%r (%s)-%F{cyan}[%b]%f'
-zstyle ':vcs_info:*' actionformats '%F{white}%r (%s)-%F{cyan}[%b|%a]%f'
+zstyle ':vcs_info:*' formats '%F{white}%r (%s)-[%F{cyan}%b%f]'
+zstyle ':vcs_info:*' actionformats '%F{white}%r (%s)-[%F{cyan}%b|%a%f]'
 
 zstyle ':vcs_info:(hg*|git*):*' get-revision true
 zstyle ':vcs_info:git:*' check-for-changes true
 
 zstyle ':vcs_info:git:*' stagedstr "%F{green}*"
 zstyle ':vcs_info:git:*' unstagedstr "%F{red}*"
-zstyle ':vcs_info:git:*' formats '%F{white}(%s) - %F{cyan}[%b]%f' '%c%u%f %m%f'
-zstyle ':vcs_info:git:*' actionformats '%F{white}(%s) - %F{cyan}[%b|%a]%f' '%c%u%f %m%f'
+zstyle ':vcs_info:git:*' formats '%F{white}(%s) [%F{cyan}%b%f]' '%c%u%f %m%f'
+zstyle ':vcs_info:git:*' actionformats '%F{white}(%s) [%F{cyan}%b|%a%f]' '%c%u%f %m%f'
 zstyle ':vcs_info:git+set-message:*' hooks git-extra-info
 function +vi-git-extra-info() {
   if [[ "$1" != "1" ]]; then
+    hook_com[branch]+=`check_git_remote`
     return 0
   fi
 
@@ -57,7 +58,7 @@ function +vi-git-extra-info() {
 }
 
 zstyle ':vcs_info:svn:*' branchformat '%b:r%r'
-zstyle ':vcs_info:svn:*' formats '%F{white}(%s) - %F{cyan}[%b]%f' '%u%f'
+zstyle ':vcs_info:svn:*' formats '%F{white}(%s) [%F{cyan}%b%f]' '%u%f'
 #zstyle ':vcs_info:*+*:*' debug true
 zstyle ':vcs_info:svn+set-message:*' hooks svn-extra-info
 function +vi-svn-extra-info() {
@@ -84,6 +85,26 @@ function _update_term_title() {
 
 function count_svn_st() {
     svn st | sort | awk '{ c[$1] += 1; } END{for (k in c) {printf "%s:%s ", k, c[k]}}'
+}
+
+function check_git_remote() {
+    local ahead behind remote arrow
+    local -a gitstatus
+
+    # Are we on a remote-tracking branch?
+    remote=${$(git rev-parse --verify ${hook_com[branch]}@{upstream} \
+        --symbolic-full-name 2>/dev/null)/refs\/remotes\/}
+
+    if [[ -n ${remote} ]] ; then
+        arrow="-"
+        ahead=$(git rev-list ${hook_com[branch]}@{upstream}..HEAD 2>/dev/null | wc -l)
+        (( $ahead )) && gitstatus+=( "%F{green}+${ahead}%f" ) && arrow+=">"
+
+        behind=$(git rev-list HEAD..${hook_com[branch]}@{upstream} 2>/dev/null | wc -l)
+        (( $behind )) && gitstatus+=( "%F{red}-${behind}%f" ) && arrow="<${arrow}"
+
+        echo "%f${arrow}%F{cyan}${remote}%f${(j:/:)gitstatus}"
+    fi
 }
 
 function check_git_untracked() {
