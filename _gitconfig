@@ -27,6 +27,7 @@
     lg = log --decorate --stat --all --graph --date=iso
     ls = ls-files
     mg = merge
+    mo = merge origin/master
     out = push -n -v
     pul = pull --ff-only
     pus = push
