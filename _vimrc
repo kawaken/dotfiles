@@ -5,9 +5,6 @@ if has('vim_starting')
   call neobundle#rc(expand('~/.vim/bundle/'))
 endif
 
-NeoBundle 'alpaca-tc/alpaca_tags'
-NeoBundle 'alpaca-tc/neorspec.vim'
-NeoBundle 'alpaca-tc/vim-endwise.git'
 NeoBundle 'altercation/vim-colors-solarized.git'
 NeoBundle 'AndrewRadev/switch.vim'
 NeoBundle 'ecomba/vim-ruby-refactoring'
@@ -23,11 +20,11 @@ NeoBundle 'Shougo/neosnippet'
 NeoBundle 'Shougo/unite.vim.git'
 NeoBundle 'Shougo/vimproc.git'
 NeoBundle 'taka84u9/vim-ref-ri'
-NeoBundle 'tpope/vim-rails'
 NeoBundle 'tsaleh/vim-matchit'
 NeoBundle 'vim-scripts/surround.vim.git'
 NeoBundle 'thinca/vim-ref'
 NeoBundle 'skwp/vim-rspec'
+NeoBundle 'thinca/vim-quickrun'
 
 if isdirectory("$GOROOT/misc/vim")
   set rtp+=$GOROOT/misc/vim
@@ -161,33 +158,6 @@ let g:gist_show_privates = 1
 let g:gist_post_private = 1
 let g:gist_detect_filetype = 1
 
-let g:alpaca_update_tags_config = {
-      \ '_' : '-R --sort=yes',
-      \ 'js' : '--languages=+js',
-      \ '-js' : '--languages=-js,JavaScript',
-      \ 'vim' : '--languages=+Vim,vim',
-      \ '-vim' : '--languages=-Vim,vim',
-      \ '-style': '--languages=-css,sass,scss,js,JavaScript,html',
-      \ 'scss' : '--languages=+scss --languages=-css,sass',
-      \ 'sass' : '--languages=+sass --languages=-css,scss',
-      \ 'css' : '--languages=+css',
-      \ 'java' : '--languages=+java $JAVA_HOME/src',
-      \ 'ruby': '--languages=+Ruby',
-      \ 'coffee': '--languages=+coffee',
-      \ '-coffee': '--languages=-coffee',
-      \ 'bundle': '--languages=+Ruby --languages=-css,sass,scss,js,JavaScript,coffee',
-      \ }
-
-aug AlpacaUpdateTags
-  au!
-  au FileWritePost,BufWritePost * AlpacaTagsUpdate -style
-  " bundleのオプションは自動で追加して実行します。
-  au FileWritePost,BufWritePost Gemfile AlpacaTagsUpdate
-  au FileReadPost,BufEnter * AlpacaTagsSet
-aug END
-
-let g:endwise_no_mappings=1
-
 " switch
 let b:switch_custom_definitions = [
       \   ["describe", "context", "specific", "example"],
@@ -201,31 +171,12 @@ let b:switch_custom_definitions = [
       \   { 'expect(\([^. ]\+\))\.to\(_not\|\)': '\1.should\2' },
       \ ]
 
-let g:rails_default_file='config/database.yml'
-let g:rails_level = 4
-let g:rails_mappings=1
-let g:rails_modelines=0
-function! SetUpRailsSetting()
-  nnoremap <buffer><Space>r :R<CR>
-  nnoremap <buffer><Space>a :A<CR>
-  nnoremap <buffer><Space>m :Rmodel<Space>
-  nnoremap <buffer><Space>c :Rcontroller<Space>
-  nnoremap <buffer><Space>v :Rview<Space>
-  nnoremap <buffer><Space>p :Rpreview<CR>
-endfunction
- 
-aug MyAutoCmd
-  au User Rails call SetUpRailsSetting()
-aug END
-
-aug RailsDictSetting
-  au!
-aug END
-
 let g:ref_open = 'split'
 let g:ref_refe_cmd = expand('~/.rvm/gems/ruby-1.9.3-p429/bin/refe')
 
 imap <silent><C-F> <Plug>(neosnippet_expand_or_jump)
+
+set splitright
 
 " load private settings
 if filereadable("$HOME/.vim/private")
