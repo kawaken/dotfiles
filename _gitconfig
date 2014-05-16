@@ -16,38 +16,31 @@
 [rerere]
     enable = true
 [alias]
-    cl = config --list
-
     ad = add
-    us = reset HEAD # unstage
+    ba = branch -a
+    br = branch
     ci = commit
+    cl = config --list
     co = checkout
-    df = diff
     dc = diff --cached
-    ls = ls-files
-    st = status -s
-
-    sh = show
+    df = diff
+    ex = exclude
+    fe = fetch
+    hist = log --pretty=format:'%C(yellow)%h %C(blue)%ad%Creset %s' --graph --date=short
     last = show HEAD
     lg = log --decorate --stat --all --graph --date=iso
-    hist = log --pretty=format:'%C(yellow)%h %C(blue)%ad%Creset %s' --graph --date=short
-    today = log --oneline --since='12 hour ago'
-    sts = stash
-    stsu = stash -u
-
-    br = branch
-    ba = branch -a
-    switch = checkout
-    fe = fetch
+    ls = ls-files
     mg = merge
     mo = merge origin/master
     pul = pull --ff-only
     pus = push
     rv = remote -v
-
-    up = !git fetch --all && git checkout origin/master && git merge --ff-only
-    
-    ex = exclude
+    sh = show
+    st = status -s
+    sts = stash
+    stsu = stash -u
+    today = log --oneline --since='12 hour ago'
+    us = reset HEAD # unstage
 [github]
 	user = kawaken
 [init]
