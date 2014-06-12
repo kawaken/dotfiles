@@ -2,7 +2,7 @@
 
 cd "$(git rev-parse --show-toplevel)"
 
-date '+%Y%m%d-%H%I%S' > VERSION
+date '+%Y%m%d-%H%M%S' > VERSION
 
 git add VERSION
 git commit -m "version bump up: $(cat VERSION)"
