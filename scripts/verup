@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd "$(git rev-parse --show-toplevel)"
+
+date '+%Y%m%d-%H%I%S' > VERSION
+
+git add VERSION
+git commit -m "version bump up: $(cat VERSION)"
+git push
