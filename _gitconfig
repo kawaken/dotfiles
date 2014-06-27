@@ -19,7 +19,7 @@
     ad = add
     ba = branch -a
     br = branch
-    ci = commit
+    ci = commit --verbose
     cl = config --list
     co = checkout
     dc = diff --cached
