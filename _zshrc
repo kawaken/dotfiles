@@ -260,8 +260,8 @@ function print_colors() {
 }
 
 # Common Alias
-if [ -f $MY_DOTFILES_DIR/alias ]; then
-    source $MY_DOTFILES_DIR/alias
+if [ -f $MY_DOTFILES_DIR/_alias ]; then
+    source $MY_DOTFILES_DIR/_alias
 fi
 
 # source OS setting
