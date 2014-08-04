@@ -1,8 +1,5 @@
 # vim: ft=zsh
 
-# Mercurial
-export HGENCODING=utf-8
-
 export GOPATH=$HOME/go
-export PATH=$PATH:/sbin:$HOME/bin:$HOME/.rvm/bin # Add RVM to PATH for scripting
+export PATH=$PATH:/sbin:$HOME/bin
 export LANG=ja_JP.UTF-8
