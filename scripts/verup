@@ -6,4 +6,4 @@ date '+%Y%m%d-%H%M%S' > VERSION
 
 git add VERSION
 git commit -m "version bump up: $(cat VERSION)"
-git push
+#git push
