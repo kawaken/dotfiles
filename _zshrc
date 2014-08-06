@@ -274,6 +274,6 @@ add-zsh-hook precmd _update_prompt
 fpath=($HOME/.zsh-completions/src $fpath)
 
 # checkversion
-$MY_DOTFILES_DIR/scripts/check-update
+(cd $MY_DOTFILES_DIR;scripts/check-update)
 
 # vim: ft=sh
