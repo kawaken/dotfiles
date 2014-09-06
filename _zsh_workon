@@ -1,0 +1,43 @@
+function show_projects() {
+  echo "\033[34mProjects list :\033[0m"
+  ls $PROJECT_DIR
+}
+function move_project_directory() {
+  cur_dir=`pwd`
+  cd $PROJECT_DIR
+  if [ ! -e $1 ]; then
+    echo "$1 does not exist."
+    cd $cur_dir
+
+    return 1
+  else
+    cd $1
+
+    return 0
+  fi
+}
+# command: cd to project dir or ls project dir
+function pjd() {
+  if [ $# -eq 0 ]; then
+    cd $PROJECT_DIR
+    show_projects
+  else
+    move_project_directory $1
+  fi
+}
+# command: virtualenvwrapper like command
+function workon () {
+  if [ $# -eq 1 ]; then
+    move_project_directory $1
+    if [ $? -eq 1 ]; then
+      return 1
+    fi
+  fi
+  if [ -f ./.pjrc ]; then
+    source ./.pjrc
+  else
+    echo "no .pjrc"
+  fi
+}
+
+# vim: ft=zsh

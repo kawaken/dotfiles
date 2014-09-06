@@ -1,154 +1,80 @@
-### 基本設定 ###
-setopt auto_cd      # ディレクトリ名だけで移動
-setopt auto_pushd   # 自動でpopdする、cdの履歴表示
+# 基本設定
+setopt auto_cd                       # ディレクトリ名だけで移動
+setopt auto_pushd                    # 自動でpushdする、cdの履歴表示
+setopt rm_star_silent                # rm * で削除確認しない(-iを付けてるので大丈夫)
+setopt interactive_comments          # #以降をコメントとみなす
 
 # 履歴関連
 HISTFILE=~/.zsh_history
 HISTSIZE=100000
 SAVEHIST=100000
+HISTTIMEFORMAT="[%Y/%M/%D %H:%M:%S] "
 setopt hist_ignore_dups
 setopt share_history
-
-setopt nolistbeep
-setopt magic_equal_subst
-setopt long_list_jobs
-
-setopt prompt_subst
-setopt prompt_percent
-setopt transient_rprompt
 setopt extendedhistory
+setopt hist_verify                   # 履歴から直接実行しない
+setopt hist_no_store                 # historyコマンドは無視
+
+# 表示設定
+autoload colors
+colors
+export LSCOLORS=ExFxCxdxBxegedabagacad
+export LS_COLORS='di=01;34:ln=01;35:so=01;32:ex=01;31:bd=46;34:cd=43;34:su=41;30:sg=46;30:tw=42;30:ow=43;30'
+zstyle ':completion:*' list-colors 'di=;34;1' 'ln=;35;1' 'so=;32;1' 'ex=31;1' 'bd=46;34' 'cd=43;34'
+setopt print_eight_bit               # 補完時の日本語表示
+setopt no_flow_control               # フローコントロールを無効(Ctrl+Sが使える)
+
+# 補完関連
+autoload -U compinit
+compinit
+setopt nolistbeep                    # beep音を出さない
+setopt list_packed                   # 表示を詰め込む
+setopt magic_equal_subst             # =の後も補完する
+unsetopt auto_remove_slash           # ディレクトリの末尾/を勝手に消さない
+
+# ジョブ関連
+REPORTTIME=30                        # 30秒以上かかったらtimeを出力
+setopt long_list_jobs                # jobs -l をデフォルト
+
+# プロンプト関連
+setopt prompt_subst                  # 実行時の変数展開
+setopt prompt_percent                # %記号使える
+setopt transient_rprompt             # 最後のRPROMPTだけ表示
 
 # hook を有効にする
 autoload -Uz add-zsh-hook
 
-# 補完設定
-autoload -U compinit
-compinit
-
-# 色設定
-autoload colors
-colors
-
-export LSCOLORS=ExFxCxdxBxegedabagacad
-export LS_COLORS='di=01;34:ln=01;35:so=01;32:ex=01;31:bd=46;34:cd=43;34:su=41;30:sg=46;30:tw=42;30:ow=43;30'
-zstyle ':completion:*' list-colors 'di=;34;1' 'ln=;35;1' 'so=;32;1' 'ex=31;1' 'bd=46;34' 'cd=43;34'
-
-# vcs関連の設定
-autoload -Uz vcs_info
-zstyle ':vcs_info:*' enable hg git svn
-zstyle ':vcs_info:*' formats '%F{white}%r (%s)-[%F{cyan}%b%f]'
-zstyle ':vcs_info:*' actionformats '%F{white}%r (%s)-[%F{cyan}%b|%a%f]'
-
-zstyle ':vcs_info:(hg*|git*):*' get-revision true
-zstyle ':vcs_info:git:*' check-for-changes true
-
-zstyle ':vcs_info:git:*' stagedstr "%F{green}*"
-zstyle ':vcs_info:git:*' unstagedstr "%F{red}*"
-zstyle ':vcs_info:git:*' formats '%F{white}(%s) [%F{cyan}%b%f]' '%c%u%f %m%f'
-zstyle ':vcs_info:git:*' actionformats '%F{white}(%s) [%F{cyan}%b|%a%f]' '%c%u%f %m%f'
-zstyle ':vcs_info:git+set-message:*' hooks git-extra-info
-function +vi-git-extra-info() {
-  if [[ "$1" != "1" ]]; then
-    hook_com[branch]+=`check_git_remote`
-    return 0
-  fi
-
-  hook_com[unstaged]+=`check_git_untracked`
-  hook_com[misc]+=`count_git_st`
-}
-
-zstyle ':vcs_info:svn:*' branchformat '%b:r%r'
-zstyle ':vcs_info:svn:*' formats '%F{white}(%s) [%F{cyan}%b%f]' '%u%f'
-#zstyle ':vcs_info:*+*:*' debug true
-zstyle ':vcs_info:svn+set-message:*' hooks svn-extra-info
-function +vi-svn-extra-info() {
-  if [[ "$1" != "1" ]]; then
-    return 0
-  fi
-
-  hook_com[unstaged]+=`count_svn_st`
-}
-
-# dotfilesの場所を変数に設定
-export MY_DOTFILES_DIR=$HOME/dotfiles
-export EDITOR=vim
-
+# SSH接続の時の設定
 if [ -n "${SSH_CONNECTION}" ]; then
-    watch="all"
-    log
-    setopt ignore_eof
+    watch="all"                      # login/logout監視
+    log                              # ターミナルに出力
+    setopt ignore_eof                # Ctrl+Dでログアウトしない
 fi
 
-function _update_term_title() {
-  :
-}
+# エイリアスの読込
+[[ -f $MY_DOTFILES_DIR/_alias ]] && source $MY_DOTFILES_DIR/_alias
 
-function count_svn_st() {
-    svn st | sort | awk '{ c[$1] += 1; } END{for (k in c) {printf "%s:%s ", k, c[k]}}'
-}
+# OSごとの設定読込
+[[ -f $MY_DOTFILES_DIR/default.d/`uname`.zshrc ]] && source $MY_DOTFILES_DIR/default.d/`uname`.zshrc
 
-function check_git_remote() {
-    local ahead behind remote arrow
-    local -a gitstatus
+# vcs関連の設定読込
+[[ -f $MY_DOTFILES_DIR/_zsh_vcs_info ]] && source $MY_DOTFILES_DIR/_zsh_vcs_info
 
-    # Are we on a remote-tracking branch?
-    remote=${$(git rev-parse --verify ${hook_com[branch]}@{upstream} \
-        --symbolic-full-name 2>/dev/null)/refs\/remotes\/}
-
-    if [[ -n ${remote} ]] ; then
-        arrow="-"
-        ahead=$(git rev-list ${hook_com[branch]}@{upstream}..HEAD 2>/dev/null | wc -l)
-        (( $ahead )) && gitstatus+=( "%F{green}+${ahead}%f" ) && arrow+=">"
-
-        behind=$(git rev-list HEAD..${hook_com[branch]}@{upstream} 2>/dev/null | wc -l)
-        (( $behind )) && gitstatus+=( "%F{red}-${behind}%f" ) && arrow="<${arrow}"
-
-        echo "%f${arrow}%F{cyan}${remote}%f${(j:/:)gitstatus}"
-    fi
-}
-
-function check_git_untracked() {
-    if [[ -n $(git ls-files --other --exclude-standard 2> /dev/null) ]]; then
-      echo -e "%F{yellow}*"
-    fi
-}
-
-function count_git_st() {
-    git status -s | sort | awk '{ c[$1] += 1; } END{for (k in c) {printf "%s:%s ", k, c[k]}}'
-}
-
-function _update_vcs_info_msg() {
-    local -a messages
-    local prompt
-
-    LANG=en_US.UTF-8 vcs_info
-
-    if [[ -z ${vcs_info_msg_0_} ]]; then
-        prompt=""
-    else
-        [[ -n "$vcs_info_msg_0_" ]] && messages+=( "${vcs_info_msg_0_}" )
-        [[ -n "$vcs_info_msg_1_" ]] && messages+=( "${vcs_info_msg_1_}" )
-        [[ -n "$vcs_info_msg_2_" ]] && messages+=( "${vcs_info_msg_2_}" )
-
-        # 間にスペースを入れて連結する
-        prompt="
-${(j: :)messages}"
-    fi
-
-    echo "$prompt"
-}
-
+# プロンプト表示処理
 function _update_pr_usr() {
   local prompt
   prompt="%n"
   if [ ${UID} -eq 0 ]; then
+    # root だったら赤
     prompt="%F{red}%n%f"
   fi
   if [ -n "${SSH_CONNECTION}" ]; then
+    # SSHだったら下線
     prompt="%U${prompt}%u"
   fi
 
   if [ $SHLVL -gt 1 ]; then
+    # シェルの階層が増えると > を表示する
     local bc
     bc=$(($SHLVL - 1))
     prompt="$(printf '%.1s' '>'{1..$bc})$prompt"
@@ -161,119 +87,37 @@ function _update_rpr_host() {
   local prompt
   prompt="%m"
   if [ -n "${SSH_CONNECTION}" ]; then
-      prompt="%B${HOST}%b"
+    # SSHだったら太文字
+    prompt="%B${HOST}%b"
   fi
   echo "$prompt"
 }
 
 function _update_prompt() {
-    RPROMPT=""
+  PR_FULLPATH="%F{yellow}%d%f"
+  PR_VCS=`_update_vcs_info_msg`
+  PR_USR=`_update_pr_usr`
+  PR_SEP="%(1j,%F{magenta}%#%f,%#)"
 
-    PR_FULLPATH="%F{yellow}%d%f"
-    PR_VCS=`_update_vcs_info_msg`
-    PR_USR=`_update_pr_usr`
-    PR_SEP="%(1j,%F{magenta}%#%f,%#)"
-
-    PROMPT="
+  PROMPT="
 $PR_FULLPATH$PR_VCS
 $PR_USR $PR_SEP "
-    RPROMPT=`_update_rpr_host`
+  RPROMPT="`_update_rpr_host` %D{%Y-%m-%d %H:%M:%S}"
 }
-
-case "${TERM}" in
-    xterm*)
-        function _update_term_title() {
-            echo -ne "\033]0;${USER}@${HOST}\007"
-        }
-        ;;
-    screen)
-        preexec() {
-            echo -ne "\ek${1%% *}\e\\"
-        }
-        ;;
-esac
-
-#functions
-export PROJECT_DIR=$HOME/projects
-function activate_python() {
-  if [ -f ./bin/activate ]; then
-    source ./bin/activate
-  fi
-  if [ -f ./virtualenv/bin/activate ]; then
-    source ./virtualenv/bin/activate
-  fi
-
-  echo "Python info"
-  which python
-  python -V
+TMOUT=1                              # ALRMシグナルの間隔
+TRAPALRM() {
+  # プロンプトを更新
+  zle reset-prompt
 }
-function show_projects() {
-    echo "\033[34mProjects list :\033[0m" 
-    ls $PROJECT_DIR
-}
-function move_project_directory() {
-    cur_dir=`pwd`
-    cd $PROJECT_DIR
-    if [ ! -e $1 ]; then
-        echo "$1 does not exist."
-        cd $cur_dir
-
-        return 1
-    else
-        cd $1
-
-        return 0
-    fi
-}
-# command: cd to project dir or ls project dir
-function pjd() {
-    if [ $# -eq 0 ]; then
-        cd $PROJECT_DIR
-        show_projects
-    else
-        move_project_directory $1
-    fi
-}
-# command: virtualenvwrapper like command
-function workon () {
-    if [ $# -eq 1 ]; then
-        move_project_directory $1
-        if [ $? -eq 1 ]; then
-            return 1
-        fi
-    fi
-    if [ -f ./.pjrc ]; then
-        source ./.pjrc
-    else
-        echo "no .pjrc"
-    fi
-}
-# command: print colors
-function print_colors() {
-    for color in `seq 0 255`; do
-        printf "\e[38;5;%dm %3d\e[m" $color $color
-        if [ `expr $color % 8` -eq 7 ]; then
-            printf "\n"
-        fi
-    done
-    echo
-}
-
-# Common Alias
-if [ -f $MY_DOTFILES_DIR/_alias ]; then
-    source $MY_DOTFILES_DIR/_alias
-fi
-
-# source OS setting
-if [ -f $MY_DOTFILES_DIR/default.d/`uname`.zshrc ]; then
-    source $MY_DOTFILES_DIR/default.d/`uname`.zshrc
-fi
-
 add-zsh-hook precmd _update_prompt
 
+# 補完対象を増やす
 fpath=($HOME/.zsh-completions/src $fpath)
+
+# 便利コマンド読込
+[[ -f $MY_DOTFILES_DIR/_zsh_workon ]] && source $MY_DOTFILES_DIR/_zsh_workon
 
 # checkversion
 (cd $MY_DOTFILES_DIR;scripts/check-update)
 
-# vim: ft=sh
+# vim: ft=zsh
