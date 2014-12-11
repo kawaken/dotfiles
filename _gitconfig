@@ -43,5 +43,5 @@
     us = reset HEAD # unstage
 [github]
 	user = kawaken
-[init]
-	templatedir = ~/.git-hooks
+#[init]
+#	templatedir = ~/.git-hooks
