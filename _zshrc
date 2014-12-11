@@ -104,11 +104,11 @@ $PR_FULLPATH$PR_VCS
 $PR_USR $PR_SEP "
   RPROMPT="`_update_rpr_host` %D{%Y-%m-%d %H:%M:%S}"
 }
-TMOUT=1                              # ALRMシグナルの間隔
-TRAPALRM() {
+#TMOUT=1                              # ALRMシグナルの間隔
+#TRAPALRM() {
   # プロンプトを更新
-  zle reset-prompt
-}
+  #zle reset-prompt
+#}
 add-zsh-hook precmd _update_prompt
 
 # 補完対象を増やす
