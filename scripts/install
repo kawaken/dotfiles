@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd $HOME
+for f in `ls $HOME/dotfiles/_*`; do
+  ln -sf $f `basename $f | tr '_' '.'`
+done
