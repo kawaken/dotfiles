@@ -1,37 +1,4 @@
-filetype plugin indent off
-
-if has('vim_starting')
-  set runtimepath+=~/.vim/bundle/neobundle.vim/
-  call neobundle#rc(expand('~/.vim/bundle/'))
-endif
-
-NeoBundle 'altercation/vim-colors-solarized.git'
-NeoBundle 'AndrewRadev/switch.vim'
-NeoBundle 'ecomba/vim-ruby-refactoring'
-NeoBundle 'gregsexton/gitv'
-NeoBundle 'jnwhiteh/vim-golang'
-NeoBundle 'mattn/gist-vim'
-NeoBundle 'mattn/webapi-vim'
-NeoBundle 'pangloss/vim-javascript'
-NeoBundle 'QuickBuf'
-NeoBundle 'Shougo/neobundle.vim.git'
-NeoBundle 'Shougo/neocomplete.git'
-NeoBundle 'Shougo/neosnippet'
-NeoBundle 'Shougo/unite.vim.git'
-NeoBundle 'Shougo/vimproc.git'
-NeoBundle 'taka84u9/vim-ref-ri'
-NeoBundle 'tsaleh/vim-matchit'
-NeoBundle 'vim-scripts/surround.vim.git'
-NeoBundle 'thinca/vim-ref'
-NeoBundle 'skwp/vim-rspec'
-NeoBundle 'thinca/vim-quickrun'
-
-if isdirectory("$GOROOT/misc/vim")
-  set rtp+=$GOROOT/misc/vim
-endif
-exe "set rtp+=".globpath($GOPATH, "src/github.com/nsf/gocode/vim")
-
-filetype plugin indent on
+:runtime bundle/vim-unbundle/unbundle.vim
 
 syntax enable
 set t_Co=256
@@ -154,10 +121,6 @@ let g:neocomplete#omni_patterns.go = '\h\w*\.\?'
 
 let g:qb_hotkey = "<C-T>"
 
-let g:gist_show_privates = 1
-let g:gist_post_private = 1
-let g:gist_detect_filetype = 1
-
 " switch
 let b:switch_custom_definitions = [
       \   ["describe", "context", "specific", "example"],
@@ -170,9 +133,6 @@ let b:switch_custom_definitions = [
       \   { '\([^. ]\+\)\.should\(_not\|\)': 'expect(\1)\.to\2' },
       \   { 'expect(\([^. ]\+\))\.to\(_not\|\)': '\1.should\2' },
       \ ]
-
-let g:ref_open = 'split'
-let g:ref_refe_cmd = expand('~/.rvm/gems/ruby-1.9.3-p429/bin/refe')
 
 imap <silent><C-F> <Plug>(neosnippet_expand_or_jump)
 

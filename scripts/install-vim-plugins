@@ -1,0 +1,22 @@
+#!/bin/bash
+
+bundles=(
+  'sunaku/vim-unbundle.git'
+  'altercation/vim-colors-solarized.git'
+  'AndrewRadev/switch.vim'
+  'gregsexton/gitv'
+  'jnwhiteh/vim-golang'
+  'Shougo/neocomplete.git'
+  'Shougo/neosnippet'
+  'vim-scripts/surround.vim.git'
+  'thinca/vim-quickrun'
+  'vim-scripts/QuickBuf.git'
+  'vim-scripts/matchit.zip.git'
+)
+
+mkdir -p $HOME/.vim/bundle
+
+cd $HOME/.vim/bundle
+for repo in ${bundles[@]}; do
+  git clone -q "https://github.com/${repo}"
+done
