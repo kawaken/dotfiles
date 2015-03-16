@@ -1,3 +1,6 @@
+if has("win64")
+  :set runtimepath+=$HOME/.vim,$HOME/.vim/after
+endif
 :runtime bundle/vim-unbundle/unbundle.vim
 
 syntax enable
