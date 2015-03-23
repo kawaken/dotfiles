@@ -1,4 +1,5 @@
 # 基本設定
+bindkey -e
 setopt auto_cd                       # ディレクトリ名だけで移動
 setopt auto_pushd                    # 自動でpushdする、cdの履歴表示
 setopt rm_star_silent                # rm * で削除確認しない(-iを付けてるので大丈夫)
@@ -14,6 +15,8 @@ setopt share_history
 setopt extendedhistory
 setopt hist_verify                   # 履歴から直接実行しない
 setopt hist_no_store                 # historyコマンドは無視
+bindkey "^R" history-incremental-search-backward
+bindkey "^S" history-incremental-search-forward
 
 # 表示設定
 autoload colors
