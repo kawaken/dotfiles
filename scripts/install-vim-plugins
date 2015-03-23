@@ -12,6 +12,7 @@ bundles=(
   'thinca/vim-quickrun'
   'vim-scripts/QuickBuf.git'
   'vim-scripts/matchit.zip.git'
+  'scrooloose/nerdtree'
 )
 
 mkdir -p $HOME/.vim/bundle
