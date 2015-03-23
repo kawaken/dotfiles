@@ -19,5 +19,8 @@ mkdir -p $HOME/.vim/bundle
 
 cd $HOME/.vim/bundle
 for repo in ${bundles[@]}; do
-  /usr/local/bin/git clone -q "https://github.com/${repo}"
+  if [ ! -d `basename $repo .git` ]; then
+    echo "clone: $repo"
+    /usr/local/bin/git clone -q "https://github.com/${repo}"
+  fi
 done
