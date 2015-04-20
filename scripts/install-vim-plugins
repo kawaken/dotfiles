@@ -5,7 +5,7 @@ bundles=(
   'altercation/vim-colors-solarized.git'
   'AndrewRadev/switch.vim'
   'gregsexton/gitv'
-  'jnwhiteh/vim-golang'
+  'fatih/vim-go'
   'Shougo/neocomplete.git'
   'Shougo/neosnippet'
   'vim-scripts/surround.vim.git'
