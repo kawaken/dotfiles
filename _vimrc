@@ -139,9 +139,12 @@ let b:switch_custom_definitions = [
 
 imap <silent><C-F> <Plug>(neosnippet_expand_or_jump)
 
+map <C-n> :NERDTreeToggle<CR>
+
 set splitright
 
 " load private settings
 if filereadable("$HOME/.vim/private")
     source "$HOME/.vim/private"
 endif
+
