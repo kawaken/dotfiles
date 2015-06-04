@@ -46,3 +46,6 @@
 	user = kawaken
 #[init]
 #	templatedir = ~/.git-hooks
+[filter "ignore_user_conf"]
+	smudge = "sed -r 's/^\\s*(name|email) = .*$/    \\1 = /'"
+	clean = "sed -r 's/^\\s*(name|email) = .*$/    \\1 = /'"
