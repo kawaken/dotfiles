@@ -1,7 +1,7 @@
 if has("win64")
   :set runtimepath+=$HOME/.vim,$HOME/.vim/after
 endif
-:runtime bundle/vim-unbundle/unbundle.vim
+:runtime bundle/vim-unbundle/plugin/unbundle.vim
 
 syntax enable
 set t_Co=256
