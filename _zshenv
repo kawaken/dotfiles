@@ -9,3 +9,5 @@ export PATH=$HOME/bin:$PATH:/sbin
 export LANG=ja_JP.UTF-8
 
 export EDITOR=vim
+
+source $HOME/.zshenv_local
