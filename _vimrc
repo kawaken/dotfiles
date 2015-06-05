@@ -84,7 +84,7 @@ autocmd FileType go setl autoindent
 autocmd FileType go setl smartindent
 autocmd FileType go setl tabstop=4 shiftwidth=4 softtabstop=0
 autocmd FileType go setl noexpandtab
-auto BufWritePre *.go Fmt
+autocmd FileType go autocmd BufWritePre <buffer> Fmt
 
 autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
 autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags

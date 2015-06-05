@@ -5,7 +5,6 @@ bundles=(
   'altercation/vim-colors-solarized.git'
   'AndrewRadev/switch.vim'
   'gregsexton/gitv'
-  'fatih/vim-go'
   'Shougo/neocomplete.git'
   'Shougo/neosnippet'
   'vim-scripts/surround.vim.git'
@@ -13,6 +12,8 @@ bundles=(
   'vim-scripts/QuickBuf.git'
   'vim-scripts/matchit.zip.git'
   'scrooloose/nerdtree'
+  'google/vim-ft-go'
+  'vim-jp/vim-go-extra'
 )
 
 mkdir -p $HOME/.vim/bundle
