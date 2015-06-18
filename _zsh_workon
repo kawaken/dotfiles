@@ -25,6 +25,28 @@ function pjd() {
     move_project_directory $1
   fi
 }
+function gen_pjrc() {
+
+  if [ -f ./.pjrc ]; then
+    echo ".pjrc file exists"
+    return
+  fi
+
+  echo -n "which language? [go]: "
+  read lang
+  case $lang in
+    go)
+      cat <<'CMD' > .pjrc
+export GOPATH=$GOPATH:`pwd`
+export GOROOT=/home/kawaken/local/go-1.4
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+CMD
+      ;;
+    *)
+      echo "unsupported: $lang"
+  esac
+
+}
 # command: virtualenvwrapper like command
 function workon () {
   if [ $# -eq 1 ]; then
@@ -36,7 +58,7 @@ function workon () {
   if [ -f ./.pjrc ]; then
     source ./.pjrc
   else
-    echo "no .pjrc"
+    echo "no .pjrc; run 'gen_pjrc'"
   fi
 }
 
