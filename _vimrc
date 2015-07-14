@@ -11,7 +11,6 @@ colorscheme solarized
 
 set modeline
 set modelines=5
-set nocompatible
 set backspace=indent,eol,start
 set fileformats=unix,dos,mac
 
