@@ -1,4 +1,4 @@
-export PROJECT_DIR=$HOME/Development/projects
+export PROJECT_DIR=$HOME/projects
 
 alias mysql=/usr/local/mysql/bin/mysql
 alias mysqladmin=/usr/local/mysql/bin/mysqladmin
