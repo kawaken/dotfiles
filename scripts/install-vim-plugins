@@ -23,6 +23,6 @@ cd $HOME/.vim/bundle
 for repo in ${bundles[@]}; do
   if [ ! -d `basename $repo .git` ]; then
     echo "clone: $repo"
-    /usr/local/bin/git clone -q "https://github.com/${repo}"
+    git clone -q "https://github.com/${repo}"
   fi
 done
