@@ -1,16 +1,19 @@
 #!/bin/bash
 
+# install vim-unbundle
+mkdir -p ~/.vim/tmp
+
+if [ ! -d ~/.vim/vim-unbundle ]; then
+  echo "clone: vim-unbundle"
+  git clone -q https://github.com/sunaku/vim-unbundle.git ~/.vim/vim-unbundle
+fi
+
 bundles=(
-  'sunaku/vim-unbundle.git'
   'altercation/vim-colors-solarized.git'
-  'Shougo/neocomplete.git'
-  'thinca/vim-quickrun'
+
   'vim-scripts/QuickBuf.git'
-  'vim-scripts/matchit.zip.git'
+  'thinca/vim-quickrun'
   'scrooloose/nerdtree'
-  'google/vim-ft-go'
-  'vim-jp/vim-go-extra'
-  'majutsushi/tagbar'
 )
 
 mkdir -p $HOME/.vim/bundle

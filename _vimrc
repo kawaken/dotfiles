@@ -1,137 +1,101 @@
-if has("win64")
-  :set runtimepath+=$HOME/.vim,$HOME/.vim/after
-endif
-:runtime bundle/vim-unbundle/plugin/unbundle.vim
+" plugin manager: vim-unbundle
+runtime vim-unbundle/plugin/unbundle.vim
+runtime macros/matchit.vim
 
-syntax enable
-set t_Co=256
-set background=dark
-let g:solarized_termcolors=256
-colorscheme solarized
-
+"" general
 set modeline
 set modelines=5
-set backspace=indent,eol,start
-set fileformats=unix,dos,mac
 
+" cursol
+set ww=b,s,<,>,[,]
+set backspace=indent,eol,start
+
+" file edit
 set enc=utf-8
 set fenc=utf-8
 set fencs=utf-8,sjis,euc-jp,iso-2022-jp
+set fileformats=unix,dos,mac
+set hidden
 
+set textwidth=0
+set tabstop=2
+set expandtab
+set shiftwidth=2
+set smartindent
+function ToggleWrap()
+  if (&wrap == 1)
+    set nowrap
+  else
+    set wrap
+  endif
+endfunction
+nmap <silent><C-]> :call ToggleWrap()<CR>
+
+" display
+set number
+set display=lastline
+set pumheight=10
+set showmatch
+set matchtime=1
+
+" status line
 set statusline=%F%m%r%h%w\ POS=%04l,%04v[%p%%]\ L=%L
 set laststatus=2
 set scrolloff=5
 
-set number
-set autoindent
-set ruler
-set shiftwidth=2
-set tabstop=2
-set list
-set listchars=tab:>\ ,trail:-,nbsp:%,extends:>,precedes:<
-set nobackup
-
-set ww=b,s,h,l,<,>,[,]
-
-"inoremap {} {}<Left>
-"inoremap [] []<Left>
-"inoremap () ()<Left>
-"inoremap "" ""<Left>
-"inoremap '' ''<Left>
-"inoremap <> <><Left>
+" matchit
+let b:match_ignorecase = 1
 
 " search
 set hlsearch
 set ignorecase
 set smartcase
+set nowrapscan
 nmap <ESC><ESC> :nohlsearch<CR><ESC>
 
-set cursorline
-augroup cch
-  autocmd! cch
-  autocmd WinLeave * set nocursorline
-  autocmd WinEnter,BufRead * set cursorline
+" temporary files
+set directory=~/.vim/tmp
+set backupdir=~/.vim/tmp
+set viminfo+=n~/.vim/tmp/viminfo.txt
+augroup swapchoice-readonly
+  autocmd!
+  autocmd SwapExists * let v:swapchoice = 'o'
 augroup END
 
-:hi clear CursorLine
-"highlight CursorLine cterm=underline gui=underline
-highlight CursorLine ctermbg=black guibg=black
+" 全角スペース・行末のスペースの可視化
+if has("syntax")
+    syntax on
+    set t_Co=256
+    set background=dark
+    let g:solarized_termcolors=256
+    colorscheme solarized
 
-set noswapfile
-set tw=0
+    " PODバグ対策
+    syn sync fromstart
 
-"タブ幅をリセット
-au FileType * setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    function! ActivateInvisibleIndicator()
+        " 下の行の"　"は全角スペース
+        syntax match InvisibleJISX0208Space "　" display containedin=ALL
+        highlight InvisibleJISX0208Space term=underline ctermbg=Blue guibg=darkgray gui=underline
+        syntax match InvisibleTrailedSpace "[ \t]\+$" display containedin=ALL
+        highlight InvisibleTrailedSpace term=underline ctermbg=Red guibg=NONE gui=undercurl guisp=darkorange
+        "syntax match InvisibleTab "\t" display containedin=ALL
+        "highlight InvisibleTab term=underline ctermbg=white gui=undercurl guisp=darkslategray
+    endfunction
 
-" vim settings
-autocmd FileType vim setl expandtab tabstop=2 shiftwidth=2 softtabstop=2
-
-" python settings
-autocmd FileType python setl autoindent
-autocmd FileType python setl smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
-autocmd FileType python setl expandtab tabstop=4 shiftwidth=4 softtabstop=4
-
-" ruby settings
-autocmd FileType ruby setl autoindent
-autocmd BufNewFile,BufRead Gemfile setl filetype=ruby
-
-" sh settings
-autocmd FileType sh setl autoindent
-autocmd FileType sh setl smartindent
-
-" go settings
-autocmd FileType go setl autoindent
-autocmd FileType go setl smartindent
-autocmd FileType go setl tabstop=4 shiftwidth=4 softtabstop=0
-autocmd FileType go setl noexpandtab
-autocmd FileType go autocmd BufWritePre <buffer> Fmt
-autocmd FileType go :highlight goErr cterm=bold ctermfg=203
-autocmd FileType go :match goErr /\<err\>/
-
-autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-
-set completeopt=menuone
-let g:neocomplete#enable_at_startup = 1
-let g:neocomplete#max_list = 20
-let g:neocomplete#auto_completion_start_length = 3
-let g:neocomplete#manual_completion_start_length = 0
-let g:neocomplete#min_keyword_length = 3
-let g:neocomplete#min_syntax_length = 3
-let g:neocomplete#enable_smart_case = 1
-let g:neocomplete#cursor_hold_i_time = 500
-inoremap <expr><C-y>  neocomplete#close_popup()
-inoremap <expr><C-e>  neocomplete#cancel_popup()
-inoremap <expr><C-g> neocomplete#undo_completion()
-inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-inoremap <expr><C-h> pumvisible() ? neocomplete#cancel_popup()."\<C-h>" : "\<C-h>"
-inoremap <expr><BS> pumvisible() ? neocomplete#cancel_popup()."\<C-h>" : "\<C-h>"
-inoremap <expr><Space> pumvisible() ? neocomplete#close_popup()."\<Space>" : "\<Space>"
-
-" <CR>: close popup and save indent.
-inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
-function! s:my_cr_function()
-  " return neocomplete#smart_close_popup() . "\<CR>"
-  " For no inserting <CR> key.
-  return pumvisible() ? neocomplete#close_popup() : "\<CR>"
-endfunction
-
-if !exists('g:neocomplete#omni_patterns')
-  let g:neocomplete#omni_patterns = {}
-endif
-let g:neocomplete#omni_patterns.go = '\h\w*\.\?'
-
-let g:qb_hotkey = "<C-T>"
-
-map <C-n> :NERDTreeToggle<CR>
-
-set splitright
-
-" load private settings
-if filereadable("$HOME/.vim/private")
-    source "$HOME/.vim/private"
+    augroup invisible
+        autocmd! invisible
+        autocmd BufNew,BufRead * call ActivateInvisibleIndicator()
+    augroup END
 endif
 
+"" plugin settings
+" quickbuf
+let g:qb_hotkey = "<C-b>"
+
+" quickrun
+nnoremap <silent> <C-q> :QuickRun<CR>
+nnoremap <expr><silent> <C-c> quickrun#is_running() ? quickrun#sweep_sessions() : "\<C-c>"
+
+" nerdtree
+nnoremap <silent> <C-n> :NERDTreeToggle<CR>
