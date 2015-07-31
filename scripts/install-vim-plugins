@@ -3,11 +3,7 @@
 bundles=(
   'sunaku/vim-unbundle.git'
   'altercation/vim-colors-solarized.git'
-  'AndrewRadev/switch.vim'
-  'gregsexton/gitv'
   'Shougo/neocomplete.git'
-  'Shougo/neosnippet'
-  'vim-scripts/surround.vim.git'
   'thinca/vim-quickrun'
   'vim-scripts/QuickBuf.git'
   'vim-scripts/matchit.zip.git'

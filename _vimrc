@@ -126,21 +126,6 @@ let g:neocomplete#omni_patterns.go = '\h\w*\.\?'
 
 let g:qb_hotkey = "<C-T>"
 
-" switch
-let b:switch_custom_definitions = [
-      \   ["describe", "context", "specific", "example"],
-      \   ['before', 'after'],
-      \   ['be_true', 'be_false'],
-      \   ['get', 'post', 'put', 'delete'],
-      \   ['==', 'eql', 'equal'],
-      \   { '\.should_not': '\.should' },
-      \   ['\.to_not', '\.to'],
-      \   { '\([^. ]\+\)\.should\(_not\|\)': 'expect(\1)\.to\2' },
-      \   { 'expect(\([^. ]\+\))\.to\(_not\|\)': '\1.should\2' },
-      \ ]
-
-imap <silent><C-F> <Plug>(neosnippet_expand_or_jump)
-
 map <C-n> :NERDTreeToggle<CR>
 
 set splitright
