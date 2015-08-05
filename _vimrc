@@ -5,6 +5,7 @@ runtime macros/matchit.vim
 "" general
 set modeline
 set modelines=5
+filetype plugin indent on
 
 " cursol
 set ww=b,s,<,>,[,]
@@ -62,6 +63,11 @@ augroup swapchoice-readonly
   autocmd SwapExists * let v:swapchoice = 'o'
 augroup END
 
+" complete
+set completeopt=menu,preview
+autocmd CursorMovedI * if pumvisible() == 0|pclose|endif
+autocmd InsertLeave * if pumvisible() == 0|pclose|endif
+
 " 全角スペース・行末のスペースの可視化
 if has("syntax")
     syntax on
@@ -99,3 +105,4 @@ nnoremap <expr><silent> <C-c> quickrun#is_running() ? quickrun#sweep_sessions() 
 
 " nerdtree
 nnoremap <silent> <C-n> :NERDTreeToggle<CR>
+

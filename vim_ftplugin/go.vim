@@ -3,9 +3,11 @@ set tabstop=4
 set shiftwidth=4
 set softtabstop=0
 
-let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': ['go'] }
-let g:syntastic_go_checkers = ['go', 'golint']
+autocmd BufWritePre <buffer> Fmt
+:highlight goErr cterm=bold ctermfg=203
+:match goErr /\<err\>/
 
-autocmd FileType go autocmd BufWritePre <buffer> Fmt
-autocmd FileType go :highlight goErr cterm=bold ctermfg=203
-autocmd FileType go :match goErr /\<err\>/
+" gocede path
+exe "set rtp+=".globpath($GOPATH, "src/github.com/nsf/gocode/vim")
+exe "set rtp+=".globpath($GOPATH, "src/github.com/golang/lint/misc/vim")
+

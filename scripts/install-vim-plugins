@@ -11,13 +11,14 @@ fi
 bundles=(
   'altercation/vim-colors-solarized.git'
 
+  'Shougo/vimproc.vim'
   'vim-scripts/QuickBuf.git'
   'thinca/vim-quickrun'
   'scrooloose/nerdtree'
+  'ctrlpvim/ctrlp.vim'
 
   'google/vim-ft-go'
   'vim-jp/vim-go-extra'
-  'scrooloose/syntastic'
 )
 
 mkdir -p $HOME/.vim/bundle
@@ -31,3 +32,8 @@ for repo in ${bundles[@]}; do
 done
 
 ln -sf ~/dotfiles/vim_ftplugin ~/.vim/after/ftplugin
+
+# make vimproc
+if [ -d vimproc.vim ]; then
+  (cd vimproc.vim; make)
+fi
