@@ -17,6 +17,7 @@ bundles=(
   'scrooloose/nerdtree'
   'ctrlpvim/ctrlp.vim'
   'scrooloose/syntastic'
+  'milkypostman/vim-togglelist'
 
   'google/vim-ft-go'
   'vim-jp/vim-go-extra'

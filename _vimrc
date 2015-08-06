@@ -116,3 +116,8 @@ let g:syntastic_warning_symbol='⚠'
 let g:syntastic_style_error_symbol = '✗'
 let g:syntastic_style_warning_symbol = '⚠'
 let g:syntastic_check_on_wq = 0
+
+" vim-togglelist
+let g:toggle_list_no_mappings = 1
+nmap <script> <silent> <C-l> :call ToggleLocationList()<CR>
+nmap <script> <silent> <C-c> :call ToggleQuickfixList()<CR>
