@@ -38,8 +38,8 @@ function gen_pjrc() {
     go)
       cat <<'CMD' > .pjrc
 export GOPATH=$GOPATH:`pwd`
-export GOROOT=/home/kawaken/local/go-1.4
-export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+export GOROOT=${GOROOT:-/usr/local/go}
+export PATH=`pwd`/bin:$PATH
 CMD
       ;;
     *)
