@@ -1,3 +1,5 @@
+export PROJECT_DIR=$HOME/projects
+
 function show_projects() {
   echo "\033[34mProjects list :\033[0m"
   ls $PROJECT_DIR

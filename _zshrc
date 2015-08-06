@@ -54,6 +54,8 @@ if [ -n "${SSH_CONNECTION}" ]; then
     setopt ignore_eof                # Ctrl+Dでログアウトしない
 fi
 
+# dotfilesの場所を変数に設定
+export MY_DOTFILES_DIR=$HOME/dotfiles
 # エイリアスの読込
 [[ -f $MY_DOTFILES_DIR/_alias ]] && source $MY_DOTFILES_DIR/_alias
 
@@ -122,5 +124,13 @@ fpath=($HOME/.zsh-completions/src $fpath)
 
 # checkversion
 (cd $MY_DOTFILES_DIR;scripts/check-update -v)
+
+# PATHの拡張
+export GOPATH=$HOME/go
+export PATH=$HOME/bin:$PATH:/sbin:$GOPATH/bin
+
+if [ -f $HOME/.zshrc_local ]; then
+  source $HOME/.zshrc_local
+fi
 
 # vim: ft=zsh

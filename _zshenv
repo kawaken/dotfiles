@@ -1,15 +1,4 @@
 # vim: ft=zsh
 
-# dotfilesの場所を変数に設定
-export MY_DOTFILES_DIR=$HOME/dotfiles
-export PROJECT_DIR=$HOME/projects
-
-export GOPATH=$HOME/go
-export PATH=$HOME/bin:$PATH:/sbin:$GOPATH/bin
 export LANG=ja_JP.UTF-8
-
 export EDITOR=vim
-
-if [ -f $HOME/.zshenv_local ]; then
-  source $HOME/.zshenv_local
-fi
