@@ -16,6 +16,7 @@ bundles=(
   'thinca/vim-quickrun'
   'scrooloose/nerdtree'
   'ctrlpvim/ctrlp.vim'
+  'scrooloose/syntastic'
 
   'google/vim-ft-go'
   'vim-jp/vim-go-extra'
