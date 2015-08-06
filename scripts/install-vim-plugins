@@ -31,7 +31,7 @@ for repo in ${bundles[@]}; do
   fi
 done
 
-ln -sf ~/dotfiles/vim_ftplugin ~/.vim/after/ftplugin
+ln -n -sf ~/dotfiles/vim_ftplugin ~/.vim/after/ftplugin
 
 # make vimproc
 if [ -d vimproc.vim ]; then
