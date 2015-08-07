@@ -1,6 +1,7 @@
 alias ls='ls -F --color=auto'
 alias la='ls -a --color=auto'
 alias ll='ls -l -h --color=auto'
+alias llrt='ls -lrt --color=auto'
 
 alias grep='grep --color=auto'
 alias crontab='crontab -i'
