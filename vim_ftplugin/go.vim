@@ -15,3 +15,6 @@ exe "set rtp+=".globpath($GOPATH, "src/github.com/golang/lint/misc/vim")
 let g:syntastic_mode_map = { 'mode': 'passive',
             \ 'active_filetypes': ['go'] }
 let g:syntastic_go_checkers = ['go', 'golint', 'govet']
+
+" neocomplete
+"let g:neocomplete#sources#omni#input_patterns.go = '[^.[:digit:] *\t]\.\w*'

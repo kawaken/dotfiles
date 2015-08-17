@@ -18,6 +18,7 @@ bundles=(
   'ctrlpvim/ctrlp.vim'
   'scrooloose/syntastic'
   'milkypostman/vim-togglelist'
+  'Shougo/neocomplete.vim'
 
   'google/vim-ft-go'
   'vim-jp/vim-go-extra'
