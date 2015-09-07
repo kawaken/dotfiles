@@ -22,6 +22,8 @@ bundles=(
 
   'google/vim-ft-go'
   'vim-jp/vim-go-extra'
+
+  'kballard/vim-swift'
 )
 
 mkdir -p $HOME/.vim/bundle
