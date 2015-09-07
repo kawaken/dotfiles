@@ -30,6 +30,7 @@
     ls = ls-files
     mg = merge
     mo = merge origin/master
+    mf = merge --ff-only
     pul = pull --ff-only
     pus = push
     rv = remote -v
