@@ -12,3 +12,4 @@ done
 mkdir -p $HOME/bin
 
 ln -sf $HOME/dotfiles/scripts/git-user $HOME/bin/git-user
+ln -sf $HOME/dotfiles/git/hooks $HOME/.git-hooks
