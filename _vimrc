@@ -58,6 +58,7 @@ nmap <ESC><ESC> :nohlsearch<CR><ESC>
 " temporary files
 set directory=~/.vim/tmp
 set backupdir=~/.vim/tmp
+set undodir=~/.vim/undo
 set viminfo+=n~/.vim/tmp/viminfo.txt
 augroup swapchoice-readonly
   autocmd!
