@@ -44,3 +44,5 @@
 	user = kawaken
 [init]
 	templatedir = ~/.git-hooks
+[diff]
+  algorithm = histogram
