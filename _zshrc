@@ -133,4 +133,12 @@ if [ -f $HOME/.zshrc_local ]; then
   source $HOME/.zshrc_local
 fi
 
+function mvim() {
+  if [ -f "`git rev-parse --show-toplevel 2>/dev/null`/Gomfile" ]; then
+    gom exec mvim "$@"
+  else
+    /Applications/MacVim.app/Contents/MacOS/mvim "$@"
+  fi
+}
+
 # vim: ft=zsh
