@@ -20,8 +20,7 @@ bundles=(
   'milkypostman/vim-togglelist'
   'Shougo/neocomplete.vim'
 
-  'google/vim-ft-go'
-  'vim-jp/vim-go-extra'
+  'fatih/vim-go'
 
   'kballard/vim-swift'
 )
