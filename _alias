@@ -34,8 +34,6 @@ alias regen='rake db:drop db:create db:migrate db:seed'
 
 alias vg='vi -c "Gist -l"'
 
-alias gm=godmine
-
 alias urlencode='python -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])'
 alias urldecode='python -c "import sys, urllib as ul; print ul.unquote_plus(sys.argv[1])"'
 # vim: ft=sh
