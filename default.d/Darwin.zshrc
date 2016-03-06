@@ -16,4 +16,8 @@ else
   alias llrt='ls -lrt'
 fi
 
+if [ -d /Applications/MacVim.app/Contents/MacOS ]; then
+  PATH=/Applications/MacVim.app/Contents/MacOS:$PATH
+fi
+
 # vim:ft=sh
