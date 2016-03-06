@@ -52,7 +52,6 @@ let b:match_ignorecase = 1
 set hlsearch
 set ignorecase
 set smartcase
-set nowrapscan
 nmap <ESC><ESC> :nohlsearch<CR><ESC>
 
 " temporary files
