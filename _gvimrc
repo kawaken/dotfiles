@@ -4,6 +4,8 @@ set background=dark
 let g:solarized_termcolors=256
 colorscheme solarized
 
+set visualbell t_vb=
+
 if has('gui_macvim')
   set guifont=Panic\ Sans:h12
   set lines=60
