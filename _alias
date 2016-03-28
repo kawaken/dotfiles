@@ -24,6 +24,12 @@ alias chx="chmod +x"
 #alias -g H='| head'
 #alias -g T='| tail'
 
+alias rl='redis-cli'
+
+alias rgrep='grep --exclude-dir=.git --exclude-dir=_vendor -r'
+
+alias ge='gom exec'
+
 alias vi=vim
 if [ -f /usr/local/git/bin/git ]; then
   alias git=/usr/local/git/bin/git
