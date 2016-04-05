@@ -98,13 +98,14 @@ function _update_rpr_host() {
 
 function _update_prompt() {
   PR_FULLPATH="%F{yellow}%d%f"
+  PR_PREV_RESULT="%(?,,%F{red}!!!%f )"
   PR_VCS=`_update_vcs_info_msg`
   PR_USR=`_update_pr_usr`
   PR_SEP="%(1j,%F{magenta}%#%f,%#)"
 
   PROMPT="
 $PR_FULLPATH$PR_VCS
-$PR_USR $PR_SEP "
+$PR_USR $PR_SEP $PR_PREV_RESULT"
   RPROMPT="`_update_rpr_host` %D{%Y-%m-%d %H:%M:%S}"
 }
 #TMOUT=1                              # ALRMシグナルの間隔
