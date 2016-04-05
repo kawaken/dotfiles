@@ -61,7 +61,7 @@ export MY_DOTFILES_DIR=$HOME/dotfiles
 [[ -f $MY_DOTFILES_DIR/default.d/`uname`.zshrc ]] && source $MY_DOTFILES_DIR/default.d/`uname`.zshrc
 
 # vcs関連の設定読込
-[[ -f $MY_DOTFILES_DIR/zsh/_zsh_vcs_info ]] && source $MY_DOTFILES_DIR/zsh/_zsh_vcs_info
+[[ -f $MY_DOTFILES_DIR/zsh/vcs_info ]] && source $MY_DOTFILES_DIR/zsh/vcs_info
 
 # プロンプト表示処理
 function _update_pr_usr() {
@@ -119,7 +119,7 @@ add-zsh-hook precmd _update_prompt
 fpath=($HOME/.zsh-completions/src $fpath)
 
 # 便利コマンド読込
-[[ -f $MY_DOTFILES_DIR/_zsh_workon ]] && source $MY_DOTFILES_DIR/_zsh_workon
+[[ -f $MY_DOTFILES_DIR/zsh/workon ]] && source $MY_DOTFILES_DIR/zsh/workon
 
 # checkversion
 (cd $MY_DOTFILES_DIR;scripts/check-update -v)
