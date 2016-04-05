@@ -105,32 +105,6 @@ let g:qb_hotkey = "<C-b>"
 nnoremap <silent> <C-q> :QuickRun<CR>
 nnoremap <expr><silent> <C-c> quickrun#is_running() ? quickrun#sweep_sessions() : "\<C-c>"
 
-let g:quickrun_config = get(g:, 'quickrun_config', {})
-
-"" quickrunのランナーにvimprocを使用する
-"" 成功時はバッファへ
-"" エラー時はquickfixへ出力
-let g:quickrun_config._ = {
-\   'runner'    : 'vimproc',
-\   'runner/vimproc/updatetime' : 60,
-\   'outputter' : 'error',
-\   'outputter/error/success' : 'null',
-\   'outputter/error/error'   : 'loclist',
-\   'outputter/buffer/split'  : ':rightbelow 8sp',
-\   'outputter/buffer/close_on_empty' : 1,
-\}
-
-"" quickrunにgo buildを登録
-let g:quickrun_config["gobuild"] = {
-\   'command': 'gom',
-\   'cmdopt' : './...',
-\   'exec': '%c build %o',
-\   "errorformat": '%f:%l: %m,%-G%.%#',
-\}
-
-"" *.goファイルを保存したら非同期にgo buildを実行
-autocmd BufWritePost *.go :QuickRun gobuild
-
 " nerdtree
 nnoremap <silent> <C-n> :NERDTreeToggle<CR>
 
@@ -145,10 +119,11 @@ let g:syntastic_style_error_symbol = '✗'
 let g:syntastic_style_warning_symbol = '⚠'
 let g:syntastic_check_on_wq = 0
 let g:syntastic_go_checkers = ['golint', 'govet']
+"let g:syntastic_always_populate_loc_list = 1
 
 " vim-togglelist
 let g:toggle_list_no_mappings = 1
-nmap <script> <silent> <C-l> :call ToggleLocationList()<CR>
+nmap <script> <silent> <C-l> :Errors<CR>
 
 " neocomplete
 "Note: This option must set it in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
@@ -175,8 +150,6 @@ if !exists('g:neocomplete#keyword_patterns')
     let g:neocomplete#keyword_patterns = {}
 endif
 let g:neocomplete#keyword_patterns['default'] = '\h\w*'
-
-let g:go_fmt_command = "goimports"
 
 " Recommended key-mappings.
 " <CR>: close popup and save indent.
