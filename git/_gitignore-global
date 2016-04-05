@@ -11,3 +11,4 @@ data/
 .pjrc
 .bundle/
 .idea/
+.setting/
