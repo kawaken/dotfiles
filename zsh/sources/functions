@@ -1,0 +1,8 @@
+function mvim() {
+  if [ -f "`git rev-parse --show-toplevel 2>/dev/null`/Gomfile" ]; then
+    gom exec mvim "$@"
+  else
+    /Applications/MacVim.app/Contents/MacOS/mvim "$@"
+  fi
+}
+

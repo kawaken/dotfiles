@@ -119,7 +119,7 @@ add-zsh-hook precmd _update_prompt
 fpath=($HOME/.zsh-completions/src $fpath)
 
 # 便利コマンド読込
-[[ -f $MY_DOTFILES_DIR/zsh/workon ]] && source $MY_DOTFILES_DIR/zsh/workon
+source $MY_DOTFILES_DIR/zsh/sources/*
 
 # checkversion
 (cd $MY_DOTFILES_DIR;scripts/check-update -v)
@@ -127,13 +127,5 @@ fpath=($HOME/.zsh-completions/src $fpath)
 if [ -f $HOME/.zshrc_local ]; then
   source $HOME/.zshrc_local
 fi
-
-function mvim() {
-  if [ -f "`git rev-parse --show-toplevel 2>/dev/null`/Gomfile" ]; then
-    gom exec mvim "$@"
-  else
-    /Applications/MacVim.app/Contents/MacOS/mvim "$@"
-  fi
-}
 
 # vim: ft=zsh
