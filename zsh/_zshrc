@@ -119,7 +119,9 @@ add-zsh-hook precmd _update_prompt
 fpath=($HOME/.zsh-completions/src $fpath)
 
 # 便利コマンド読込
-source $MY_DOTFILES_DIR/zsh/sources/*
+for conf in $MY_DOTFILES_DIR/zsh/sources/*; do
+	source ${conf};
+done
 
 # checkversion
 (cd $MY_DOTFILES_DIR;scripts/check-update -v)
