@@ -124,10 +124,6 @@ fpath=($HOME/.zsh-completions/src $fpath)
 # checkversion
 (cd $MY_DOTFILES_DIR;scripts/check-update -v)
 
-# PATHの拡張
-export GOPATH=$HOME/go
-export PATH=$HOME/bin:$PATH:/sbin:$GOPATH/bin
-
 if [ -f $HOME/.zshrc_local ]; then
   source $HOME/.zshrc_local
 fi
