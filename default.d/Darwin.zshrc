@@ -20,4 +20,9 @@ if [ -d /Applications/MacVim.app/Contents/MacOS ]; then
   PATH=/Applications/MacVim.app/Contents/MacOS:$PATH
 fi
 
+if [ -d /Applications/Postgres.app/Contents/Versions/latest/bin ]; then
+  PATH=$PATH:/Applications/Postgres.app/Contents/Versions/latest/bin
+fi
+
+alias vi=Vim
 # vim:ft=sh
