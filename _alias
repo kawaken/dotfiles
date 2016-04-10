@@ -24,6 +24,7 @@ alias chx="chmod +x"
 alias -g V='| view -'
 alias -g H='| head'
 alias -g T='| tail -f'
+alias -g G='| grep'
 
 alias rl='redis-cli'
 
