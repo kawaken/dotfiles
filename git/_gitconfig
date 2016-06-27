@@ -16,7 +16,7 @@
     ad = add
     ba = branch -a
     br = branch
-    ci = commit --verbose
+    ci = commit
     cl = config --list
     co = checkout
     df = diff
@@ -46,3 +46,6 @@
 	templatedir = ~/.git-hooks
 [diff]
   algorithm = histogram
+	compactionHeuristic = true
+[commit]
+	verbose = true
