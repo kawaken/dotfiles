@@ -25,4 +25,8 @@ if [ -d /Applications/Postgres.app/Contents/Versions/latest/bin ]; then
 fi
 
 alias vi=Vim
+if [ -e /opt/local/bin/svn ]; then
+  alias svn=/opt/local/bin/svn
+fi
+
 # vim:ft=sh
