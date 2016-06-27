@@ -164,4 +164,13 @@ endif
 
 set cmdheight=2
 
+function UpdateColorScheme()
+  if &readonly
+    colorscheme morning
+  else
+    colorscheme gruvbox
+  endif
+endfunction
+autocmd BufReadPost * call UpdateColorScheme()
+
 NeoCompleteEnable
