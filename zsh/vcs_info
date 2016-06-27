@@ -27,7 +27,7 @@ function +vi-git-extra-info() {
   fi
 
   hook_com[unstaged]+=`check_git_untracked`
-  hook_com[misc]+=`count_git_st`
+  hook_com[misc]+="`count_git_st``check_git_user`"
 }
 
 function check_git_remote() {
@@ -63,6 +63,12 @@ function check_git_untracked() {
 function count_git_st() {
   # git status の種類別にカウントして表示
   git status -s | sort | awk '{ c[$1] += 1; } END{for (k in c) {printf "%s:%s ", k, c[k]}}'
+}
+
+function check_git_user() {
+  domain=`git config user.email | cut -d'@' -f 2`
+  echo "%F{magenta}${domain:0:2}%f"
+
 }
 
 # svnの設定
