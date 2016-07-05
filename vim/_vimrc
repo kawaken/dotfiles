@@ -33,6 +33,9 @@ function ToggleWrap()
 endfunction
 nmap <silent><C-]> :call ToggleWrap()<CR>
 
+autocmd FileType text setlocal textwidth=0
+autocmd FileType gitcommit setlocal textwidth=0
+
 " display
 set number
 set display=lastline
