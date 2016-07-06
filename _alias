@@ -1,5 +1,5 @@
 alias ll="ls -l --time-style=+'%Y/%m/%d %H:%M:%S'"
-alias lrt='ls -lrt'
+alias lrt='ll -rt'
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
@@ -17,10 +17,6 @@ alias gd='cd `git rev-parse --show-toplevel`'
 alias today="LANG=C date '+%F'"
 alias now="LANG=C date '+%F %T'"
 
-alias wl='wc -l'
-
-alias chx="chmod +x"
-
 alias -g V='| view -'
 alias -g H='| head'
 alias -g T='| tail -f'
@@ -35,10 +31,4 @@ alias vs='code'
 alias vi=vim
 alias visjis='vi -c ":e ++enc=cp932"'
 
-alias regen='rake db:drop db:create db:migrate db:seed'
-alias be='bundle exec'
-alias ge='gom exec'
-
-alias urlencode='python -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])'
-alias urldecode='python -c "import sys, urllib as ul; print ul.unquote_plus(sys.argv[1])"'
 # vim: ft=sh
