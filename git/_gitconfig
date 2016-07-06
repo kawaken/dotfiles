@@ -35,7 +35,7 @@
     pus = push
     rv = remote -v
     sh = show
-    st = status -s
+    st = status -s --branch
     sts = stash
     stsu = stash -u
     td = log --oneline --since='12 hour ago'
