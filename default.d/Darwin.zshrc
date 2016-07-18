@@ -12,6 +12,7 @@ fi
 
 if [ -d /Applications/MacVim.app/Contents/MacOS ]; then
   PATH=/Applications/MacVim.app/Contents/MacOS:$PATH
+  alias vim=Vim
 fi
 
 if [ -d /Applications/Postgres.app/Contents/Versions/latest/bin ]; then
