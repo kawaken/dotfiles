@@ -1,6 +1,9 @@
 function mvim() {
-  if [ -f "`git rev-parse --show-toplevel 2>/dev/null`/Gomfile" ]; then
+  _git_dir=`git rev-parse --show-toplevel 2>/dev/null`
+  if [ -f "${_git_dir}/Gomfile" ]; then
     gom exec mvim "$@"
+  elif [ -f "${_git_dir}/Cormfile" ]; then
+    corm exec mvim "$@"
   else
     /Applications/MacVim.app/Contents/MacOS/mvim "$@"
   fi
