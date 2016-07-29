@@ -27,4 +27,6 @@ if [ -e /opt/local/bin/svn ]; then
   alias svn=/opt/local/bin/svn
 fi
 
+alias to='open $(tag -f fav | peco)'
+
 # vim:ft=sh
