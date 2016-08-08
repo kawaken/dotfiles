@@ -98,10 +98,10 @@ if has("syntax")
     augroup END
 endif
 
-"" plugin settings
-" quickbuf
-let g:qb_hotkey = "<C-b>"
+" Quick View Buffers
+nnoremap <silent> ;; :<C-u>buffers<CR>
 
+"" plugin settings
 " quickrun
 nnoremap <silent> <C-q> :QuickRun<CR>
 nnoremap <expr><silent> <C-c> quickrun#is_running() ? quickrun#sweep_sessions() : "\<C-c>"

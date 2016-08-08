@@ -12,7 +12,6 @@ bundles=(
   'morhetz/gruvbox.git'
 
   'Shougo/vimproc.vim'
-  'vim-scripts/QuickBuf.git'
   'thinca/vim-quickrun'
   'scrooloose/nerdtree'
   'ctrlpvim/ctrlp.vim'
