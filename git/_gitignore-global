@@ -12,3 +12,4 @@ data/
 .bundle/
 .idea/
 .setting/
+.vscode/
