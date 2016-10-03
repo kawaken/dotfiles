@@ -13,3 +13,4 @@ data/
 .idea/
 .setting/
 .vscode/
+credentials.csv
