@@ -26,6 +26,9 @@ setopt print_eight_bit               # 補完時の日本語表示
 setopt no_flow_control               # フローコントロールを無効(Ctrl+Sが使える)
 
 # 補完関連
+## 補完対象を増やす
+fpath=($HOME/.zsh-completions/src /usr/local/share/zsh-completions $fpath)
+
 autoload -U compinit
 compinit
 setopt nolistbeep                    # beep音を出さない
@@ -114,9 +117,6 @@ $PR_USR $PR_SEP $PR_PREV_RESULT"
   #zle reset-prompt
 #}
 add-zsh-hook precmd _update_prompt
-
-# 補完対象を増やす
-fpath=($HOME/.zsh-completions/src $fpath)
 
 # 便利コマンド読込
 for conf in $MY_DOTFILES_DIR/zsh/sources/*; do
