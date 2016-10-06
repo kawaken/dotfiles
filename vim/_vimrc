@@ -168,7 +168,7 @@ endif
 set cmdheight=2
 
 function UpdateColorScheme()
-  if &readonly
+  if &readonly && &buftype ==# ''
     colorscheme morning
   else
     colorscheme gruvbox
