@@ -39,9 +39,8 @@ function gen_pjrc() {
   case $lang in
     go)
       cat <<'CMD' > .pjrc
-export GOPATH=$GOPATH:`pwd`
-export GOROOT=${GOROOT:-/usr/local/go}
-export PATH=`pwd`/bin:$PATH
+export GOPATH=$PROJECT_DIR
+export PATH=`pwd`/bin:$PROJECT_DIR/bin:$PATH
 CMD
       ;;
     *)
