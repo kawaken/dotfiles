@@ -29,4 +29,8 @@ fi
 
 alias to='open $(tag -f fav | peco)'
 
+function dash() {
+  open "dash://$1:$2"
+}
+
 # vim:ft=sh
