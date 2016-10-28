@@ -3,7 +3,7 @@ syntax enable
 set visualbell t_vb=
 
 if has('gui_macvim')
-  set guifont=guifont=SourceHanCodeJP-Light:h12
+  set guifont=Ricty-Regular:h12
   set lines=60
   set columns=155
   set guioptions-=T
