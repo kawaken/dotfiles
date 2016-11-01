@@ -21,7 +21,7 @@
     co = checkout
     df = diff
     dc = diff --cached
-    dw = diff --word-diff
+    dw = diff --word-diff-regex='\\w+'
     ex = exclude
     fe = fetch
     hist = log --pretty=format:'%C(yellow)%h %C(blue)%ad%Creset %s' --graph --date=short
