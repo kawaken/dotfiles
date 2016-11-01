@@ -1,0 +1,35 @@
+#!/bin/zsh
+
+if [ -z "$REDMINE_URL" -o -z "$REDMINE_TOKEN" ]; then
+  echo "REDMINE_URL or REDMINE_TOKEN is not defined"
+  exit 1
+fi
+
+# env values in ~/.zshrc_local
+function issues() {
+  curl -s "$REDMINE_URL/issues.json?assigned_to_id=me&key=$REDMINE_TOKEN" \
+    | jq --raw-output '.issues[] | [ (.id|tostring), .project.name, .subject] | @tsv'
+}
+
+function br() {
+  is=$(issues|peco)
+
+  if [ -z "$is" ]; then
+    echo "no issues selected"
+    exit
+  fi
+
+  id=$(echo $is | cut -f 1)
+  desc=$(echo $is | cut -f 2-)
+
+  if git checkout -b issue-$id; then
+    echo "created: issue-$id"
+    echo "    $desc"
+  fi
+}
+
+function current() {
+
+}
+
+$1
