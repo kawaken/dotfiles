@@ -23,6 +23,7 @@ bundles=(
 
   'kballard/vim-swift'
   'rizzatti/dash.vim'
+  'cespare/vim-toml'
 )
 
 mkdir -p $HOME/.vim/bundle
