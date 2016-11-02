@@ -11,7 +11,7 @@ function issues() {
     | jq --raw-output '.issues[] | [ (.id|tostring), .project.name, .subject] | @tsv'
 }
 
-function br() {
+function branch() {
   is=$(issues|peco)
 
   if [ -z "$is" ]; then
@@ -29,7 +29,26 @@ function br() {
 }
 
 function current() {
+  br=$(git symbolic-ref --short HEAD)
+  id=$(echo $br | cut -d "-" -f 2)
 
+  curl -s "$REDMINE_URL/issues/$id.json?key=$REDMINE_TOKEN" \
+    | jq --raw-output '.issue | "プロジェクト: \(.project.name)
+タイトル    : \(.subject)
+詳細        : \(.description)
+担当者      : \(.assigned_to.name)
+ステータス  : \(.status.name)
+開始日      : \(.start_date)
+期限        : \(.due_date)
+"'
+  echo "$REDMINE_URL/issues/$id"
 }
 
-$1
+cmd=$1
+case $1 in
+  is) cmd=issues ;;
+  br) cmd=branch ;;
+  c) cmd=current ;;
+esac
+
+$cmd
