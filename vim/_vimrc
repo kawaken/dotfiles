@@ -2,60 +2,53 @@
 runtime vim-unbundle/plugin/unbundle.vim
 runtime macros/matchit.vim
 
-"" general
+" general
 let mapleader = "\<Space>"
 set modeline
 set modelines=5
 filetype plugin indent on
 
 " cursol
-set ww=b,s,<,>,[,]
+set whichwrap=b,s,<,>,[,]
 set backspace=indent,eol,start
+set scrolloff=5
+set sidescrolloff=5
+set sidescroll=1
 
-" file edit
-set enc=utf-8
-set fenc=utf-8
-set fencs=utf-8,sjis,euc-jp,iso-2022-jp
-set fileformats=unix,dos,mac
-set hidden
-
-set textwidth=0
-set tabstop=2
-set expandtab
-set shiftwidth=2
-set smartindent
-function ToggleWrap()
-  if (&wrap == 1)
-    set nowrap
-  else
-    set wrap
-  endif
-endfunction
-nmap <silent><C-]> :call ToggleWrap()<CR>
-
-autocmd FileType text setlocal textwidth=0
-autocmd FileType gitcommit setlocal textwidth=0
+"" matchit
+let b:match_ignorecase = 1
 
 " display
-set number
 set display=lastline
 set pumheight=10
 set showmatch
 set matchtime=1
 
-" status line
+"" status line
 set statusline=%F%m%r%h%w\ POS=%04l,%04v[%p%%]\ L=%L
 set laststatus=2
-set scrolloff=5
-
-" matchit
-let b:match_ignorecase = 1
+set cmdheight=2
 
 " search
 set hlsearch
 set ignorecase
 set smartcase
 nmap <ESC><ESC> :nohlsearch<CR><ESC>
+
+" file edit
+set enc=utf-8
+set fenc=utf-8
+set fencs=utf-8,sjis,euc-jp,iso-2022-jp
+set fileformats=unix,dos,mac
+set confirm
+set hidden
+set autoread
+
+set textwidth=0
+set tabstop=2
+set shiftwidth=2
+set expandtab
+set smartindent
 
 " temporary files
 set directory=~/.vim/tmp
@@ -97,17 +90,6 @@ if has("syntax")
         autocmd BufNew,BufRead * call ActivateInvisibleIndicator()
     augroup END
 endif
-
-" Quick View Buffers
-nnoremap <silent> ;; :<C-u>buffers<CR>
-
-"" plugin settings
-" quickrun
-nnoremap <silent> <C-q> :QuickRun<CR>
-nnoremap <expr><silent> <C-c> quickrun#is_running() ? quickrun#sweep_sessions() : "\<C-c>"
-
-" nerdtree
-nnoremap <silent> <C-n> :NERDTreeToggle<CR>
 
 " syntastic
 set statusline+=%#warningmsg#
@@ -152,6 +134,46 @@ if !exists('g:neocomplete#keyword_patterns')
 endif
 let g:neocomplete#keyword_patterns['default'] = '\h\w*'
 
+
+" remap
+"" copy and paste
+vmap <Leader>y "+y
+nmap <Leader>p "+gp
+nmap <Leader>P "+gP
+nnoremap p "0p
+nnoremap P "0P
+
+"" wrap
+function ToggleWrap()
+  if (&wrap == 1)
+    set nowrap
+  else
+    set wrap
+  endif
+endfunction
+nmap <silent><Leader>w :call ToggleWrap()<CR>
+
+"" number
+function ToggleNumber()
+  if (&number == 1)
+    set nonumber
+  else
+    set number
+  endif
+endfunction
+nmap <silent><Leader>n :call ToggleNumber()<CR>
+
+"" Quick View Buffers
+nnoremap <silent> ;; :<C-u>buffers<CR>
+
+"" plugin settings
+" quickrun
+nnoremap <silent> <C-q> :QuickRun<CR>
+nnoremap <expr><silent> <C-c> quickrun#is_running() ? quickrun#sweep_sessions() : "\<C-c>"
+
+" nerdtree
+nnoremap <silent> <C-n> :NERDTreeToggle<CR>
+
 " <TAB>: completion.
 inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 " <C-h>, <BS>: close popup and delete backword char.
@@ -160,12 +182,11 @@ inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
 inoremap <expr><C-y>  neocomplete#close_popup()
 inoremap <expr><C-e>  neocomplete#cancel_popup()
 
+
 " Enable heavy omni completion.
 if !exists('g:neocomplete#sources#omni#input_patterns')
   let g:neocomplete#sources#omni#input_patterns = {}
 endif
-
-set cmdheight=2
 
 function UpdateColorScheme()
   if &readonly && &buftype ==# ''
