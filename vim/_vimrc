@@ -23,6 +23,8 @@ set display=lastline
 set pumheight=10
 set showmatch
 set matchtime=1
+set list
+set listchars=eol:$,tab:▸\
 
 "" status line
 set statusline=%F%m%r%h%w\ POS=%04l,%04v[%p%%]\ L=%L
@@ -54,7 +56,7 @@ set smartindent
 set directory=~/.vim/tmp
 set backupdir=~/.vim/tmp
 set undodir=~/.vim/undo
-set viminfo+=n~/.vim/tmp/viminfo.txt
+set viminfo=%,'100,f1,<0,n~/.vim/tmp/viminfo.txt
 augroup swapchoice-readonly
   autocmd!
   autocmd SwapExists * let v:swapchoice = 'o'
