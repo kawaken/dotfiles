@@ -24,7 +24,12 @@ set pumheight=10
 set showmatch
 set matchtime=1
 set list
-set listchars=eol:$,tab:▸\
+set listchars=eol:$,tab:▸~,trail:~
+
+syntax on
+set t_Co=256
+set background=dark
+colorscheme gruvbox
 
 "" status line
 set statusline=%F%m%r%h%w\ POS=%04l,%04v[%p%%]\ L=%L
@@ -64,34 +69,10 @@ augroup END
 
 " complete
 set completeopt=menu
-autocmd CursorMovedI * if pumvisible() == 0|pclose|endif
-autocmd InsertLeave * if pumvisible() == 0|pclose|endif
-
-" 全角スペース・行末のスペースの可視化
-if has("syntax")
-    syntax on
-    set t_Co=256
-    set background=dark
-    colorscheme gruvbox
-
-    " PODバグ対策
-    syn sync fromstart
-
-    function! ActivateInvisibleIndicator()
-        " 下の行の"　"は全角スペース
-        syntax match InvisibleJISX0208Space "　" display containedin=ALL
-        highlight InvisibleJISX0208Space term=underline ctermbg=Blue guibg=darkgray gui=underline
-        syntax match InvisibleTrailedSpace "[ \t]\+$" display containedin=ALL
-        highlight InvisibleTrailedSpace term=underline ctermbg=Red guibg=NONE gui=undercurl guisp=darkorange
-        "syntax match InvisibleTab "\t" display containedin=ALL
-        "highlight InvisibleTab term=underline ctermbg=white gui=undercurl guisp=darkslategray
-    endfunction
-
-    augroup invisible
-        autocmd! invisible
-        autocmd BufNew,BufRead * call ActivateInvisibleIndicator()
-    augroup END
-endif
+augroup auto-pclose
+  autocmd CursorMovedI * if pumvisible() == 0|pclose|endif
+  autocmd InsertLeave * if pumvisible() == 0|pclose|endif
+augroup END
 
 " syntastic
 set statusline+=%#warningmsg#
@@ -136,14 +117,10 @@ if !exists('g:neocomplete#keyword_patterns')
 endif
 let g:neocomplete#keyword_patterns['default'] = '\h\w*'
 
-
 " remap
 "" copy and paste
-vmap <Leader>y "+y
-nmap <Leader>p "+gp
-nmap <Leader>P "+gP
-nnoremap p "0p
-nnoremap P "0P
+vmap <Leader>c "+y
+nmap <Leader>v "+gP
 
 "" wrap
 function ToggleWrap()
