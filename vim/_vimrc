@@ -78,6 +78,7 @@ if has("syntax")
     set t_Co=256
     set background=dark
     colorscheme gruvbox
+    let g:gruvbox_contrast_dark='hard'
 
     " PODバグ対策
     syn sync fromstart
