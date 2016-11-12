@@ -3,7 +3,6 @@ set tabstop=4
 set shiftwidth=4
 set softtabstop=0
 
-autocmd BufWritePre <buffer> Fmt
 :highlight goErr cterm=bold ctermfg=203
 :match goErr /\<err\>/
 
