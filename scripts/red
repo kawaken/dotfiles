@@ -7,7 +7,7 @@ fi
 
 # env values in ~/.zshrc_local
 function issues() {
-  curl -s "$REDMINE_URL/issues.json?assigned_to_id=me&key=$REDMINE_TOKEN" \
+  curl -s "$REDMINE_URL/issues.json?key=$REDMINE_TOKEN&assigned_to_id=me&status_id=2" \
     | jq --raw-output '.issues[] | [ (.id|tostring), .project.name, .subject] | @tsv'
 }
 
