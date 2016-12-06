@@ -36,4 +36,6 @@ alias vs='code'
 alias vi=vim
 alias visjis='vi -c ":e ++enc=cp932"'
 
+alias ap="ansible-playbook"
+
 # vim: ft=sh
