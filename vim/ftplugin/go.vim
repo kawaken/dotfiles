@@ -5,7 +5,7 @@ set softtabstop=0
 
 autocmd BufWritePre <buffer> Fmt
 :highlight goErr cterm=bold ctermfg=203
-:match goErr /\<err\>/
+:match goErr /\<err\>|\<ok\>/
 
 " gocede path
 exe "set rtp+=".globpath($GOPATH, "src/github.com/nsf/gocode/vim")
