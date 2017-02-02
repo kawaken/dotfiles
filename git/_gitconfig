@@ -13,6 +13,7 @@
 [rerere]
     enable = true
 [alias]
+    al = log --no-merges --date=iso-strict --pretty='format:%C(yellow)%h %C(green)%cd %C(blue)%an%C(red)%d %C(reset)%s' --numstat
     ad = add
     ba = branch -a
     br = branch
