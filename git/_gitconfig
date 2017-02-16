@@ -6,6 +6,7 @@
     autocrlf = input
     quotepath = false
     filemode = false
+    editor = code --wait
 [color]
     ui = true
 [push]
