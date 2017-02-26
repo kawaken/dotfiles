@@ -38,4 +38,6 @@ alias visjis='vi -c ":e ++enc=cp932"'
 
 alias ap="ansible-playbook"
 
+alias ts='tree -L 3'
+
 # vim: ft=sh
