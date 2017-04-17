@@ -34,13 +34,19 @@ function gen_pjrc() {
     return
   fi
 
-  echo -n "which language? [go]: "
+  echo -n "which language? [go|node]: "
   read lang
   case $lang in
     go)
-      cat <<'CMD' > .pjrc
+      cat <<'CMD' >> .pjrc
 export GOPATH=$PROJECT_DIR
 export PATH=`pwd`/bin:$PROJECT_DIR/bin:$PATH
+CMD
+      ;;
+    node)
+      cat <<'CMD' >> .pjrc
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 CMD
       ;;
     *)
