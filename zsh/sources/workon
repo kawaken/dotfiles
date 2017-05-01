@@ -34,7 +34,7 @@ function gen_pjrc() {
     return
   fi
 
-  echo -n "which language? [go|node]: "
+  echo -n "which language? [go|node|java]: "
   read lang
   case $lang in
     go)
@@ -47,6 +47,13 @@ CMD
       cat <<'CMD' >> .pjrc
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+CMD
+      ;;
+    java)
+      cat <<'CMD' >> .pjrc
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="/Users/kekawano/.sdkman"
+[[ -s "/Users/kekawano/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/kekawano/.sdkman/bin/sdkman-init.sh"
 CMD
       ;;
     *)
