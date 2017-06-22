@@ -9,8 +9,10 @@ logs/
 log/
 data/
 .pjrc
+.pj_*
 .bundle/
 .idea/
 .setting/
 .vscode/
 credentials.csv
+javaconfig.json
