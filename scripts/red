@@ -9,6 +9,8 @@ fi
 function issues() {
   curl -s "$REDMINE_URL/issues.json?key=$REDMINE_TOKEN&assigned_to_id=me&status_id=2" \
     | jq --raw-output '.issues[] | [ (.id|tostring), .project.name, .subject] | @tsv'
+  curl -s "$REDMINE_URL/issues.json?key=$REDMINE_TOKEN&assigned_to_id=me&status_id=15" \
+    | jq --raw-output '.issues[] | [ (.id|tostring), .project.name, .subject] | @tsv'
 }
 
 function branch() {
@@ -22,15 +24,15 @@ function branch() {
   id=$(echo $is | cut -f 1)
   desc=$(echo $is | cut -f 2-)
 
-  if git checkout -b issue-$id; then
-    echo "created: issue-$id"
+  if git checkout -b issue/$id; then
+    echo "created: issue/$id"
     echo "    $desc"
   fi
 }
 
 function current() {
   br=$(git symbolic-ref --short HEAD)
-  id=$(echo $br | cut -d "-" -f 2)
+  id=$(echo $br | cut -d "/" -f 2)
 
   curl -s "$REDMINE_URL/issues/$id.json?key=$REDMINE_TOKEN" \
     | jq --raw-output '.issue | "プロジェクト: \(.project.name)
