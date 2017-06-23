@@ -44,11 +44,24 @@ function current() {
   echo "$REDMINE_URL/issues/$id"
 }
 
+function help() {
+  cat <<MSG
+  red subcommands
+
+  Subcommands:
+    is: show issues list
+    br: select issue and create branch
+    c:  show current issue
+    h:  show this message
+MSG
+}
+
 cmd=$1
 case $1 in
   is) cmd=issues ;;
   br) cmd=branch ;;
   c) cmd=current ;;
+  *) cmd=help ;;
 esac
 
 $cmd
