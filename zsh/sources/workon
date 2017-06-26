@@ -29,38 +29,44 @@ function pjd() {
 }
 function gen_pjrc() {
 
-  if [ -f ./.pjrc ]; then
-    echo ".pjrc file exists"
-    return
-  fi
-
   echo -n "which language? [go|node|java]: "
   read lang
   case $lang in
     go)
-      cat <<'CMD' >> .pjrc
+      cat <<'CMD' >> .pj_go_rc
 export GOPATH=$PROJECT_DIR
 export PATH=`pwd`/bin:$PROJECT_DIR/bin:$PATH
 CMD
       ;;
     node)
-      cat <<'CMD' >> .pjrc
+      cat <<'CMD' >> .pj_node_rc
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 CMD
       ;;
     java)
-      cat <<'CMD' >> .pjrc
+      cat <<'CMD' >> .pj_java_rc
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="/Users/kekawano/.sdkman"
 [[ -s "/Users/kekawano/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/kekawano/.sdkman/bin/sdkman-init.sh"
 CMD
       ;;
     *)
-      echo "unsupported: $lang"
+      vi .pjrc
   esac
 
 }
+
+function detect_lang() {
+  _git_dir=`git rev-parse --show-toplevel 2>/dev/null`
+  if [ -n "$_git_dir" ]; then
+    cd $_git_dir
+    for f in `find . -maxdepth 1 -type f -name '.pj_*_rc'`; do
+      echo -n $f | cut -d "_" -f 2
+    done
+  fi
+}
+
 # command: virtualenvwrapper like command
 function workon () {
   if [ $# -eq 1 ]; then
@@ -69,11 +75,16 @@ function workon () {
       return 1
     fi
   fi
+
   if [ -f ./.pjrc ]; then
     source ./.pjrc
   else
-    echo "no .pjrc; run 'gen_pjrc'"
+    echo "no .pjrc"
   fi
+
+  for f in `find . -maxdepth 1 -type f -name '.pj_*_rc'`; do
+    source $f
+  done
 }
 
 # vim: ft=zsh
