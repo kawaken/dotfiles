@@ -40,4 +40,6 @@ alias ap="ansible-playbook"
 
 alias ts='tree -L 3'
 
+alias nr='npm run'
+
 # vim: ft=sh
