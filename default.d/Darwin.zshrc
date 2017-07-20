@@ -23,9 +23,9 @@ if [ -d /usr/local/mysql ]; then
   PATH=$PATH:/usr/local/mysql/bin
 fi
 
-if [ -e /opt/local/bin/svn ]; then
-  alias svn=/opt/local/bin/svn
-fi
+#if [ -e /opt/local/bin/svn ]; then
+  #alias svn=/opt/local/bin/svn
+#fi
 
 alias to='open $(tag -f fav | peco)'
 
