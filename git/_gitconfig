@@ -2,6 +2,8 @@
     path = .gitconfig.local
 [includeIf "gitdir:~/projects/src/github.com/"]
     path = .gitconfig.github
+[includeIf "gitdir:~/projects/src/gist.github.com/"]
+    path = .gitconfig.github
 [core]
     pager = less -R
     excludesfile = ~/.gitignore-global
