@@ -30,6 +30,7 @@
     ex = exclude
     fe = fetch
     hist = log --pretty=format:'%C(yellow)%h %C(blue)%ad%Creset %s' --graph --date=short
+    id = rev-parse HEAD
     last = show HEAD
     lg = log --decorate --stat --all --graph --date=iso
     ls = ls-files
