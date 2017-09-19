@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ -z "$BOOSTNOTE_REPOSITORY" ]; then
+	echo "Boostnote's repository is not defined"
+	exit
+fi
+
+notes_dir="$HOME/Boostnote"
+if [ ! -d $notes_dir ]; then
+	cd $HOME
+	git clone $BOOSTNOTE_REPOSITORY Boostnote
+	exit
+fi
+
+cd $notes_dir
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+current_version=$(git rev-parse $current_branch 2>/dev/null)
+
+git fetch --quiet
+remote_version=$(git rev-parse origin/$current_branch 2>/dev/null)
+
+function err_msg() {
+	echo "Boostnote version is different from remote."
+	echo "=========================================="
+	echo "current_branch   : $current_branch"
+	echo "current_version  : $current_version"
+	echo "remote_version   : $remote_version"
+}
+
+if [ "$current_version" != "$remote_version" ]; then
+	[[ "$1" == '-v' ]] && err_msg
+	exit 1
+fi

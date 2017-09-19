@@ -136,4 +136,6 @@ if [ -f $HOME/.zshrc_local ]; then
   source $HOME/.zshrc_local
 fi
 
+(cd $MY_DOTFILES_DIR;scripts/check-notes -v)
+
 # vim: ft=zsh
