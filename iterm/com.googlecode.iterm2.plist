@@ -1616,6 +1616,8 @@
 	</dict>
 	<key>Default Bookmark Guid</key>
 	<string>EBF9889D-984D-4659-975B-855C51150DCB</string>
+	<key>HotkeyMigratedFromSingleToMulti</key>
+	<true/>
 	<key>LoadPrefsFromCustomFolder</key>
 	<true/>
 	<key>NSNavLastRootDirectory</key>
@@ -1649,16 +1651,18 @@
 	<array/>
 	<key>NSWindow Frame NSFontPanel</key>
 	<string>1279 394 445 77 0 0 1920 1177 </string>
+	<key>NSWindow Frame SUUpdateAlert</key>
+	<string>650 589 620 392 0 0 1920 1177 </string>
 	<key>NSWindow Frame SessionsPreferences</key>
 	<string>452 397 606 456 0 0 1920 1177 </string>
 	<key>NSWindow Frame SharedPreferences</key>
-	<string>830 253 796 473 0 0 1920 1177 </string>
+	<string>900 416 796 473 0 0 1920 1177 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>58 174 1170 877 0 0 1920 1177 </string>
+	<string>1955 281 650 877 1920 120 1920 1057 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
-	<string>44 268 650 877 0 0 1920 1177 </string>
+	<string>253 396 970 677 0 0 1920 1177 </string>
 	<key>NSWindow Frame iTerm Window 2</key>
-	<string>96 98 1442 1013 0 0 1920 1177 </string>
+	<string>1253 248 650 877 0 0 1920 1177 </string>
 	<key>NSWindow Frame iTerm Window 3</key>
 	<string>8 293 650 877 0 0 1920 1177 </string>
 	<key>NSWindow Frame iTerm Window 4</key>
@@ -2989,6 +2993,8 @@
 	<string>/Users/kekawano/dotfiles/iterm</string>
 	<key>Print In Black And White</key>
 	<true/>
+	<key>SUAutomaticallyUpdate</key>
+	<true/>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUFeedAlternateAppNameKey</key>
@@ -2998,7 +3004,7 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2017-08-16T00:47:06Z</date>
+	<date>2017-09-20T04:50:51Z</date>
 	<key>SUSendProfileInfo</key>
 	<false/>
 	<key>findIgnoreCase_iTerm</key>
@@ -3006,6 +3012,6 @@
 	<key>findRegex_iTerm</key>
 	<false/>
 	<key>iTerm Version</key>
-	<string>3.0.15</string>
+	<string>3.1.1</string>
 </dict>
 </plist>
