@@ -1618,6 +1618,12 @@
 	</dict>
 	<key>Default Bookmark Guid</key>
 	<string>EBF9889D-984D-4659-975B-855C51150DCB</string>
+	<key>DimBackgroundWindows</key>
+	<false/>
+	<key>DimInactiveSplitPanes</key>
+	<true/>
+	<key>DimOnlyText</key>
+	<true/>
 	<key>HotkeyMigratedFromSingleToMulti</key>
 	<true/>
 	<key>LoadPrefsFromCustomFolder</key>
@@ -1660,15 +1666,15 @@
 	<key>NSWindow Frame SUUpdateAlert</key>
 	<string>530 477 620 392 0 0 1680 1027 </string>
 	<key>NSWindow Frame SessionsPreferences</key>
-	<string>269 126 606 469 0 0 1680 1027 </string>
+	<string>-1591 3 618 519 -1920 -30 1920 1057 </string>
 	<key>NSWindow Frame SharedPreferences</key>
-	<string>717 473 918 452 0 0 1680 1027 </string>
+	<string>-1038 410 918 494 -1920 -30 1920 1057 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>10 140 650 877 0 0 1680 1027 </string>
+	<string>102 114 650 877 0 0 1680 1027 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
-	<string>28 321 970 677 0 0 1680 1027 </string>
+	<string>-691 103 650 877 -1920 -30 1920 1057 </string>
 	<key>NSWindow Frame iTerm Window 2</key>
-	<string>233 78 650 877 0 0 1680 1027 </string>
+	<string>-1886 87 650 877 -1920 -30 1920 1057 </string>
 	<key>New Bookmarks</key>
 	<array>
 		<dict>
@@ -2247,7 +2253,7 @@
 			<key>Option Key Sends</key>
 			<integer>0</integer>
 			<key>Prompt Before Closing 2</key>
-			<false/>
+			<integer>1</integer>
 			<key>Right Option Key Sends</key>
 			<integer>0</integer>
 			<key>Rows</key>
@@ -2289,7 +2295,7 @@
 			<key>Terminal Type</key>
 			<string>xterm-256color</string>
 			<key>Transparency</key>
-			<real>0.24065077728426396</real>
+			<real>0.10120360088832486</real>
 			<key>Unlimited Scrollback</key>
 			<true/>
 			<key>Use Bold Font</key>
@@ -3010,14 +3016,18 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2017-10-20T01:35:46Z</date>
+	<date>2018-03-26T01:26:46Z</date>
 	<key>SUSendProfileInfo</key>
 	<false/>
+	<key>SplitPaneDimmingAmount</key>
+	<real>0.20980068108974359</real>
 	<key>findIgnoreCase_iTerm</key>
 	<true/>
+	<key>findMode_iTerm</key>
+	<integer>0</integer>
 	<key>findRegex_iTerm</key>
 	<false/>
 	<key>iTerm Version</key>
-	<string>3.1.3</string>
+	<string>3.1.5</string>
 </dict>
 </plist>
