@@ -37,4 +37,15 @@ function macdown() {
   "$(mdfind kMDItemCFBundleIdentifier=com.uranusjr.macdown | head -n1)/Contents/SharedSupport/bin/macdown" $@
 }
 
+function memo() {
+  if [ -d $MEMO_HOME ]; then
+    cd $MEMO_HOME
+    local filename=$(date '+%Y%m%d_%H%M%S').md
+    echo -e "# $(date '+%Y-%m-%d %H:%M:%S')\n" > ./src/$filename
+    vs --wait --extensions-dir ./ext --goto src/$filename:2 ./src
+    git add -A .
+    git commit -m "add $filename"
+  fi
+}
+
 # vim: ft=zsh
