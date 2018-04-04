@@ -29,7 +29,7 @@ alias -g G='| grep'
 
 alias rl='redis-cli'
 
-alias rgrep='grep --exclude-dir=.svn --exclude-dir=.git --exclude-dir=_vendor --exclude-dir=vendor -r'
+alias rgrep='grep --exclude-dir=.svn --exclude-dir=.git --exclude-dir=_vendor --exclude-dir=vendor ${EXCLUDED_OPTS} -r'
 
 alias vs='code'
 
