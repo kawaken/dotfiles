@@ -29,7 +29,7 @@ function pjd() {
 }
 function gen_pjrc() {
 
-  echo -n "which language? [go|node|java]: "
+  echo -n "which language? [go|node|java|python]: "
   read lang
   case $lang in
     go)
@@ -49,6 +49,11 @@ CMD
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="/Users/kekawano/.sdkman"
 [[ -s "/Users/kekawano/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/kekawano/.sdkman/bin/sdkman-init.sh"
+CMD
+      ;;
+    python)
+      cat <<'CMD' >> .pj_python_rc
+source ./venv/bin/activate
 CMD
       ;;
     *)
