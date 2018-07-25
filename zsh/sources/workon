@@ -89,4 +89,6 @@ function workon () {
   export __wkon="%F{green}[$wkon]%f"
 }
 
+alias wo=workon
+
 # vim: ft=zsh
