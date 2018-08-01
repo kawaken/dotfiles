@@ -42,4 +42,6 @@ alias ts='tree -L 3'
 
 alias nr='npm run'
 
+alias dr='docker run -it --rm alpine /bin/sh'
+
 # vim: ft=sh
