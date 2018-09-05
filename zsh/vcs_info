@@ -39,6 +39,8 @@ function check_git_remote() {
     --symbolic-full-name 2>/dev/null)/refs\/remotes\/}
 
   if [[ -n ${remote} ]] ; then
+    hostname=$(git ls-remote --get-url | cut -d: -f1 | cut -d@ -f2)
+
     arrow="-"
     # ローカルが進んでいたら 件数と -> を表示
     ahead=$(git rev-list ${hook_com[branch]}@{upstream}..HEAD 2>/dev/null | wc -l)
@@ -49,7 +51,7 @@ function check_git_remote() {
     (( $behind )) && gitstatus+=( "%F{red}-${behind}%f" ) && arrow="<${arrow}"
 
     # local <-> remote 件数 のフォーマットで表示
-    echo "%f${arrow}%F{cyan}${remote}%f${(j:/:)gitstatus}"
+    echo "%f${arrow}%F{cyan}${remote}(${hostname})%f${(j:/:)gitstatus}"
   fi
 }
 
