@@ -13,7 +13,7 @@
 [color]
     ui = true
 [push]
-    default = simple
+    default = current
 [rerere]
     enable = true
 [alias]
