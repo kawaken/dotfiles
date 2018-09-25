@@ -31,7 +31,7 @@ function +vi-git-extra-info() {
 }
 
 function check_git_remote() {
-  local ahead behind remote arrow
+  local ahead behind remote hostname arrow
   local -a gitstatus
 
   # トラッキングブランチを確認
