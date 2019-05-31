@@ -2,10 +2,10 @@
 autoload -Uz vcs_info
 
 #zstyle ':vcs_info:*+*:*' debug true
-zstyle ':vcs_info:*' enable hg git svn
+zstyle ':vcs_info:*' enable git
 
 # gitの設定
-zstyle ':vcs_info:(hg*|git*):*' get-revision true
+zstyle ':vcs_info:git:*' get-revision true
 zstyle ':vcs_info:git:*' check-for-changes true
 
 zstyle ':vcs_info:git:*' stagedstr "%F{green}*"
@@ -74,9 +74,9 @@ function check_git_user() {
 }
 
 # svnの設定
-zstyle ':vcs_info:svn:*' branchformat '%b:r%r'
-zstyle ':vcs_info:svn:*' formats '%F{white}(%s) [%F{cyan}%b%f]' '%u%f'
-zstyle ':vcs_info:svn+set-message:*' hooks svn-extra-info
+#zstyle ':vcs_info:svn:*' branchformat '%b:r%r'
+#zstyle ':vcs_info:svn:*' formats '%F{white}(%s) [%F{cyan}%b%f]' '%u%f'
+#zstyle ':vcs_info:svn+set-message:*' hooks svn-extra-info
 function +vi-svn-extra-info() {
   if [[ "$1" != "1" ]]; then
     return 0
