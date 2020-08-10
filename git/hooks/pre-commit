@@ -1,8 +1,0 @@
-#!/bin/bash
-
-gitdirs=$(find ./vendor -mindepth 1 -type d -name .git | wc -l)
-
-if [ "$gitdirs" -gt 0 ]; then
-  echo "sub gitdirs exists"
-  exit 1
-fi
