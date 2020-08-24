@@ -1,0 +1,3 @@
+# put this file in $HOME/.config/git/ignore
+Thumbs.db
+.DS_Store
