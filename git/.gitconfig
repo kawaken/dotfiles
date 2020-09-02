@@ -9,3 +9,25 @@
     ui = true
 [push]
     default = current
+[core]
+	pager = less -RiM
+[alias]
+	ad = add
+	ba = branch -a
+	br = branch
+	ci = commit
+	cl = config --list
+	co = checkout
+	df = diff
+	dc = diff --cached
+	dw = diff --word-diff-regex='\\w+'
+	fe = fetch
+	lg = log --decorate --stat --graph --date=iso
+	la = log --decorate --stat --graph --date=iso --all
+	mf = merge --ff-only
+	pl = pul --ff-only
+	ps = push
+	rv = remote -v
+	sh = show
+	st = status -s --branch
+	us = reset HEAD # unstage
