@@ -1,5 +1,2 @@
-
-# append gnubin to PATH
-for d in /usr/local/opt/*/libexec/gnubin; do
-  export PATH=$d:$PATH
-done
+# OS依存のファイル
+[ -f $ZDOTDIR/.zshrc_$(uname) ] && . $ZDOTDIR/.zshrc_$(uname)
