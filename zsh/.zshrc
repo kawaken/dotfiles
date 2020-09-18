@@ -3,6 +3,7 @@
 # エイリアス
 [ -f $ZDOTDIR/aliases ] && . $ZDOTDIR/aliases
 
+# オプション
 # http://zsh.sourceforge.net/Doc/Release/Options.html
 # Changing Directories
 setopt AUTO_CD                       # ディレクトリ名だけで移動
