@@ -1,5 +1,7 @@
 # OS依存のファイル
 [ -f $ZDOTDIR/.zshrc_$(uname) ] && . $ZDOTDIR/.zshrc_$(uname)
+# エイリアス
+[ -f $ZDOTDIR/aliases ] && . $ZDOTDIR/aliases
 
 # http://zsh.sourceforge.net/Doc/Release/Options.html
 # Changing Directories
