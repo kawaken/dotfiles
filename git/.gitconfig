@@ -24,6 +24,7 @@
 	fe = fetch
 	lg = log --decorate --stat --graph --date=iso
 	la = log --decorate --stat --graph --date=iso --all
+	ls = ls-files
 	mf = merge --ff-only
 	pl = pul --ff-only
 	ps = push
