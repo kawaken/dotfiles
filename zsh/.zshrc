@@ -41,3 +41,7 @@ setopt PROMPT_SUBST                  # 実行時の変数展開
 setopt TRANSIENT_RPROMPT             # 最後のRPROMPTだけ表示
 # Zle
 unsetopt BEEP                        # beep音を出さない
+
+# キーバインド
+bindkey -e
+
