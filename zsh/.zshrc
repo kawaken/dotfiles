@@ -45,9 +45,14 @@ unsetopt BEEP                        # beep音を出さない
 # キーバインド
 bindkey -e
 
-
 # 履歴
 HISTFILE=~/.zsh_history
 HISTSIZE=100000
 SAVEHIST=100000
 HISTTIMEFORMAT="[%Y/%M/%D %H:%M:%S] "
+
+# completionを追加
+fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
+
+autoload -U compinit
+compinit -u
