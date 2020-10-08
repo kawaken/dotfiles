@@ -28,6 +28,7 @@
 	mf = merge --ff-only
 	pl = pul --ff-only
 	ps = push
+  pus = push
 	rv = remote -v
 	sh = show
 	st = status -s --branch
