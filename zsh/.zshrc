@@ -56,3 +56,8 @@ fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
 
 autoload -U compinit
 compinit -u
+
+# 端末依存のファイル
+if [ -f $HOME/.zshrc_local ]; then
+  source $HOME/.zshrc_local
+fi
