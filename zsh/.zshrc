@@ -1,8 +1,3 @@
-# OS依存のファイル
-[ -f $ZDOTDIR/.zshrc_$(uname) ] && . $ZDOTDIR/.zshrc_$(uname)
-# エイリアス
-[ -f $ZDOTDIR/aliases ] && . $ZDOTDIR/aliases
-
 # オプション
 # http://zsh.sourceforge.net/Doc/Release/Options.html
 # Changing Directories
@@ -31,9 +26,10 @@ unsetopt FLOW_CONTROL                # フローコントロールを無効(Ctrl
 setopt IGNORE_EOF                    # Ctrl+Dでログアウトしない
 setopt INTERACTIVE_COMMENTS          # #以降をコメントとみなす
 setopt PRINT_EIGHT_BIT               # 補完時の日本語表示
-setopt PRINT_EXIT_VALUE              # 0以外の終了コードを表示
+#setopt PRINT_EXIT_VALUE              # 0以外の終了コードを表示
 setopt RM_STAR_SILENT                # rm * で削除確認しない(-iを付けてるので大丈夫)
 # Job Control
+REPORTTIME=30                        # 30秒以上でtimeを出力
 unsetopt BG_NICE                     # バックグラウンドジョブの優先度を下げない
 setopt LONG_LIST_JOBS                # jobs -l をデフォルト
 # Prompting
@@ -57,7 +53,64 @@ fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
 autoload -U compinit
 compinit -u
 
+function _source() {
+  [ -n "$1" -a -f "$1" ] && . "$1"
+}
+
+# OS依存のファイル
+_source $ZDOTDIR/.zshrc_$(uname)
+
+# vcs_info
+_source $ZDOTDIR/vcs_info
+
+# エイリアス
+_source $ZDOTDIR/aliases
+
+# PATH
+_source $ZDOTDIR/path
+
 # 端末依存のファイル
-if [ -f $HOME/.zshrc_local ]; then
-  source $HOME/.zshrc_local
-fi
+_source $HOME/.zshrc_local
+
+# hook を有効にする
+autoload -Uz add-zsh-hook
+
+# プロンプト設定
+# シェルの階層が増えると > を表示する
+function _update_shlvl() {
+  if [ $SHLVL -gt 1 ]; then
+    local bc
+    bc=$(($SHLVL - 1))
+    prompt="$(printf '%.1s' '>'{1..$bc})$prompt"
+  fi
+
+  echo "$prompt"
+}
+
+export __wkon
+function _update_workon() {
+  echo $__wkon
+}
+
+function _update_prompt() {
+  # PWDを黄色で
+  local full_path="%F{yellow}%d%f"
+  # vcs_infoのメッセージ
+  local vcs_info_msg=$(_update_vcs_info_msg)
+  # shellの深さ
+  local shlvl=$(_update_shlvl)
+  # 直前実行したコマンドの結果
+  local prev_result="%(?,,%F{red}!!!%f )"
+  # user
+  local user="%n"
+  # jobがあればセパレーターをマゼンタに
+  local sep="%(1j,%F{magenta}%#%f,%#)"
+  # workonの状態
+  local work_mode=$(_update_workon)
+
+  PROMPT="
+${full_path}${vcs_info_msg} ${work_mode}
+${user} ${sep} ${prev_result}"
+  RPROMPT="%D{%Y-%m-%d %H:%M:%S}"
+}
+add-zsh-hook precmd _update_prompt
