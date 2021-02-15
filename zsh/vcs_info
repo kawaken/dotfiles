@@ -91,4 +91,3 @@ ${(j: :)messages}"
   echo "$prompt"
 }
 
-echo hogehoge
