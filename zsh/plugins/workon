@@ -30,6 +30,11 @@ Poetry: $(poetry --version)
 LANG
 }
 
+export __wkon
+function _update_workon() {
+  echo $__wkon
+}
+
 # command: virtualenvwrapper like command
 function workon () {
   wkon=
