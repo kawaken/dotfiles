@@ -1,3 +1,0 @@
-# Go対応
-export GO111MODULE=on
-export PATH=$HOME/bin:$HOME/go/bin:$PATH

@@ -83,11 +83,6 @@ function _update_shlvl() {
   echo "$prompt"
 }
 
-export __wkon
-function _update_workon() {
-  echo $__wkon
-}
-
 function _update_prompt() {
   # PWDを黄色で
   local full_path="%F{yellow}%d%f"
