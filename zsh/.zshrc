@@ -60,14 +60,10 @@ function _source() {
 # OS依存のファイル
 _source $ZDOTDIR/.zshrc_$(uname)
 
-# vcs_info
-_source $ZDOTDIR/vcs_info
-
-# エイリアス
-_source $ZDOTDIR/aliases
-
-# PATH
-_source $ZDOTDIR/path
+# source plugins
+for file in $ZDOTDIR/plugins/**/*(.); do
+  _source $file
+done
 
 # 端末依存のファイル
 _source $HOME/.zshrc_local
