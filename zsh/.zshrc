@@ -61,7 +61,7 @@ function _source() {
 _source $ZDOTDIR/.zshrc_$(uname)
 
 # source plugins
-for file in $ZDOTDIR/plugins/**/*(.); do
+for file in $ZDOTDIR/plugins/*(.); do
   _source $file
 done
 
@@ -105,3 +105,6 @@ ${user} ${sep} ${prev_result}"
   RPROMPT="%D{%Y-%m-%d %H:%M:%S}"
 }
 add-zsh-hook precmd _update_prompt
+
+# 最後に実行する必要がある
+source_zsh-syntax-highlighting
