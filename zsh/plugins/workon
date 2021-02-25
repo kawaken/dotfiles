@@ -1,0 +1,50 @@
+export PROJECT_DIR=$HOME/projects
+export PATH=$PROJECT_DIR/bin:$PATH
+
+# command: cd to project dir or ls project dir
+function pjd() {
+  cd $PROJECT_DIR
+  echo "\033[34mProjects list :\033[0m"
+  ls $PROJECT_DIR
+}
+
+function gen_pjrc() {
+  cat <<'CMD' >> .pjrc
+# Describe the settings for the project
+CMD
+  vi .pjrc
+}
+
+function show_langs() {
+  cat <<LANG
+Node:   $(node --version)
+Path:   $(which node)
+
+Go:     $(go version)
+GOROOT: $(go env GOROOT)
+GOPATH: $(go env GOPATH)
+
+Python: $(python3 --version)
+Path:   $(which python3)
+Poetry: $(poetry --version)
+LANG
+}
+
+export __wkon
+function _update_workon() {
+  echo $__wkon
+}
+
+# command: virtualenvwrapper like command
+function workon () {
+  wkon=
+  if [ -f ./.pjrc ]; then
+    source ./.pjrc
+    wkon="RC"
+  fi
+
+  show_langs
+  export __wkon="%F{green}[$wkon]%f"
+}
+
+alias wo=workon

@@ -1,9 +1,4 @@
-# vim: ft=zsh
-
-export LANG=ja_JP.UTF-8
 export EDITOR=vim
+export ZDOTDIR=$HOME/dotfiles/zsh
 
-# PATHの拡張
-export GOPATH=${GOPATH:-$HOME/go}
-export PATH=$HOME/bin:$PATH:/sbin:$GOPATH/bin
-
+# cd; ln -s dotfiles/zsh/_zshenv .zshenv

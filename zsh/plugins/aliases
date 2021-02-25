@@ -1,0 +1,13 @@
+alias ls='ls -F --color=auto'
+alias la='ls -a'
+alias ll="ls -l -h --time-style=+'%Y/%m/%d %H:%M:%S'"
+alias lrt='ll -rt'
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias grep='grep --color=auto'
+alias less='less -R'
+alias crontab='crontab -i'
+alias gi=git
+alias vs='code'
+alias vi=vim

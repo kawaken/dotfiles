@@ -1,10 +1,7 @@
 # vcs_infoを有効
 autoload -Uz vcs_info
 
-#zstyle ':vcs_info:*+*:*' debug true
 zstyle ':vcs_info:*' enable git
-
-# gitの設定
 zstyle ':vcs_info:git:*' get-revision true
 zstyle ':vcs_info:git:*' check-for-changes true
 
@@ -73,22 +70,6 @@ function check_git_user() {
 
 }
 
-# svnの設定
-#zstyle ':vcs_info:svn:*' branchformat '%b:r%r'
-#zstyle ':vcs_info:svn:*' formats '%F{white}(%s) [%F{cyan}%b%f]' '%u%f'
-#zstyle ':vcs_info:svn+set-message:*' hooks svn-extra-info
-function +vi-svn-extra-info() {
-  if [[ "$1" != "1" ]]; then
-    return 0
-  fi
-
-  hook_com[unstaged]+=`count_svn_st`
-}
-
-function count_svn_st() {
-  svn st | sort | awk '{ c[$1] += 1; } END{for (k in c) {printf "%s:%s ", k, c[k]}}'
-}
-
 function _update_vcs_info_msg() {
   local -a messages
   local prompt
@@ -109,4 +90,4 @@ ${(j: :)messages}"
 
   echo "$prompt"
 }
-# vim: ft=zsh
+
