@@ -33,3 +33,5 @@
 	sh = show
 	st = status -s --branch
 	us = reset HEAD # unstage
+[init]
+	defaultBranch = main
