@@ -26,9 +26,8 @@
 	la = log --decorate --stat --graph --date=iso --all
 	ls = ls-files
 	mf = merge --ff-only
-	pl = pull --ff-only
-	ps = push
-  pus = push
+	pul = pull --ff-only
+	pus = push
 	rv = remote -v
 	sh = show
 	st = status -s --branch
