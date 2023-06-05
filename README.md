@@ -52,3 +52,15 @@ git config --file ~/.gitconfig.local user.email "yourmail"
 # zshの設定
 ln -s dotfiles/zsh/_zshenv .zshenv
 ```
+
+### fzf
+
+```
+brew install fzf
+```
+
+`Do you want to update your shell configuration files? ([y]/n)` にたいしては `N` とする。
+
+```
+$(brew --prefix)/opt/fzf/install
+```
