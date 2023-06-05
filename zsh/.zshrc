@@ -47,12 +47,6 @@ HISTSIZE=100000
 SAVEHIST=100000
 HISTTIMEFORMAT="[%Y/%M/%D %H:%M:%S] "
 
-# completionを追加
-fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
-
-autoload -U compinit
-compinit -u
-
 function _source() {
   [ -n "$1" -a -f "$1" ] && . "$1"
 }
