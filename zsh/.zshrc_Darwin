@@ -1,4 +1,12 @@
+# completionを追加
+if [ -f /opt/homebrew/bin/brew ]; then
+  fpath=($(/opt/homebrew/bin/brew --prefix)/share/zsh/site-functions $fpath)
+fi
+
+autoload -U compinit
+compinit -u
+
 # append gnubin to PATH
-for d in /usr/local/opt/*/libexec/gnubin; do
+for d in /opt/homebrew/opt/*/libexec/gnubin; do
   export PATH=$d:$PATH
 done
