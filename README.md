@@ -39,7 +39,7 @@ brew install go node zig
 
 ```
 cd $HOME
-gh repo clone kawaken/dotfiles
+gh repo clone kawaken/dotfiles -- --recurse-submodules
 
 # gitの設定
 mkdir -p .config/git
