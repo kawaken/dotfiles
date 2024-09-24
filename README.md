@@ -11,7 +11,7 @@
 
 ### Homebrew でインストールする
 
-良く使うコマンド類
+良く使うコマンド類(Macのみ)
 
 ```
 brew install binutils findutils
@@ -29,6 +29,9 @@ gh auth login
 
 `gh auth login` しておくと SSH の公開鍵いらないので便利。
 
+WSLの場合はターミナルからはブラウザーが開かないので、
+デバイスコードをコピーしておいて直接Windows側のブラウザーでログインした後コードを貼り付ける。
+
 プログラミング言語
 
 ```
@@ -38,6 +41,9 @@ brew install go node zig
 ## install
 
 ```
+# gh コマンドの設定済み内容を待避、後からincludeされる
+mv .gitconfig .gitconfig.local
+
 cd $HOME
 gh repo clone kawaken/dotfiles -- --recurse-submodules
 
@@ -51,16 +57,8 @@ git config --file ~/.gitconfig.local user.email "yourmail"
 
 # zshの設定
 ln -s dotfiles/zsh/_zshenv .zshenv
-```
 
-### fzf
-
-```
+# fzfの設定
 brew install fzf
-```
-
-`Do you want to update your shell configuration files? ([y]/n)` にたいしては `N` とする。
-
-```
-$(brew --prefix)/opt/fzf/install
+echo 'source <(fzf --zsh)' >> .zshrc_local
 ```

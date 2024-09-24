@@ -1,4 +1,6 @@
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# この呼び出しタイミングではfzfのパスが適用されていないし、
+# パスも環境によるので、ここでは設定しないことにした
+# [[ -x "$(command -v fzf)" ]] && source <(fzf --zsh)
 
 fzf-history-widget-accept() {
   fzf-history-widget
