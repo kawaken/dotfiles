@@ -1,6 +1,7 @@
 # この呼び出しタイミングではfzfのパスが適用されていないし、
 # パスも環境によるので、ここでは設定しないことにした
 # [[ -x "$(command -v fzf)" ]] && source <(fzf --zsh)
+# $HOME/.zshrc_local で source <(fzf --zsh) しておく
 
 fzf-history-widget-accept() {
   fzf-history-widget
@@ -16,7 +17,7 @@ __fgitst() {
   setopt localoptions pipefail no_aliases 2> /dev/null
   local item
   eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --bind=ctrl-z:ignore $FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" $(__fzfcmd) -m "$@" | while read item; do
-    echo -n "${(q)item:3} "
+    echo -n "${(q)item:2} "
   done
   local ret=$?
   echo
