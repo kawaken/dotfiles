@@ -11,7 +11,7 @@
 
 ### Homebrew でインストールする
 
-良く使うコマンド類(Macのみ)
+良く使うコマンド類(Mac のみ)
 
 ```
 brew install binutils findutils
@@ -29,8 +29,8 @@ gh auth login
 
 `gh auth login` しておくと SSH の公開鍵いらないので便利。
 
-WSLの場合はターミナルからはブラウザーが開かないので、
-デバイスコードをコピーしておいて直接Windows側のブラウザーでログインした後コードを貼り付ける。
+WSL の場合はターミナルからはブラウザーが開かないので、
+デバイスコードをコピーしておいて直接 Windows 側のブラウザーでログインした後コードを貼り付ける。
 
 プログラミング言語
 
@@ -63,11 +63,6 @@ brew install fzf
 echo 'source <(fzf --zsh)' >> .zshrc_local
 ```
 
-# Apps
+## よく使ってるアプリケーション
 
-普段使いしているアプリケーション
-
-- [Alfred \- Productivity App for macOS](https://www.alfredapp.com/)
-- [Download – KeePassXC](https://keepassxc.org/download/#macos) : 仕事用
-- [日本語入力システム｢ATOK｣ \| ATOK Passport \|【公式】ATOK\.com](https://atok.com/)
-- [Magnet – Window manager for Mac](https://magnet.crowdcafe.com/index.html)
+[apps.md](./apps.md) も見てアプリをインストールする
