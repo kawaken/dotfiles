@@ -100,5 +100,8 @@ ${user} ${sep} ${prev_result}"
 }
 add-zsh-hook precmd _update_prompt
 
+# ZDOTDIRを前提にしているので、HOMEのrcファイルも読み込む
+_source $HOME/.zshrc
+
 # 最後に実行する必要がある
 source_zsh-syntax-highlighting
