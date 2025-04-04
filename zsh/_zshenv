@@ -1,5 +1,7 @@
 export EDITOR=vim
 export ZDOTDIR=$HOME/dotfiles/zsh
 
+export PATH=/opt/homebrew/bin:$PATH
+
 # cd; ln -s dotfiles/zsh/_zshenv .zshenv
-. "$HOME/.cargo/env"
+

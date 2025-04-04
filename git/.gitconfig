@@ -28,7 +28,9 @@
 	ls = ls-files
 	mf = merge --ff-only
 	pul = pull --ff-only
+	pur = pull --rebase
 	pus = push
+	puf = push --force-with-lease --force-if-includes
 	rv = remote -v
 	sh = show
 	st = status -s --branch
