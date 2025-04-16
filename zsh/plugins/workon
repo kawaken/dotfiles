@@ -48,3 +48,44 @@ function workon () {
 }
 
 alias wo=workon
+
+
+# メインのOrganizationやリポジトリへ移動する
+function repod() {
+  # PROJECT_MAIN_ORGが指定されていない場合は終了
+  if [ -z "$PROJECT_MAIN_ORG" ]; then
+    echo "PROJECT_MAIN_ORG is not specified"
+    return 1
+  fi
+
+  # 引数がなければメインのOrganizationへ移動
+  if [ -z "$1" ]; then
+    cd $PROJECT_MAIN_ORG
+    return
+  fi
+
+  # PROJECT_MAIN_ORG_PREFIX が指定されていない場合はそのまま移動
+  if [ -z "$PROJECT_MAIN_ORG_PREFIX" ]; then
+    cd $PROJECT_MAIN_ORG/$1
+    return
+  fi
+
+  # ディレクトリが存在したら移動する
+  local target_dir="$PROJECT_MAIN_ORG/${PROJECT_MAIN_ORG_PREFIX}-$1"
+  if [ -d "$target_dir" ]; then
+    cd "$target_dir"
+    return
+  fi
+
+  # Prefixなしのディレクトリが存在したら移動する
+  local target_dir="$PROJECT_MAIN_ORG/$1"
+  if [ -d "$target_dir" ]; then
+    cd "$target_dir"
+    return
+  fi
+
+  echo "Directory not found: $target_dir"
+  # PROJECT_MAIN_ORGに移動してディレクトリ一覧のみ表示する
+  cd $PROJECT_MAIN_ORG
+  ls
+}
