@@ -37,3 +37,6 @@
 	us = reset HEAD # unstage
 [init]
 	defaultBranch = main
+
+[includeIf "gitdir:~/projects/src/github.com/kawaken/"]
+        path = ~/dotfiles/git/.gitconfig-me
