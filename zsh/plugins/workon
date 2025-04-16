@@ -89,3 +89,43 @@ function repod() {
   cd $PROJECT_MAIN_ORG
   ls
 }
+
+# cdコマンドの拡張
+function cd() {
+  # PROJECT_MAIN_ORGが指定されていない場合は通常のcdとして動作
+  if [ -z "$PROJECT_MAIN_ORG" ]; then
+    builtin cd "$@"
+    return
+  fi
+
+  # 現在のディレクトリがPROJECT_MAIN_ORG配下でない場合は通常のcdとして動作
+  if [[ "$(pwd)" != "$PROJECT_MAIN_ORG"* ]]; then
+    builtin cd "$@"
+    return
+  fi
+
+  # 引数がない場合は通常のcdとして動作
+  if [ -z "$1" ]; then
+    builtin cd "$@"
+    return
+  fi
+
+  # 引数そのままのディレクトリが存在する場合は移動
+  if [ -d "$1" ]; then
+    builtin cd "$1"
+    return
+  fi
+
+  # PROJECT_MAIN_ORG_PREFIXが指定されている場合
+  if [ -n "$PROJECT_MAIN_ORG_PREFIX" ]; then
+    local target_dir="${PROJECT_MAIN_ORG_PREFIX}-$1"
+    if [ -d "$target_dir" ]; then
+      builtin cd "$target_dir"
+      return
+    fi
+  fi
+
+  # どちらのディレクトリも見つからない場合は通常のcdとして動作
+  builtin cd "$@"
+}
+
