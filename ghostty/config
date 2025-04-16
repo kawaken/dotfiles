@@ -1,0 +1,15 @@
+shell-integration-features = no-cursor
+
+theme = Monokai Pro Spectrum
+selection-foreground = #94b09f
+selection-background = #406667
+font-size = 17
+font-family = HackGen
+
+cursor-style = block
+cursor-style-blink = false
+cursor-opacity = 0.5
+macos-option-as-alt = true
+mouse-hide-while-typing = true
+confirm-close-surface = false
+scrollback-limit = 1000000
