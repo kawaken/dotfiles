@@ -3,7 +3,7 @@
 # [[ -x "$(command -v fzf)" ]] && source <(fzf --zsh)
 # $HOME/.zshrc_local で source <(fzf --zsh) しておく
 
-export FZF_DEFAULT_OPTS="--height 10"
+export FZF_DEFAULT_OPTS="--height 15"
 
 fzf-history-widget-accept() {
   fzf-history-widget
@@ -19,8 +19,8 @@ __fgitst() {
   setopt localoptions pipefail no_aliases 2> /dev/null
   local item
   eval "$cmd" | FZF_DEFAULT_OPTS="--reverse --bind=ctrl-z:ignore $FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" $(__fzfcmd) -m "$@" | while read item; do
-    echo -n "${(q)item:2} "
-  done
+    echo $item | awk '{ print $2}'
+  done | tr '\n' ' '
   local ret=$?
   echo
   return $ret
