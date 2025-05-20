@@ -10,7 +10,7 @@
 [push]
     default = current
 [core]
-	pager = less -RiM
+	pager = delta
 	excludesFile = ~/dotfiles/git/ignore-global
 [alias]
 	ad = add
@@ -21,7 +21,6 @@
 	co = checkout
 	df = diff
 	dc = diff --cached
-	dw = diff --word-diff-regex='\\w+'
 	fe = fetch
 	lg = log --decorate --stat --graph --date=iso
 	la = log --decorate --stat --graph --date=iso --all
@@ -40,3 +39,9 @@
 
 [includeIf "gitdir:~/projects/src/github.com/kawaken/"]
         path = ~/dotfiles/git/.gitconfig-me
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+[merge]
+	conflictStyle = zdiff3
