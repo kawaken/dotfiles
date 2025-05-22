@@ -12,3 +12,4 @@ alias gi=git
 alias vs='code'
 alias vi=vim
 alias cr='cursor'
+alias cl='claude'
