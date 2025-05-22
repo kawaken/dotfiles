@@ -103,5 +103,8 @@ add-zsh-hook precmd _update_prompt
 # ZDOTDIRを前提にしているので、HOMEのrcファイルも読み込む
 _source $HOME/.zshrc
 
+# progit
+[ -f $HOMEBREW_PREFIX/share/forgit/forgit.plugin.zsh ] && source $HOMEBREW_PREFIX/share/forgit/forgit.plugin.zsh
+
 # 最後に実行する必要がある
 source_zsh-syntax-highlighting
