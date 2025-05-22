@@ -1,5 +1,6 @@
 [include]
     path = .gitconfig.local
+    path = ~/dotfiles/git/delta
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
@@ -41,7 +42,5 @@
         path = ~/dotfiles/git/.gitconfig-me
 [interactive]
 	diffFilter = delta --color-only
-[delta]
-	navigate = true
 [merge]
 	conflictStyle = zdiff3
