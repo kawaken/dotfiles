@@ -61,6 +61,14 @@ ln -s dotfiles/zsh/_zshenv .zshenv
 # fzfの設定
 brew install fzf
 echo 'source <(fzf --zsh)' >> .zshrc_local
+
+## delta,forgit
+brew install delta
+brew install forgit
+
+# ghosttyの設定
+mkdir -p .config/ghostty
+ln -s ~/{dotfiles,.config}/ghostty/config
 ```
 
 ## よく使ってるアプリケーション
