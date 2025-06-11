@@ -1,46 +1,46 @@
 [include]
-    path = .gitconfig.local
-    path = ~/dotfiles/git/delta
+  path = .gitconfig.local
+  path = ~/dotfiles/git/delta
 [filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
 [color]
-    ui = true
+  ui = true
 [push]
-    default = current
+  default = current
 [core]
-	pager = delta
-	excludesFile = ~/dotfiles/git/ignore-global
+  pager = delta
+  excludesFile = ~/dotfiles/git/ignore-global
 [alias]
-	ad = add
-	ba = branch -a
-	br = branch
-	ci = commit
-	cl = config --list
-	co = checkout
-	df = diff
-	dc = diff --cached
-	fe = fetch
-	lg = log --decorate --stat --graph --date=iso
-	la = log --decorate --stat --graph --date=iso --all
-	ls = ls-files
-	mf = merge --ff-only
-	pul = pull --ff-only
-	pur = pull --rebase
-	pus = push
-	puf = push --force-with-lease --force-if-includes
-	rv = remote -v
-	sh = show
-	st = status -s --branch
-	us = reset HEAD # unstage
+  ad = add
+  ba = branch -a
+  br = branch
+  ci = commit
+  cl = config --list
+  co = checkout
+  df = diff
+  dc = diff --cached
+  fe = fetch
+  lg = log --decorate --stat --graph --date=iso
+  la = log --decorate --stat --graph --date=iso --all
+  ls = ls-files
+  mf = merge --ff-only
+  pul = pull --ff-only
+  pur = pull --rebase
+  pus = push
+  puf = push --force-with-lease --force-if-includes
+  rv = remote -v
+  sh = show
+  st = status -s --branch
+  us = reset HEAD # unstage
 [init]
-	defaultBranch = main
+  defaultBranch = main
 
 [includeIf "gitdir:~/projects/src/github.com/kawaken/"]
-        path = ~/dotfiles/git/.gitconfig-me
+  path = ~/dotfiles/git/.gitconfig-me
 [interactive]
-	diffFilter = delta --color-only
+  diffFilter = delta --color-only
 [merge]
-	conflictStyle = zdiff3
+  conflictStyle = zdiff3
