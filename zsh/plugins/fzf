@@ -5,7 +5,6 @@
 
 export FZF_DEFAULT_OPTS="--height 15"
 
-
 __fgitst() {
   git rev-parse --is-inside-work-tree > /dev/null 2>&1 || return
 
@@ -16,7 +15,6 @@ __fgitst() {
     echo $item | awk '{ print $2}'
   done | tr '\n' ' '
   local ret=$?
-  echo
   return $ret
 }
 
