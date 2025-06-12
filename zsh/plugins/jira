@@ -1,0 +1,15 @@
+# jira コマンドがあるか確認
+# あれば引数を渡して実行する、なければインストールするように促す
+_jira() {
+  if ! command -v jira > /dev/null 2>&1; then
+    echo "command not found: jira"
+    return 1
+  fi
+  jira "$@"
+}
+
+# 現在のスプリントの課題を表示
+current_sprint_issues() {
+  _jira issue list --jql='Sprint in openSprints() AND status != Done AND project = ADMIN AND type != エピック' --plain --columns=key,summary --no-headers
+}
+

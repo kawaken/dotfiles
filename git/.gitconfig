@@ -35,6 +35,21 @@
   sh = show
   st = status -s --branch
   us = reset HEAD # unstage
+  asq = rebase --autosquash @{u}
+
+  # upstream設定の簡略化
+  set-upstream = !git branch -u origin/$(git branch --show-current)
+
+  # fixupコミットをメッセージ検索で作成
+  fixup-search = "!f() { git commit --fixup :/\"$1\"; }; f"
+
+  # メインworktreeに移動してからworktree削除
+  worktree-remove-safe = "!f() { cd $(dirname $(git rev-parse --git-common-dir)) && git worktree remove \"$1\"; }; f"
+
+  # 上流ブランチとの差分・ログ確認
+  diff-upstream = diff @{u}..@
+  log-upstream = log --oneline @{u}..@
+
 [init]
   defaultBranch = main
 
