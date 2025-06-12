@@ -7,7 +7,7 @@ zstyle ':vcs_info:git:*' check-for-changes true
 
 zstyle ':vcs_info:git:*' stagedstr "%F{green}*"
 zstyle ':vcs_info:git:*' unstagedstr "%F{red}*"
-zstyle ':vcs_info:git:*' formats '%F{white}(%s) [%F{cyan}%b%f]' '%c%u%f %m%f'
+zstyle ':vcs_info:git:*' formats '%F{white}[%F{cyan}%b%f]' '%c%u%f %m%f'
 zstyle ':vcs_info:git:*' actionformats '%F{white}(%s) [%F{cyan}%b|%a%f]' '%c%u%f %m%f'
 
 # set-messageのhook
