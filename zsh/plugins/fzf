@@ -5,12 +5,6 @@
 
 export FZF_DEFAULT_OPTS="--height 15"
 
-fzf-history-widget-accept() {
-  fzf-history-widget
-  zle accept-line
-}
-zle     -N     fzf-history-widget-accept
-bindkey '^X^R' fzf-history-widget-accept
 
 __fgitst() {
   git rev-parse --is-inside-work-tree > /dev/null 2>&1 || return
