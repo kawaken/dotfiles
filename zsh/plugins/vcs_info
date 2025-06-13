@@ -28,27 +28,30 @@ function +vi-git-extra-info() {
 }
 
 function check_git_remote() {
-  local ahead behind remote arrow
-  local -a gitstatus
+  local ahead behind remote gitstatus branch
+  local -a status_parts
 
   # トラッキングブランチを確認
   remote=${$(git rev-parse --verify ${hook_com[branch]}@{upstream} \
     --symbolic-full-name 2>/dev/null)/refs\/remotes\/}
 
   if [[ -n ${remote} ]] ; then
-    arrow="-"
-    # ローカルが進んでいたら 件数と -> を表示
+    # リモートブランチ名が異なればそれを表示
+    [[ ${hook_com[branch]} != ${remote#*/} ]] && branch="-%F{cyan}${remote}%f"
+
+    # ローカルが進んでいたら 件数を追加
     ahead=$(git rev-list ${hook_com[branch]}@{upstream}..HEAD 2>/dev/null | wc -l)
-    (( $ahead )) && status_parts+=( "%F{green}+${ahead}%f" ) && arrow+=">"
+    (( $ahead )) && status_parts+=( "%F{green}+${ahead}%f" )
 
-    # リモートが進んでいたら 件数と <- を表示
+    # リモートが進んでいたら 件数を追加
     behind=$(git rev-list HEAD..${hook_com[branch]}@{upstream} 2>/dev/null | wc -l)
-    (( $behind )) && status_parts+=( "%F{red}-${behind}%f" ) && arrow="<${arrow}"
+    (( $behind )) && status_parts+=( "%F{red}-${behind}%f" )
 
-    gitstatus="${status_parts:+ ${(j:/:)status_parts}}"
+    # status_parts を結合して gitstatus に格納
+    gitstatus="${(j:/:)status_parts}"
 
-    # local <-> remote 件数 のフォーマットで表示
-    echo "%f${arrow}%F{cyan}${remote}%f${gitstatus}"
+    # 最終出力
+    echo "%f:${branch}${gitstatus}"
   fi
 }
 
