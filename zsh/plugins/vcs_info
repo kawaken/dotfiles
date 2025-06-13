@@ -28,7 +28,7 @@ function +vi-git-extra-info() {
 }
 
 function check_git_remote() {
-  local ahead behind remote hostname arrow
+  local ahead behind remote arrow
   local -a gitstatus
 
   # トラッキングブランチを確認
@@ -36,19 +36,19 @@ function check_git_remote() {
     --symbolic-full-name 2>/dev/null)/refs\/remotes\/}
 
   if [[ -n ${remote} ]] ; then
-    hostname=$(git ls-remote --get-url | cut -d: -f1 | cut -d@ -f2)
-
     arrow="-"
     # ローカルが進んでいたら 件数と -> を表示
     ahead=$(git rev-list ${hook_com[branch]}@{upstream}..HEAD 2>/dev/null | wc -l)
-    (( $ahead )) && gitstatus+=( "%F{green}+${ahead}%f" ) && arrow+=">"
+    (( $ahead )) && status_parts+=( "%F{green}+${ahead}%f" ) && arrow+=">"
 
     # リモートが進んでいたら 件数と <- を表示
     behind=$(git rev-list HEAD..${hook_com[branch]}@{upstream} 2>/dev/null | wc -l)
-    (( $behind )) && gitstatus+=( "%F{red}-${behind}%f" ) && arrow="<${arrow}"
+    (( $behind )) && status_parts+=( "%F{red}-${behind}%f" ) && arrow="<${arrow}"
+
+    gitstatus="${status_parts:+ ${(j:/:)status_parts}}"
 
     # local <-> remote 件数 のフォーマットで表示
-    echo "%f${arrow}%F{cyan}${remote}(${hostname})%f${(j:/:)gitstatus}"
+    echo "%f${arrow}%F{cyan}${remote}%f${gitstatus}"
   fi
 }
 
