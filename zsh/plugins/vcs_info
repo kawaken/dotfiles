@@ -39,14 +39,16 @@ function check_git_remote() {
     arrow="-"
     # ローカルが進んでいたら 件数と -> を表示
     ahead=$(git rev-list ${hook_com[branch]}@{upstream}..HEAD 2>/dev/null | wc -l)
-    (( $ahead )) && gitstatus+=( "%F{green}+${ahead}%f" ) && arrow+=">"
+    (( $ahead )) && status_parts+=( "%F{green}+${ahead}%f" ) && arrow+=">"
 
     # リモートが進んでいたら 件数と <- を表示
     behind=$(git rev-list HEAD..${hook_com[branch]}@{upstream} 2>/dev/null | wc -l)
-    (( $behind )) && gitstatus+=( "%F{red}-${behind}%f" ) && arrow="<${arrow}"
+    (( $behind )) && status_parts+=( "%F{red}-${behind}%f" ) && arrow="<${arrow}"
+
+    gitstatus="${status_parts:+ ${(j:/:)status_parts}}"
 
     # local <-> remote 件数 のフォーマットで表示
-    echo "%f${arrow}%F{cyan}${remote} %f${(j:/:)gitstatus}"
+    echo "%f${arrow}%F{cyan}${remote}%f${gitstatus}"
   fi
 }
 
