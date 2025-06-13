@@ -35,6 +35,10 @@
   sh = show
   st = status -s --branch
   us = reset HEAD # unstage
+  asq = rebase --autosquash @{u}
+
+  set-upstream = !git branch -u origin/$(git branch --show-current)
+
 [init]
   defaultBranch = main
 
