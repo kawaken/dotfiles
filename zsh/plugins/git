@@ -1,0 +1,170 @@
+#!/bin/zsh
+
+# Git helper functions
+
+# git wk - Workflow commands for efficient commit management
+function git-wk() {
+    case "$1" in
+        start)
+            shift
+            git-wk-start "$@"
+            ;;
+        commit)
+            shift
+            git-wk-commit "$@"
+            ;;
+        finish)
+            shift
+            git-wk-finish "$@"
+            ;;
+        list)
+            shift
+            git-wk-list "$@"
+            ;;
+        squash)
+            shift
+            git-wk-squash "$@"
+            ;;
+        next)
+            shift
+            git-wk-next "$@"
+            ;;
+        *)
+            echo "Usage: git wk <command> [options]"
+            echo ""
+            echo "Commands:"
+            echo "  start [description]  - Start work with empty WIP commit"
+            echo "  commit               - Commit current changes as fixup"
+            echo "  finish               - Finish work and squash fixup commits"
+            echo "  list                 - List all active work sessions across worktrees"  
+            echo "  squash               - Squash fixup commits without finishing work"
+            echo "  next [description]   - Finish current work and start next work"
+            ;;
+    esac
+}
+
+# git wk start - Start work with empty WIP commit
+function git-wk-start() {
+    local work_desc="${1:-work}"
+    git commit --allow-empty -m "WIP: $work_desc"
+    
+    local branch_name=$(git branch --show-current)
+    local commit_hash=$(git rev-parse --short HEAD)
+    local tag_name="wip-${branch_name}-${commit_hash}"
+    
+    git tag $tag_name
+    git config --local wip.current $tag_name
+    echo "Work started: $tag_name"
+}
+
+# git wk commit - Commit current changes as fixup
+function git-wk-commit() {
+    local tag_name=$(git config --local --get wip.current)
+    if [ -z "$tag_name" ]; then
+        echo "エラー: 作業用タグが設定されていません。先に 'git wk start' を実行してください。"
+        return 1
+    fi
+    
+    git add .
+    git commit --fixup=$tag_name
+    echo "Fixup commit created for: $tag_name"
+}
+
+# git wk finish - Finish work and squash fixup commits
+function git-wk-finish() {
+    local tag_name=$(git config --local --get wip.current)
+    if [ -z "$tag_name" ]; then
+        echo "エラー: 作業用タグが設定されていません。"
+        return 1
+    fi
+    
+    git rebase --autosquash ${tag_name}^
+    git tag -d $tag_name
+    git config --local --unset wip.current
+    echo "Work finished and commits squashed"
+}
+
+# git wk list - List all active work sessions across worktrees
+function git-wk-list() {
+    echo "Active work sessions:"
+    echo "===================="
+    
+    local found_any=false
+    
+    # Check current worktree
+    local current_tag=$(git config --local --get wip.current 2>/dev/null)
+    if [ -n "$current_tag" ]; then
+        local current_path=$(pwd)
+        local current_branch=$(git branch --show-current)
+        echo "📁 $current_path"
+        echo "   Branch: $current_branch"
+        echo "   Tag: $current_tag"
+        echo ""
+        found_any=true
+    fi
+    
+    # Check other worktrees
+    git worktree list --porcelain | while read -r line; do
+        if [[ $line =~ ^worktree ]]; then
+            local worktree_path="${line#worktree }"
+            if [ "$worktree_path" != "$(pwd)" ]; then
+                local wt_tag=$(git -C "$worktree_path" config --local --get wip.current 2>/dev/null)
+                if [ -n "$wt_tag" ]; then
+                    local wt_branch=$(git -C "$worktree_path" branch --show-current)
+                    echo "📁 $worktree_path"
+                    echo "   Branch: $wt_branch"
+                    echo "   Tag: $wt_tag"
+                    echo ""
+                    found_any=true
+                fi
+            fi
+        fi
+    done
+    
+    if [ "$found_any" = false ]; then
+        echo "No active work sessions found."
+    fi
+}
+
+# git wk squash - Squash fixup commits without finishing work
+function git-wk-squash() {
+    local tag_name=$(git config --local --get wip.current)
+    if [ -z "$tag_name" ]; then
+        echo "エラー: 作業用タグが設定されていません。" 
+        return 1
+    fi
+    
+    git rebase --autosquash ${tag_name}^
+    echo "Fixup commits squashed for: $tag_name"
+}
+
+# git wk next - Finish current work and start next work
+function git-wk-next() {
+    local work_desc="${1:-work}"
+    
+    # Check if there's current work to finish
+    local current_tag=$(git config --local --get wip.current)
+    if [ -n "$current_tag" ]; then
+        echo "Finishing current work: $current_tag"
+        git rebase --autosquash ${current_tag}^
+        git tag -d $current_tag
+        git config --local --unset wip.current
+        echo "Current work finished and commits squashed"
+        echo ""
+    fi
+    
+    # Start new work
+    echo "Starting next work: $work_desc"
+    git commit --allow-empty -m "WIP: $work_desc"
+    
+    local branch_name=$(git branch --show-current)
+    local commit_hash=$(git rev-parse --short HEAD)
+    local tag_name="wip-${branch_name}-${commit_hash}"
+    
+    git tag $tag_name
+    git config --local wip.current $tag_name
+    echo "Next work started: $tag_name"
+}
+
+# Make the functions available as git subcommands
+alias git-wk='git-wk'
