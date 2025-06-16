@@ -13,18 +13,22 @@ zstyle ':vcs_info:git:*' actionformats '%F{white}(%s) [%F{cyan}%b|%a%f]' '%c%u%f
 # set-messageのhook
 zstyle ':vcs_info:git+set-message:*' hooks git-extra-info
 function +vi-git-extra-info() {
-  # work treeにいるか確認
-  if [[ $(command git rev-parse --is-inside-work-tree 2> /dev/null) != 'true' ]]; then
+  # work treeにいるか確認（エラー出力を抑制）
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     return 1
   fi
 
-  if [[ "$1" != "1" ]]; then
-    hook_com[branch]+=`check_git_remote`
-    return 0
-  fi
-
-  hook_com[unstaged]+=`check_git_untracked`
-  hook_com[misc]+="`count_git_st``check_git_user`"
+  case "$1" in
+    0)
+      # ブランチ情報にリモート情報を追加
+      hook_com[branch]+=$(check_git_remote)
+      ;;
+    1)
+      # ステージング情報に未追跡ファイル情報を追加
+      hook_com[unstaged]+=$(check_git_untracked)
+      hook_com[misc]+="$(count_git_st)$(check_git_user)"
+      ;;
+  esac
 }
 
 function check_git_remote() {
