@@ -55,7 +55,7 @@ function check_git_remote() {
     gitstatus="${(j:/:)status_parts}"
 
     # 最終出力
-    echo "%f:${branch}${gitstatus}"
+    echo "%f⇡${branch}${gitstatus}"
   fi
 }
 
