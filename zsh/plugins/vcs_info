@@ -1,100 +1,107 @@
-# vcs_infoを有効
-autoload -Uz vcs_info
-
-zstyle ':vcs_info:*' enable git
-zstyle ':vcs_info:git:*' get-revision true
-zstyle ':vcs_info:git:*' check-for-changes true
-
-zstyle ':vcs_info:git:*' stagedstr "%F{green}*"
-zstyle ':vcs_info:git:*' unstagedstr "%F{red}*"
-zstyle ':vcs_info:git:*' formats '%F{white}[%F{cyan}%b%f]' '%c%u%f %m%f'
-zstyle ':vcs_info:git:*' actionformats '%F{white}(%s) [%F{cyan}%b|%a%f]' '%c%u%f %m%f'
-
-# set-messageのhook
-zstyle ':vcs_info:git+set-message:*' hooks git-extra-info
-function +vi-git-extra-info() {
-  # work treeにいるか確認（エラー出力を抑制）
+#!/usr/bin/env zsh
+function get_git_vcs_info() {
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     return 1
   fi
-
-  case "$1" in
-    0)
-      # ブランチ情報にリモート情報を追加
-      hook_com[branch]+=$(check_git_remote)
-      ;;
-    1)
-      # ステージング情報に未追跡ファイル情報を追加
-      hook_com[unstaged]+=$(check_git_untracked)
-      hook_com[misc]+="$(count_git_st)$(check_git_user)"
-      ;;
-  esac
-}
-
-function check_git_remote() {
-  local ahead behind remote gitstatus branch
-  local -a status_parts
-
-  # トラッキングブランチを確認
-  remote=${$(git rev-parse --verify ${hook_com[branch]}@{upstream} \
-    --symbolic-full-name 2>/dev/null)/refs\/remotes\/}
-
-  if [[ -n ${remote} ]] ; then
-    # リモートブランチ名が異なればそれを表示
-    [[ ${hook_com[branch]} != ${remote#*/} ]] && branch="-%F{cyan}${remote}%f"
-
-    # ローカルが進んでいたら 件数を追加
-    ahead=$(git rev-list ${hook_com[branch]}@{upstream}..HEAD 2>/dev/null | wc -l)
-    (( $ahead )) && status_parts+=( "%F{green}+${ahead}%f" )
-
-    # リモートが進んでいたら 件数を追加
-    behind=$(git rev-list HEAD..${hook_com[branch]}@{upstream} 2>/dev/null | wc -l)
-    (( $behind )) && status_parts+=( "%F{red}-${behind}%f" )
-
-    # status_parts を結合して gitstatus に格納
-    gitstatus="${(j:/:)status_parts}"
-
-    # 最終出力
-    echo "%f⇡${branch}${gitstatus}"
+  
+  local branch remote ahead behind staged modified untracked email domain output
+  local status_output
+  
+  branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  if [[ -z "$branch" ]] || [[ "$branch" == "HEAD" ]]; then
+    return 1
   fi
-}
-
-function check_git_untracked() {
-  # untracked のファイルがあったら 黄色* を表示
-  if [[ -n $(git ls-files --other --exclude-standard 2> /dev/null) ]]; then
-    echo -e "%F{yellow}*"
+  
+  remote=$(git rev-parse --verify "${branch}@{upstream}" --symbolic-full-name 2>/dev/null | sed 's|refs/remotes/||')
+  
+  if [[ -n "$remote" ]]; then
+    if [[ "$branch" != "${remote#*/}" ]]; then
+      branch="%F{cyan}${branch}%f-%F{cyan}${remote}%f"
+    else
+      branch="%F{cyan}${branch}%f"
+    fi
+    
+    ahead=$(git rev-list "${branch}@{upstream}..HEAD" 2>/dev/null | wc -l | tr -d ' ')
+    behind=$(git rev-list "HEAD..${branch}@{upstream}" 2>/dev/null | wc -l | tr -d ' ')
+    
+    if (( ahead >= 10 )); then
+      output+="%F{green}⇡*%f"
+    elif (( ahead > 0 )); then
+      output+="%F{green}⇡${ahead}%f"
+    fi
+    
+    if (( behind >= 10 )); then
+      output+="%F{red}⇣*%f"
+    elif (( behind > 0 )); then
+      output+="%F{red}⇣${behind}%f"
+    fi
+  else
+    branch="%F{cyan}${branch}%f"
   fi
-}
-
-function count_git_st() {
-  # git status の種類別にカウントして表示
-  git status -s | sort | awk '{ c[$1] += 1; } END{for (k in c) {printf "%s:%s ", k, c[k]}}'
-}
-
-function check_git_user() {
-  domain=`git config user.email | cut -d'@' -f 2`
-  echo "%F{magenta}${domain:0:2}%f"
-
+  
+  status_output=$(git status --porcelain 2>/dev/null)
+  staged=0
+  modified=0
+  untracked=0
+  
+  if [[ -n "$status_output" ]]; then
+    while IFS= read -r line; do
+      if [[ -z "$line" ]]; then
+        continue
+      fi
+      
+      local index_status="${line:0:1}"
+      local work_tree_status="${line:1:1}"
+      
+      if [[ "$index_status" != " " ]] && [[ "$index_status" != "?" ]]; then
+        ((staged++))
+      fi
+      
+      if [[ "$work_tree_status" != " " ]] && [[ "$index_status" != "?" ]]; then
+        ((modified++))
+      fi
+      
+      if [[ "$index_status" == "?" ]]; then
+        ((untracked++))
+      fi
+    done <<< "$status_output"
+  fi
+  
+  email=$(git config user.email 2>/dev/null)
+  if [[ -n "$email" ]]; then
+    domain="${email##*@}"
+    domain="%F{magenta}${domain:0:2}%f"
+  fi
+  
+  local final_output="%F{white}[%f${branch}${output}%F{white}]%f"
+  
+  local file_status=""
+  if (( staged > 0 )); then
+    file_status+="%F{green}${staged}%f"
+  fi
+  if (( modified > 0 )); then
+    file_status+="%F{red}${modified}%f"
+  fi
+  if (( untracked > 0 )); then
+    file_status+="%F{yellow}${untracked}%f"
+  fi
+  
+  if [[ -n "$file_status" ]]; then
+    final_output+="${file_status}"
+  fi
+  
+  if [[ -n "$domain" ]]; then
+    final_output+=" ${domain}"
+  fi
+  
+  echo "$final_output"
 }
 
 function _update_vcs_info_msg() {
-  local -a messages
   local prompt
-
-  LANG=en_US.UTF-8 vcs_info
-
-  if [[ -z ${vcs_info_msg_0_} ]]; then
-    prompt=""
-  else
-    [[ -n "$vcs_info_msg_0_" ]] && messages+=( "${vcs_info_msg_0_}" )
-    [[ -n "$vcs_info_msg_1_" ]] && messages+=( "${vcs_info_msg_1_}" )
-    [[ -n "$vcs_info_msg_2_" ]] && messages+=( "${vcs_info_msg_2_}" )
-
-    # 間にスペースを入れて連結する
-    prompt="
-${(j: :)messages}"
-  fi
-
+  
+  prompt=$(get_git_vcs_info)
+  
   echo "$prompt"
 }
 
