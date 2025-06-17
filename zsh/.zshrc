@@ -80,8 +80,8 @@ function _update_shlvl() {
 function _update_prompt() {
   # PWDを黄色で
   local full_path="%F{yellow}%d%f"
-  # vcs_infoのメッセージ
-  local vcs_info_msg=$(_update_vcs_info_msg)
+  # git branch statusのメッセージ
+  local git_branch_status_msg=$(_update_git_branch_status_msg)
   # shellの深さ
   local shlvl=$(_update_shlvl)
   # 直前実行したコマンドの結果
@@ -94,7 +94,7 @@ function _update_prompt() {
   local work_mode=$(_update_workon)
 
   PROMPT="
-${full_path}${vcs_info_msg} ${work_mode}
+${full_path}${git_branch_status_msg} ${work_mode}
 ${user} ${sep} ${prev_result}"
   RPROMPT="%D{%Y-%m-%d %H:%M:%S}"
 }

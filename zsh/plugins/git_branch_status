@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-function get_git_vcs_info() {
+function get_git_branch_status() {
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     return 1
   fi
@@ -36,7 +36,7 @@ function get_git_vcs_info() {
       output+="%F{red}⇣${behind}%f"
     fi
   else
-    branch="%F{cyan}${branch}%f"
+    branch="%F{white}%K{red}${branch}%k%f"
   fi
   
   status_output=$(git status --porcelain 2>/dev/null)
@@ -73,7 +73,7 @@ function get_git_vcs_info() {
     domain="%F{magenta}${domain:0:2}%f"
   fi
   
-  local final_output="%F{white}[%f${branch}${output}%F{white}]%f"
+  local final_output="%F{white}[%f${branch}${output}%F{white}] %f"
   
   local file_status=""
   if (( staged > 0 )); then
@@ -94,14 +94,14 @@ function get_git_vcs_info() {
     final_output+=" ${domain}"
   fi
   
-  echo "$final_output"
+  echo "
+$final_output"
 }
 
-function _update_vcs_info_msg() {
+function _update_git_branch_status_msg() {
   local prompt
   
-  prompt=$(get_git_vcs_info)
+  prompt=$(get_git_branch_status)
   
   echo "$prompt"
 }
-
