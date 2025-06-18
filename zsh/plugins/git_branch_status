@@ -81,13 +81,13 @@ function get_git_branch_status() {
 
   local file_status=""
   if (( staged > 0 )); then
-    file_status+="%F{green}${staged}%f"
+    file_status+="%F{green}⊡${staged}%f"
   fi
   if (( modified > 0 )); then
-    file_status+="%F{red}${modified}%f"
+    file_status+="%F{red}✎${modified}%f"
   fi
   if (( untracked > 0 )); then
-    file_status+="%F{yellow}${untracked}%f"
+    file_status+="%F{yellow}?${untracked}%f"
   fi
 
   if [[ -n "$file_status" ]]; then
