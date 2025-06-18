@@ -77,9 +77,33 @@ function _update_shlvl() {
   echo "$prompt"
 }
 
+function _shorten_path() {
+  local current_path="$PWD"
+  
+  # ホームディレクトリを ~ で置換
+  if [[ "$current_path" == "$HOME" ]]; then
+    echo -n "~"
+    return
+  elif [[ "$current_path" == "$HOME"/* ]]; then
+    current_path="~${current_path#$HOME}"
+  fi
+  
+  # PROJECT_DIR内の場合、repo名以下の部分のみ表示
+  if [[ -n "$PROJECT_DIR" && "$PWD" == "$PROJECT_DIR"/* ]]; then
+    local project_relative="${PWD#$PROJECT_DIR}"
+    # src/github.com/organization/repo/... の形式からrepo以下を抽出
+    if [[ "$project_relative" =~ ^/src/github\.com/[^/]+/(.*)$ ]]; then
+      echo -n "❯${match[1]}"
+      return
+    fi
+  fi
+  
+  echo -n "$current_path"
+}
+
 function _update_prompt() {
   # PWDを黄色で
-  local full_path="%F{yellow}%d%f"
+  local shorten_path="%F{yellow}$(_shorten_path)%f"
   # git branch statusのメッセージ
   local git_branch_status_msg=$(_update_git_branch_status_msg)
   # shellの深さ
