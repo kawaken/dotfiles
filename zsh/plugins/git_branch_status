@@ -3,33 +3,37 @@ function get_git_branch_status() {
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     return 1
   fi
-  
+
   local branch remote ahead behind staged modified untracked email domain output
   local status_output
-  
+
   branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
   if [[ -z "$branch" ]] || [[ "$branch" == "HEAD" ]]; then
     return 1
   fi
-  
-  remote=$(git rev-parse --verify "${branch}@{upstream}" --symbolic-full-name 2>/dev/null | sed 's|refs/remotes/||')
-  
+
+  remote=$(git rev-parse --verify "@{upstream}" --symbolic-full-name 2>/dev/null | sed 's|refs/remotes/||')
+
   if [[ -n "$remote" ]]; then
     if [[ "$branch" != "${remote#*/}" ]]; then
       branch="%F{cyan}${branch}%f-%F{cyan}${remote}%f"
     else
       branch="%F{cyan}${branch}%f"
     fi
-    
-    ahead=$(git rev-list "${branch}@{upstream}..HEAD" 2>/dev/null | wc -l | tr -d ' ')
-    behind=$(git rev-list "HEAD..${branch}@{upstream}" 2>/dev/null | wc -l | tr -d ' ')
-    
+
+    ahead=$(git rev-list "@{upstream}..HEAD" 2>/dev/null | wc -l | tr -d ' ')
+    behind=$(git rev-list "HEAD..@{upstream}" 2>/dev/null | wc -l | tr -d ' ')
+
+    if (( ahead > 0 )) || (( behind > 0 )); then
+      output+=":"
+    fi
+
     if (( ahead >= 10 )); then
       output+="%F{green}⇡*%f"
     elif (( ahead > 0 )); then
       output+="%F{green}⇡${ahead}%f"
     fi
-    
+
     if (( behind >= 10 )); then
       output+="%F{red}⇣*%f"
     elif (( behind > 0 )); then
@@ -38,43 +42,43 @@ function get_git_branch_status() {
   else
     branch="%F{white}%K{red}${branch}%k%f"
   fi
-  
+
   status_output=$(git status --porcelain 2>/dev/null)
   staged=0
   modified=0
   untracked=0
-  
+
   if [[ -n "$status_output" ]]; then
     while IFS= read -r line; do
       if [[ -z "$line" ]]; then
         continue
       fi
-      
+
       local index_status="${line:0:1}"
       local work_tree_status="${line:1:1}"
-      
+
       if [[ "$index_status" != " " ]] && [[ "$index_status" != "?" ]]; then
         ((staged++))
       fi
-      
+
       if [[ "$work_tree_status" != " " ]] && [[ "$index_status" != "?" ]]; then
         ((modified++))
       fi
-      
+
       if [[ "$index_status" == "?" ]]; then
         ((untracked++))
       fi
     done <<< "$status_output"
   fi
-  
+
   email=$(git config user.email 2>/dev/null)
   if [[ -n "$email" ]]; then
     domain="${email##*@}"
     domain="%F{magenta}${domain:0:2}%f"
   fi
-  
+
   local final_output="%F{white}[%f${branch}${output}%F{white}] %f"
-  
+
   local file_status=""
   if (( staged > 0 )); then
     file_status+="%F{green}${staged}%f"
@@ -85,23 +89,23 @@ function get_git_branch_status() {
   if (( untracked > 0 )); then
     file_status+="%F{yellow}${untracked}%f"
   fi
-  
+
   if [[ -n "$file_status" ]]; then
     final_output+="${file_status}"
   fi
-  
+
   if [[ -n "$domain" ]]; then
     final_output+=" ${domain}"
   fi
-  
+
   echo "
 $final_output"
 }
 
 function _update_git_branch_status_msg() {
   local prompt
-  
+
   prompt=$(get_git_branch_status)
-  
+
   echo "$prompt"
 }
