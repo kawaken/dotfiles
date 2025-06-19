@@ -79,7 +79,7 @@ function _update_shlvl() {
 
 function _shorten_path() {
   local current_path="$PWD"
-  
+
   # ホームディレクトリを ~ で置換
   if [[ "$current_path" == "$HOME" ]]; then
     echo -n "~"
@@ -87,7 +87,7 @@ function _shorten_path() {
   elif [[ "$current_path" == "$HOME"/* ]]; then
     current_path="~${current_path#$HOME}"
   fi
-  
+
   # PROJECT_DIR内の場合、repo名以下の部分のみ表示
   if [[ -n "$PROJECT_DIR" && "$PWD" == "$PROJECT_DIR"/* ]]; then
     local project_relative="${PWD#$PROJECT_DIR}"
@@ -97,7 +97,7 @@ function _shorten_path() {
       return
     fi
   fi
-  
+
   echo -n "$current_path"
 }
 
@@ -118,7 +118,7 @@ function _update_prompt() {
   local work_mode=$(_update_workon)
 
   PROMPT="
-${full_path}${git_branch_status_msg} ${work_mode}
+${shorten_path}${git_branch_status_msg} ${work_mode}
 ${user} ${sep} ${prev_result}"
   RPROMPT="%D{%Y-%m-%d %H:%M:%S}"
 }
