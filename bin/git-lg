@@ -1,2 +1,8 @@
 #!/bin/bash
-git log --pretty=format:'%C(yellow)%h%C(reset) %s%C(green)%d%C(reset)%C(blue)%(trailers:key=Co-Authored-By,only,unfold)%C(reset)' origin/main..HEAD "$@" | sed 's/Co-Authored-By: .*/🤖/'
+echo -e "\033[1;34m[origin/main..HEAD]\033[0m"
+output=$(git log --pretty=format:'%C(yellow)%h%C(reset) %s%C(green)%d%C(reset)%C(blue)%(trailers:key=Co-Authored-By,only,unfold)%C(reset)' origin/main..HEAD "$@" | sed 's/Co-Authored-By: .*/🤖/')
+if [ -z "$output" ]; then
+    echo -e "\033[0;90m差分がありません\033[0m"
+else
+    echo "$output"
+fi
