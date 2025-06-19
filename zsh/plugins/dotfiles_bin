@@ -1,0 +1,4 @@
+# dotfilesのbinディレクトリをPATHに追加
+if [ -d "$HOME/dotfiles/bin" ]; then
+  export PATH="$HOME/dotfiles/bin:$PATH"
+fi

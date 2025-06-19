@@ -1,0 +1,2 @@
+#!/bin/bash
+git log --pretty=format:'%C(yellow)%h%C(reset) %s%C(green)%d%C(reset)%C(blue)%(trailers:key=Co-Authored-By,only,unfold)%C(reset)' origin/main..HEAD "$@" | sed 's/Co-Authored-By: .*/🤖/'
