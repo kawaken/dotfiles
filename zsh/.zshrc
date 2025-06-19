@@ -110,8 +110,6 @@ function _update_prompt() {
   local shlvl=$(_update_shlvl)
   # 直前実行したコマンドの結果
   local prev_result="%(?,,%F{red}!!!%f )"
-  # user
-  local user="%n"
   # jobがあればセパレーターをマゼンタに
   local sep="%(1j,%F{magenta}%#%f,%#)"
   # workonの状態
@@ -119,7 +117,7 @@ function _update_prompt() {
 
   PROMPT="
 ${shorten_path}${git_branch_status_msg} ${work_mode}
-${user} ${sep} ${prev_result}"
+${sep} ${prev_result}"
   RPROMPT="%D{%Y-%m-%d %H:%M:%S}"
 }
 add-zsh-hook precmd _update_prompt
