@@ -1,8 +1,17 @@
 #!/bin/bash
-echo -e "\033[1;34m[origin/main..HEAD]\033[0m"
-output=$(git log --pretty=format:'%C(yellow)%h%C(reset) %s%C(green)%d%C(reset)%C(blue)%(trailers:key=Co-Authored-By,only,unfold)%C(reset)' origin/main..HEAD "$@" | sed 's/Co-Authored-By: .*/🤖/')
-if [ -z "$output" ]; then
-    echo -e "\033[0;90m差分がありません\033[0m"
-else
-    echo "$output"
-fi
+
+# フォーマット文字列を分かりやすく定義
+format="%C(yellow)%h%C(reset)"                                    # コミットハッシュ（黄色）
+format+=" "                                                         # スペース
+format+="%C(cyan)%ad%C(reset)"                                     # 日付（シアン）
+format+=" "                                                         # スペース
+format+="🫵 "                                                       # デフォルトの絵文字
+format+="%(trailers:key=Co-Authored-By,only,valueonly,unfold,separator=)" # Co-Authored-By
+format+="%s"                                                        # コミットメッセージ
+format+="%C(auto)%d%C(reset)"                                      # ブランチ・タグ情報（自動色）
+
+{
+    echo -e "\033[1;34m[origin/main..HEAD]\033[0m"
+    git log --color=always --pretty=format:"$format" --date=relative origin/main..HEAD "$@" \
+        | sed 's/🫵 Claude <noreply@anthropic.com>/🤖 /'
+} | less -RFX
