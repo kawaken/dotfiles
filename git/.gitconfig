@@ -27,7 +27,7 @@
   mf = merge --ff-only
   pul = pull --ff-only
   pur = pull --rebase
-  pus = push
+  pus = push -u
   puf = push --force-with-lease --force-if-includes
   rv = remote -v
   sh = show
