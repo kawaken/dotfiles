@@ -27,7 +27,7 @@
   mf = merge --ff-only
   pul = pull --ff-only
   pur = pull --rebase
-  pus = push -u
+  pus = !git rev-parse --abbrev-ref @{u} >/dev/null 2>&1 && git push || git push -u
   puf = push --force-with-lease --force-if-includes
   rv = remote -v
   sh = show
