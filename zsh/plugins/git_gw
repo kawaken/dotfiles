@@ -1,0 +1,239 @@
+#!/bin/zsh
+
+# Git worktree management function
+# gw - Git Worktree helper for efficient branch-based development
+
+function gw() {
+    case "$1" in
+        create|c)
+            shift
+            _gw_create "$@"
+            ;;
+        list|l)
+            shift
+            _gw_list "$@"
+            ;;
+        remove|rm)
+            shift
+            _gw_remove "$@"
+            ;;
+        switch|s)
+            shift
+            _gw_switch "$@"
+            ;;
+        claude-sync|cs)
+            shift
+            _gw_claude_sync "$@"
+            ;;
+        *)
+            echo "Usage: gw <command> [options]"
+            echo ""
+            echo "Commands:"
+            echo "  create, c <branch>     Create worktree and switch to it"
+            echo "  list, l                List all worktrees"
+            echo "  remove, rm <branch>    Remove worktree"
+            echo "  switch, s <branch>     Switch to existing worktree"
+            echo "  claude-sync, cs        Sync .claude directory from main"
+            ;;
+    esac
+}
+
+# Create new worktree
+function _gw_create() {
+    local branch_name="$1"
+    if [ -z "$branch_name" ]; then
+        echo "エラー: ブランチ名を指定してください"
+        return 1
+    fi
+    
+    # Check if we're in a git repository
+    if ! git rev-parse --git-dir > /dev/null 2>&1; then
+        echo "エラー: gitリポジトリではありません"
+        return 1
+    fi
+    
+    # Get main repository path (first line from worktree list)
+    local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
+    local repo_name=$(basename "$main_repo_path")
+    local parent_dir=$(dirname "$main_repo_path")
+    local worktree_path="${parent_dir}/${repo_name}-${branch_name}"
+    
+    # Check if worktree already exists
+    if [ -d "$worktree_path" ]; then
+        echo "Worktree already exists. Moving to: $worktree_path"
+        cd "$worktree_path"
+        return 0
+    fi
+    
+    # Check if remote branch exists
+    if git ls-remote --heads origin "$branch_name" | grep -q "$branch_name"; then
+        echo "エラー: リモートブランチ '$branch_name' が既に存在します"
+        return 1
+    fi
+    
+    # Update main branch
+    echo "Updating main branch..."
+    (cd "$main_repo_path" && git checkout main && git pull)
+    
+    # Create worktree
+    echo "Creating worktree: $worktree_path"
+    git worktree add -b "$branch_name" "$worktree_path" main
+    
+    # Move to new worktree
+    cd "$worktree_path"
+    
+    # Sync .claude directory
+    if [ -d "${main_repo_path}/.claude" ]; then
+        echo "Syncing .claude directory..."
+        cp -r "${main_repo_path}/.claude" .
+    fi
+    
+    echo "Worktree created and switched to: $worktree_path"
+}
+
+# List worktrees
+function _gw_list() {
+    git worktree list
+}
+
+# Remove worktree
+function _gw_remove() {
+    local branch_name="$1"
+    if [ -z "$branch_name" ]; then
+        echo "エラー: ブランチ名を指定してください"
+        return 1
+    fi
+    
+    shift  # Remove branch name from arguments
+    local additional_args=("$@")  # Capture additional arguments like --force
+    
+    # Get main repository path
+    local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
+    local repo_name=$(basename "$main_repo_path")
+    local parent_dir=$(dirname "$main_repo_path")
+    local worktree_path="${parent_dir}/${repo_name}-${branch_name}"
+    
+    if [ ! -d "$worktree_path" ]; then
+        echo "エラー: Worktree '$worktree_path' が存在しません"
+        return 1
+    fi
+    
+    # Remove worktree with optional arguments
+    git worktree remove "${additional_args[@]}" "$worktree_path"
+    echo "Worktree removed: $worktree_path"
+}
+
+# Switch to existing worktree
+function _gw_switch() {
+    local branch_name="$1"
+    if [ -z "$branch_name" ]; then
+        echo "エラー: ブランチ名を指定してください"
+        return 1
+    fi
+    
+    # Get main repository path
+    local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
+    local repo_name=$(basename "$main_repo_path")
+    local parent_dir=$(dirname "$main_repo_path")
+    local worktree_path="${parent_dir}/${repo_name}-${branch_name}"
+    
+    if [ ! -d "$worktree_path" ]; then
+        echo "エラー: Worktree '$worktree_path' が存在しません"
+        return 1
+    fi
+    
+    cd "$worktree_path"
+    echo "Switched to: $worktree_path"
+}
+
+# Sync .claude directory from main
+function _gw_claude_sync() {
+    # Check if we're in a git repository
+    if ! git rev-parse --git-dir > /dev/null 2>&1; then
+        echo "エラー: gitリポジトリではありません"
+        return 1
+    fi
+    
+    # Get main repository path
+    local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
+    local current_path=$(pwd)
+    
+    # Check if we're in main repository
+    if [ "$current_path" = "$main_repo_path" ]; then
+        echo "エラー: mainリポジトリでは同期の必要がありません"
+        return 1
+    fi
+    
+    # Check if .claude exists in main
+    if [ ! -d "${main_repo_path}/.claude" ]; then
+        echo "エラー: mainリポジトリに.claudeディレクトリが存在しません"
+        return 1
+    fi
+    
+    # Sync .claude directory
+    echo "Syncing .claude directory from main..."
+    rm -rf .claude
+    cp -r "${main_repo_path}/.claude" .
+    echo ".claude directory synced successfully"
+}
+
+# Completion function
+function _gw() {
+    local -a subcommands
+    local state
+    
+    subcommands=(
+        'create:Create new worktree and switch to it'
+        'c:Create new worktree (alias)'
+        'list:List all worktrees'
+        'l:List worktrees (alias)'
+        'remove:Remove worktree'
+        'rm:Remove worktree (alias)'
+        'switch:Switch to existing worktree'
+        's:Switch to worktree (alias)'
+        'claude-sync:Sync .claude directory from main'
+        'cs:Sync .claude directory (alias)'
+    )
+    
+    _arguments -C \
+        '1: :->command' \
+        '2: :->args'
+    
+    case $state in
+        command)
+            _describe -t commands 'gw subcommand' subcommands
+            ;;
+        args)
+            case $words[2] in
+                remove|rm|switch|s)
+                    _gw_worktree_branches
+                    ;;
+                create|c)
+                    # No completion for branch name
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+# Helper function to complete worktree branches
+function _gw_worktree_branches() {
+    local -a branches
+    local worktree_list
+    
+    # Get worktree list
+    worktree_list=$(git worktree list 2>/dev/null)
+    if [[ -n "$worktree_list" ]]; then
+        # Extract branch names from worktrees (excluding main)
+        branches=(${(f)"$(echo "$worktree_list" | awk 'NR>1 {print $NF}' | sed 's/\[//;s/\]//')"})
+        
+        if [[ ${#branches[@]} -gt 0 ]]; then
+            _describe -t branches 'worktree branch' branches
+        fi
+    fi
+}
+
+# Register completion
+if (( $+functions[compdef] )); then
+    compdef _gw gw
+fi
