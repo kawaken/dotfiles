@@ -118,7 +118,49 @@ function _gw_remove() {
         return 1
     fi
     
-    # Remove worktree with optional arguments
+    # Check if --force is already specified
+    local has_force=false
+    for arg in "${additional_args[@]}"; do
+        if [[ "$arg" == "--force" || "$arg" == "-f" ]]; then
+            has_force=true
+            break
+        fi
+    done
+    
+    # If --force is not specified, check for untracked/modified files
+    if [ "$has_force" = false ]; then
+        local status_output
+        status_output=$(git -C "$worktree_path" status -sb 2>/dev/null)
+        local has_changes=false
+        
+        # Check if there are any changes (lines other than the branch line)
+        if echo "$status_output" | grep -q "^[^#].*[AMD??]"; then
+            has_changes=true
+        fi
+        
+        if [ "$has_changes" = true ]; then
+            echo "Worktree contains untracked or modified files:"
+            echo "$status_output"
+            echo ""
+            echo -n "Delete anyway? [y/N]: "
+            read -r response
+            
+            case "$response" in
+                [Yy]|[Yy][Ee][Ss])
+                    additional_args+=("--force")
+                    ;;
+                *)
+                    echo "Aborted"
+                    return 1
+                    ;;
+            esac
+        fi
+    fi
+    
+    # Move to main repository before removing worktree
+    cd "$main_repo_path"
+    
+    # Remove worktree with arguments
     git worktree remove "${additional_args[@]}" "$worktree_path"
     echo "Worktree removed: $worktree_path"
 }
