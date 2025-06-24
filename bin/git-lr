@@ -11,6 +11,6 @@ format+="%C(auto)%d%C(reset)"                                      # ブラン�
 
 {
     echo -e "\033[1;34m[最近2週間]\033[0m"
-    git log --color=always --pretty=format:"$format" --date=relative --graph --all --since='2 weeks ago' "$@" \
+    git log --color=always --pretty=format:"$format" --date=relative --graph --since='2 weeks ago' HEAD origin/HEAD "$@" \
         | sed 's/Claude <noreply@anthropic.com>/🤖 /'
 } | less -RFX
