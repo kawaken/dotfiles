@@ -41,6 +41,16 @@ unsetopt BEEP                        # beep音を出さない
 # キーバインド
 bindkey -e
 
+# コマンドラインをエディタで編集する機能
+# Ctrl+k, e でコマンドラインを $EDITOR で編集可能
+# 使い方: コマンドラインに入力中、Ctrl+kを押してからeを押すと
+#         現在のコマンドラインがvimで開かれ、編集できる
+#         保存して終了すると編集内容がコマンドラインに反映される
+#         編集をキャンセルしたい場合は保存せずにエディタを終了する
+autoload -Uz edit-command-line
+zle -N edit-command-line
+bindkey '^ke' edit-command-line
+
 # 履歴
 HISTFILE=~/.zsh_history
 HISTSIZE=100000
