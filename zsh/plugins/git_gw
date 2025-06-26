@@ -184,7 +184,13 @@ function _gw_switch() {
     local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
     local repo_name=$(basename "$main_repo_path")
     local parent_dir=$(dirname "$main_repo_path")
-    local worktree_path="${parent_dir}/${repo_name}-${branch_name}"
+    
+    # Check if switching to main
+    if [ "$branch_name" = "main" ]; then
+        local worktree_path="$main_repo_path"
+    else
+        local worktree_path="${parent_dir}/${repo_name}-${branch_name}"
+    fi
 
     if [ ! -d "$worktree_path" ]; then
         echo "エラー: Worktree '$worktree_path' が存在しません"
@@ -273,8 +279,12 @@ function _gw_worktree_branches() {
     # Get worktree list
     worktree_list=$(git worktree list 2>/dev/null)
     if [[ -n "$worktree_list" ]]; then
-        # Extract branch names from worktrees (excluding main)
-        branches=(${(f)"$(echo "$worktree_list" | awk 'NR>1 {print $NF}' | sed 's/\[//;s/\]//')"})
+        # Always include main as an option
+        branches=("main")
+        
+        # Extract branch names from worktrees (excluding main which is already added)
+        local other_branches=(${(f)"$(echo "$worktree_list" | awk 'NR>1 {print $NF}' | sed 's/\[//;s/\]//')"})
+        branches+=("${other_branches[@]}")
 
         if [[ ${#branches[@]} -gt 0 ]]; then
             _describe -t branches 'worktree branch' branches
