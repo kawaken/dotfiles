@@ -96,8 +96,8 @@ function _gw_list() {
     local lines=("${(@f)$(git worktree list)}")
     for line in "${lines[@]}"; do
         local fields=($line)
-        local path="${fields[1]}"
-        local shortened_path=$(_shorten_path "$path")
+        local worktree_path="${fields[1]}"
+        local shortened_path=$(_shorten_path "$worktree_path")
         echo -n "$shortened_path"
         echo " ${fields[@]:1}"
     done
