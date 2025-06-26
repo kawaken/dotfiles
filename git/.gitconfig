@@ -33,6 +33,7 @@
   sh = show
   st = status -s --branch
   us = reset HEAD # unstage
+  wk = worktree
   asq = rebase --autosquash @{u}
 
   set-upstream = !git branch -u origin/$(git branch --show-current)
