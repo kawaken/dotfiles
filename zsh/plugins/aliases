@@ -13,3 +13,4 @@ alias vs='code'
 alias vi=vim
 alias cr='cursor'
 alias cl='claude'
+alias gd='gw cd'

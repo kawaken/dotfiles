@@ -17,9 +17,9 @@ function gw() {
             shift
             _gw_remove "$@"
             ;;
-        switch|s)
+        cd)
             shift
-            _gw_switch "$@"
+            _gw_cd "$@"
             ;;
         claude-sync|cs)
             shift
@@ -32,7 +32,7 @@ function gw() {
             echo "  create, c <branch>     Create worktree and switch to it"
             echo "  list, l                List all worktrees"
             echo "  remove, rm <branch>    Remove worktree"
-            echo "  switch, s <branch>     Switch to existing worktree"
+            echo "  cd [branch|-]          Switch to worktree (no args = main, - = previous)"
             echo "  claude-sync, cs        Sync .claude directory from main"
             ;;
     esac
@@ -173,22 +173,33 @@ function _gw_remove() {
 }
 
 # Switch to existing worktree
-function _gw_switch() {
+function _gw_cd() {
     local branch_name="$1"
-    if [ -z "$branch_name" ]; then
-        echo "エラー: ブランチ名を指定してください"
-        return 1
-    fi
-
+    
     # Get main repository path
     local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
     local repo_name=$(basename "$main_repo_path")
     local parent_dir=$(dirname "$main_repo_path")
     
-    # Check if switching to main
-    if [ "$branch_name" = "main" ]; then
+    # Save current path before switching
+    local current_path=$(pwd)
+    
+    # Handle different cases
+    if [ -z "$branch_name" ]; then
+        # No argument: go to main
+        local worktree_path="$main_repo_path"
+    elif [ "$branch_name" = "-" ]; then
+        # Dash: go to previous worktree
+        if [ -z "$GW_PREVIOUS_WORKTREE" ]; then
+            echo "エラー: 以前のワークツリーがありません"
+            return 1
+        fi
+        local worktree_path="$GW_PREVIOUS_WORKTREE"
+    elif [ "$branch_name" = "main" ]; then
+        # Explicitly main
         local worktree_path="$main_repo_path"
     else
+        # Branch name provided
         local worktree_path="${parent_dir}/${repo_name}-${branch_name}"
     fi
 
@@ -197,6 +208,9 @@ function _gw_switch() {
         return 1
     fi
 
+    # Save current path as previous before switching
+    export GW_PREVIOUS_WORKTREE="$current_path"
+    
     cd "$worktree_path"
     echo "Switched to: $worktree_path"
 }
@@ -244,8 +258,7 @@ function _gw() {
         'l:List worktrees (alias)'
         'remove:Remove worktree'
         'rm:Remove worktree (alias)'
-        'switch:Switch to existing worktree'
-        's:Switch to worktree (alias)'
+        'cd:Change to worktree directory'
         'claude-sync:Sync .claude directory from main'
         'cs:Sync .claude directory (alias)'
     )
@@ -260,7 +273,7 @@ function _gw() {
             ;;
         args)
             case $words[2] in
-                remove|rm|switch|s)
+                remove|rm|cd)
                     _gw_worktree_branches
                     ;;
                 create|c)
@@ -295,4 +308,6 @@ function _gw_worktree_branches() {
 # Register completion
 if (( $+functions[compdef] )); then
     compdef _gw gw
+    # Also register completion for gd alias
+    compdef _gw gd
 fi
