@@ -15,6 +15,23 @@ function workon () {
   fi
 
   export __wkon="%F{green}[$wkon]%f"
+  
+  # Git workflow: cc/{current-branch} ブランチ作成と wip コミット
+  if git rev-parse --git-dir > /dev/null 2>&1; then
+    local current_branch=$(git rev-parse --abbrev-ref HEAD)
+    local cc_branch="cc/${current_branch}"
+    
+    # cc/{current-branch} ブランチを作成（既存の場合は削除して再作成）
+    git branch -D "${cc_branch}" 2>/dev/null
+    git checkout -b "${cc_branch}"
+    
+    # 空のwipコミットを作成
+    git commit --allow-empty -m "wip"
+    
+    # コミットハッシュを wip.head として git config に保存
+    local wip_hash=$(git rev-parse HEAD)
+    git config wip.head "${wip_hash}"
+  fi
 }
 
 alias wo=workon
