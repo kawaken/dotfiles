@@ -1,35 +1,6 @@
 export PROJECT_DIR=$HOME/projects
 export PATH=$PROJECT_DIR/bin:$PATH
 
-# command: cd to project dir or ls project dir
-function pjd() {
-  cd $PROJECT_DIR
-  echo "\033[34mProjects list :\033[0m"
-  ls $PROJECT_DIR
-}
-
-function gen_pjrc() {
-  cat <<'CMD' >> .pjrc
-# Describe the settings for the project
-CMD
-  vi .pjrc
-}
-
-function show_langs() {
-  cat <<LANG
-Node:   $(node --version)
-Path:   $(which node)
-
-Go:     $(go version)
-GOROOT: $(go env GOROOT)
-GOPATH: $(go env GOPATH)
-
-Python: $(python3 --version)
-Path:   $(which python3)
-Poetry: $(poetry --version)
-LANG
-}
-
 export __wkon
 function _update_workon() {
   echo $__wkon
@@ -43,7 +14,6 @@ function workon () {
     wkon="RC"
   fi
 
-  show_langs
   export __wkon="%F{green}[$wkon]%f"
 }
 
@@ -64,29 +34,24 @@ function repod() {
     return
   fi
 
-  # PROJECT_MAIN_ORG_PREFIX が指定されていない場合はそのまま移動
-  if [ -z "$PROJECT_MAIN_ORG_PREFIX" ]; then
-    cd $PROJECT_MAIN_ORG/$1
-    return
-  fi
-
-  # ディレクトリが存在したら移動する
-  local target_dir="$PROJECT_MAIN_ORG/${PROJECT_MAIN_ORG_PREFIX}-$1"
-  if [ -d "$target_dir" ]; then
-    cd "$target_dir"
-    return
-  fi
-
-  # Prefixなしのディレクトリが存在したら移動する
-  local target_dir="$PROJECT_MAIN_ORG/$1"
-  if [ -d "$target_dir" ]; then
-    cd "$target_dir"
-    return
-  fi
-
-  echo "Directory not found: $target_dir"
-  # PROJECT_MAIN_ORGに移動してディレクトリ一覧のみ表示する
-  cd $PROJECT_MAIN_ORG
-  ls
+  # 引数ありの場合は PROJECT_MAIN_ORG/$1 へ移動
+  cd $PROJECT_MAIN_ORG/$1
 }
+
+# repod の補完関数
+function _repod() {
+  if [ -z "$PROJECT_MAIN_ORG" ]; then
+    return
+  fi
+  
+  # PROJECT_MAIN_ORG 内のディレクトリ一覧を補完候補にする
+  local directories
+  directories=("${(@f)$(ls -d $PROJECT_MAIN_ORG/*/ 2>/dev/null | xargs -n1 basename)}")
+  
+  _arguments \
+    '1:directory:('${directories[@]}')'
+}
+
+# repod コマンドの補完を設定
+compdef _repod repod
 
