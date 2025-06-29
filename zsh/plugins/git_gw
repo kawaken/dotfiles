@@ -25,6 +25,18 @@ function gw() {
             shift
             _gw_claude_sync "$@"
             ;;
+        workon)
+            shift
+            _gw_workon "$@"
+            ;;
+        compact)
+            shift
+            _gw_compact "$@"
+            ;;
+        done)
+            shift
+            _gw_done "$@"
+            ;;
         *)
             echo "Usage: gw <command> [options]"
             echo ""
@@ -34,6 +46,9 @@ function gw() {
             echo "  remove, rm <branch>    Remove worktree"
             echo "  cd [branch|-]          Switch to worktree (no args = main, - = previous)"
             echo "  claude-sync, cs        Sync .claude directory from main"
+            echo "  workon                 Start work with wip commit on cc/ branch"
+            echo "  compact <message>      Compact fixup commits and start new wip"
+            echo "  done                   Complete work and merge back"
             ;;
     esac
 }
@@ -246,6 +261,163 @@ function _gw_claude_sync() {
     echo ".claude directory synced successfully"
 }
 
+# Start work with wip commit on cc/ branch
+function _gw_workon() {
+    # Check if we're in a git repository
+    if ! git rev-parse --git-dir > /dev/null 2>&1; then
+        echo "エラー: gitリポジトリではありません"
+        return 1
+    fi
+
+    # Get current branch name
+    local current_branch=$(git branch --show-current)
+    if [ -z "$current_branch" ]; then
+        echo "エラー: 現在のブランチ名を取得できません"
+        return 1
+    fi
+
+    # Create cc/ branch name
+    local cc_branch="cc/${current_branch}"
+
+    # Check if cc/ branch already exists
+    if git show-ref --verify --quiet "refs/heads/${cc_branch}"; then
+        echo "エラー: ブランチ '${cc_branch}' が既に存在します"
+        return 1
+    fi
+
+    # Create and checkout cc/ branch
+    echo "Creating and switching to branch: ${cc_branch}"
+    git checkout -b "${cc_branch}"
+
+    # Create empty wip commit
+    echo "Creating wip commit..."
+    git commit --allow-empty -m "wip"
+
+    # Save commit hash to git config
+    local commit_hash=$(git rev-parse HEAD)
+    git config --local wip.head "${commit_hash}"
+
+    echo "Started work on ${cc_branch} with wip commit: ${commit_hash}"
+}
+
+# Compact fixup commits and optionally start new wip
+function _gw_compact() {
+    local message="$1"
+    local stay_flag=false
+
+    # Check for --stay flag
+    if [ "$2" = "--stay" ]; then
+        stay_flag=true
+    fi
+
+    # Check if message is provided
+    if [ -z "$message" ]; then
+        echo "エラー: コミットメッセージを指定してください"
+        echo "Usage: gw compact <message> [--stay]"
+        return 1
+    fi
+
+    # Check if wip.head is set
+    local wip_head=$(git config --get wip.head)
+    if [ -z "$wip_head" ]; then
+        echo "エラー: wip.head が設定されていません"
+        echo "先に 'gw workon' を実行してください"
+        return 1
+    fi
+
+    # Check if wip commit exists
+    if ! git cat-file -e "${wip_head}" 2>/dev/null; then
+        echo "エラー: wip.head のコミット '${wip_head}' が存在しません"
+        return 1
+    fi
+
+    # Rebase with autosquash to compact fixup commits
+    echo "Compacting fixup commits..."
+    GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash "${wip_head}^"
+
+    # Update the wip commit message
+    echo "Updating commit message..."
+    git commit --amend -m "$message"
+
+    if [ "$stay_flag" = false ]; then
+        # Create new wip commit
+        echo "Creating new wip commit..."
+        git commit --allow-empty -m "wip"
+        
+        # Update wip.head
+        local new_commit_hash=$(git rev-parse HEAD)
+        git config --local wip.head "${new_commit_hash}"
+        
+        echo "Compacted commits and created new wip: ${new_commit_hash}"
+    else
+        # Update wip.head to current HEAD
+        local current_hash=$(git rev-parse HEAD)
+        git config --local wip.head "${current_hash}"
+        
+        echo "Compacted commits. Current HEAD is now wip.head: ${current_hash}"
+    fi
+}
+
+# Complete work and merge back
+function _gw_done() {
+    # Check if wip.head is set
+    local wip_head=$(git config --get wip.head)
+    if [ -z "$wip_head" ]; then
+        echo "エラー: wip.head が設定されていません"
+        return 1
+    fi
+
+    # Get current branch name
+    local current_branch=$(git branch --show-current)
+    if [[ ! "$current_branch" =~ ^cc/ ]]; then
+        echo "エラー: cc/ ブランチで作業していません"
+        return 1
+    fi
+
+    # Extract original branch name
+    local original_branch=${current_branch#cc/}
+
+    # Check if there's only wip.head commit (empty wip)
+    local commit_count=$(git rev-list "${wip_head}^..HEAD" --count 2>/dev/null || echo "0")
+    if [ "$commit_count" = "1" ]; then
+        # Check if the only commit is the wip.head itself
+        local head_hash=$(git rev-parse HEAD)
+        if [ "$head_hash" = "$wip_head" ]; then
+            # Check if it's an empty commit with message "wip"
+            local commit_message=$(git log -1 --pretty=%s HEAD)
+            if [ "$commit_message" = "wip" ]; then
+                echo "Removing empty wip commit..."
+                git reset --hard HEAD^
+            fi
+        fi
+    else
+        # Check for remaining fixup commits
+        local fixup_count=$(git log --oneline "${wip_head}^..HEAD" | grep -c "^[^ ]* fixup!" || true)
+        if [ "$fixup_count" -gt 0 ]; then
+            echo "エラー: 未処理の fixup コミットが ${fixup_count} 件あります"
+            echo "先に 'gw compact' を実行してください"
+            return 1
+        fi
+    fi
+
+    # Switch back to original branch
+    echo "Switching back to ${original_branch}..."
+    git checkout "${original_branch}"
+
+    # Rebase cc/ branch commits onto original branch
+    echo "Rebasing commits..."
+    git rebase "${current_branch}"
+
+    # Delete cc/ branch
+    echo "Deleting work branch ${current_branch}..."
+    git branch -D "${current_branch}"
+
+    # Remove wip.head config
+    git config --unset wip.head
+
+    echo "Work completed and merged back to ${original_branch}"
+}
+
 # Completion function
 function _gw() {
     local -a subcommands
@@ -261,6 +433,9 @@ function _gw() {
         'cd:Change to worktree directory'
         'claude-sync:Sync .claude directory from main'
         'cs:Sync .claude directory (alias)'
+        'workon:Start work with wip commit on cc/ branch'
+        'compact:Compact fixup commits and start new wip'
+        'done:Complete work and merge back'
     )
 
     _arguments -C \
