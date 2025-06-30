@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git add:*)",
+      "WebFetch(domain:ghostty.org)",
+      "Bash(ls:*)",
+      "Bash(rg:*)",
       "Bash(gh issue view:*)"
     ],
     "deny": []
