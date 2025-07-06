@@ -59,6 +59,6 @@ _claude_preexec_hook() {
 }
 
 # フック関数を登録
-autoload -Uz add-zsh-hook
-add-zsh-hook precmd _claude_precmd_hook
-add-zsh-hook preexec _claude_preexec_hook
+# autoload -Uz add-zsh-hook
+# add-zsh-hook precmd _claude_precmd_hook
+# add-zsh-hook preexec _claude_preexec_hook
