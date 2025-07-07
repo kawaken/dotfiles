@@ -7,7 +7,7 @@ format+="%C(cyan)%ad%C(reset)"                                     # 日付（�
 format+=" "                                                         # スペース
 format+="%C(dim)(%ar)%C(reset)"                                    # 相対日付（薄い色）
 format+=" "                                                         # スペース
-format+="%(trailers:key=Co-Authored-By,only,valueonly,unfold,separator=)" # Co-Authored-By
+format+="%(trailers:key=Co-Authored-By,valueonly,unfold,separator=)" # Co-Authored-By
 format+="%s"                                                        # コミットメッセージ
 format+="%C(auto)%d%C(reset)"                                      # ブランチ・タグ情報（自動色）
 

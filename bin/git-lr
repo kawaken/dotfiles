@@ -5,7 +5,7 @@ format="%C(yellow)%h%C(reset)"                                    # コミット
 format+=" "                                                         # スペース
 format+="%C(cyan)%ad%C(reset)"                                     # 日付（シアン）
 format+=" "                                                         # スペース
-format+="%(trailers:key=Co-Authored-By,only,valueonly,unfold,separator=)" # Co-Authored-By
+format+="%(trailers:key=Co-Authored-By,valueonly,unfold,separator=)" # Co-Authored-By
 format+="%s"                                                        # コミットメッセージ
 format+="%C(auto)%d%C(reset)"                                      # ブランチ・タグ情報（自動色）
 
