@@ -1,18 +1,11 @@
 #!/bin/bash
 
-# git-fi: fixup commit to the WIP head
-# Usage: git fi
-
-set -euo pipefail
-
 # Get the configured WIP head
-wip_head=$(git config --get wip.head || true)
+wip_head=$(git config --get wip.head)
 
 if [ -z "$wip_head" ]; then
     echo "エラー: wip.head が設定されていません" >&2
-    echo "使用例: git config wip.head HEAD~1" >&2
     exit 1
 fi
 
-# Create fixup commit
 git commit --fixup="$wip_head"
