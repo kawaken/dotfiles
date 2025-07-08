@@ -8,4 +8,4 @@ if [ -z "$wip_head" ]; then
     exit 1
 fi
 
-git commit --fixup="$wip_head"
+git commit --fixup="$wip_head" "$@"
