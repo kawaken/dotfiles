@@ -35,7 +35,6 @@
   us = reset HEAD # unstage
   wk = worktree
   asq = rebase --autosquash @{u}
-  fi = !sh -c 'wip_head=$(git config --get wip.head); if [ -z "$wip_head" ]; then echo "エラー: wip.head が設定されていません"; exit 1; fi; git commit --fixup="$wip_head"'
 
   set-upstream = !git branch -u origin/$(git branch --show-current)
 
