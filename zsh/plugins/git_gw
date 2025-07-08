@@ -17,7 +17,7 @@ function gw() {
             shift
             _gw_remove "$@"
             ;;
-        cd)
+        cd|switch|sw)
             shift
             _gw_cd "$@"
             ;;
@@ -45,6 +45,7 @@ function gw() {
             echo "  list, l                List all worktrees"
             echo "  remove, rm <branch>    Remove worktree"
             echo "  cd [branch|-]          Switch to worktree (no args = main, - = previous)"
+            echo "  switch, sw <branch>    Switch to worktree (alias for cd)"
             echo "  claude-sync, cs        Sync .claude directory from main"
             echo "  workon                 Start work with wip commit on cc/ branch"
             echo "  compact <message>      Compact fixup commits and start new wip"
@@ -190,15 +191,15 @@ function _gw_remove() {
 # Switch to existing worktree
 function _gw_cd() {
     local branch_name="$1"
-    
+
     # Get main repository path
     local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
     local repo_name=$(basename "$main_repo_path")
     local parent_dir=$(dirname "$main_repo_path")
-    
+
     # Save current path before switching
     local current_path=$(pwd)
-    
+
     # Handle different cases
     if [ -z "$branch_name" ]; then
         # No argument: go to main
@@ -225,7 +226,7 @@ function _gw_cd() {
 
     # Save current path as previous before switching
     export GW_PREVIOUS_WORKTREE="$current_path"
-    
+
     cd "$worktree_path"
     echo "Switched to: $worktree_path"
 }
@@ -343,17 +344,17 @@ function _gw_compact() {
         # Create new wip commit
         echo "Creating new wip commit..."
         git commit --allow-empty -m "wip"
-        
+
         # Update wip.head
         local new_commit_hash=$(git rev-parse HEAD)
         git config --local wip.head "${new_commit_hash}"
-        
+
         echo "Compacted commits and created new wip: ${new_commit_hash}"
     else
         # Update wip.head to current HEAD
         local current_hash=$(git rev-parse HEAD)
         git config --local wip.head "${current_hash}"
-        
+
         echo "Compacted commits. Current HEAD is now wip.head: ${current_hash}"
     fi
 }
@@ -469,7 +470,7 @@ function _gw_worktree_branches() {
     if [[ -n "$worktree_list" ]]; then
         # Always include main as an option
         branches=("main")
-        
+
         # Extract branch names from worktrees (excluding main which is already added)
         local other_branches=(${(f)"$(echo "$worktree_list" | awk 'NR>1 {print $NF}' | sed 's/\[//;s/\]//')"})
         branches+=("${other_branches[@]}")
