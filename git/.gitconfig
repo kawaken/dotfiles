@@ -22,7 +22,7 @@
   co = checkout
   df = diff
   dc = diff --cached
-  fe = fetch
+  fe = fetch --prune
   ls = ls-files
   mf = merge --ff-only
   pul = pull --ff-only
