@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Get the configured WIP head
+wip_head=$(git config --get wip.head)
+
+if [ -z "$wip_head" ]; then
+    echo "エラー: wip.head が設定されていません" >&2
+    exit 1
+fi
+
+git commit --fixup="$wip_head" "$@"

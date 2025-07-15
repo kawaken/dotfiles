@@ -2,3 +2,8 @@
 if [ -d "$HOME/dotfiles/bin" ]; then
   export PATH="$HOME/dotfiles/bin:$PATH"
 fi
+
+# git/binディレクトリをPATHに追加
+if [ -d "$HOME/dotfiles/git/bin" ]; then
+  export PATH="$HOME/dotfiles/git/bin:$PATH"
+fi
