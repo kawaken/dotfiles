@@ -98,8 +98,7 @@ function get_git_branch_status() {
     final_output+=" ${domain}"
   fi
 
-  echo "
-$final_output"
+  echo "$final_output"
 }
 
 function _update_git_branch_status_msg() {
