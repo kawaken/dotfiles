@@ -1,0 +1,5 @@
+# Find all files in the git/rc directory and source them
+local base_dir=${0:A:h}
+for file in $(find "${base_dir}/../../git/rc" -type f); do
+  source "$file"
+done
