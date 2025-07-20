@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+
+for branch in $(git branch | grep -v '^[*+]'); do
+    git branch -d "$branch"
+done
