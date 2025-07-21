@@ -4,3 +4,4 @@ Thumbs.db
 .pjrc
 .env
 secrethub.env
+.jira_enabled
