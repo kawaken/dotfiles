@@ -110,7 +110,7 @@ function _gw_create() {
     # Sync .claude directory
     if [ -d "${main_repo_path}/.claude" ]; then
         echo "Syncing .claude directory..."
-        cp -r "${main_repo_path}/.claude" .
+        cp -rn "${main_repo_path}/.claude" .
     fi
 
     echo "Worktree created and switched to: $worktree_path"
