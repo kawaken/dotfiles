@@ -10,6 +10,10 @@ _jira() {
 
 # 現在のスプリントの課題を表示
 current_sprint_issues() {
-  _jira issue list --jql='Sprint in openSprints() AND status != Done AND project = ADMIN AND type != エピック' --plain --columns=key,summary --no-headers
+  _jira issue list \
+    --jql="Sprint in openSprints() AND status != Done AND project = ${JIRA_PROJECT} AND type != エピック" \
+    --plain \
+    --columns=key,summary \
+    --no-headers
 }
 
