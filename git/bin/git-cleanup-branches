@@ -1,5 +1,7 @@
 #!/usr/bin/env zsh
 
+git fetch --prune
+
 for branch in $(git branch | grep -v '^[*+]'); do
     git branch -d "$branch"
 done
