@@ -51,3 +51,5 @@
   diffFilter = delta --color-only
 [merge]
   conflictStyle = zdiff3
+[advice]
+	forceDeleteBranch = false
