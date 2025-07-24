@@ -1,7 +1,9 @@
 [delta]
   navigate = true
-  minus-style = syntax "#800000"
-  minus-emph-style = syntax "#d75f5f"
-
-  plus-style = syntax "#00af87"
-  plus-emph-style = syntax "#008000"
+  true-color = always
+  
+  minus-style = syntax "#3d1a1a"
+  minus-emph-style = syntax "#ff5555"
+  
+  plus-style = syntax "#1a3d1a"
+  plus-emph-style = syntax "#55ff55"
