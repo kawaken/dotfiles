@@ -1,0 +1,72 @@
+#!/bin/bash
+
+# JIRAの現在スプリント情報を定期的に更新するバックグラウンドジョブ
+# ghostから実行される前提
+
+set -euo pipefail
+
+# XDGに従ったデータディレクトリ
+DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync"
+DATA_FILE="$DATA_DIR/current_sprint_issues.json"
+
+# ディレクトリ作成
+mkdir -p "$DATA_DIR"
+
+# JIRAプロジェクトの環境変数チェック
+if [[ -z "${JIRA_PROJECT:-}" ]]; then
+    echo "Error: JIRA_PROJECT environment variable is not set" >&2
+    exit 1
+fi
+
+# JIRAコマンドの存在確認
+if ! command -v jira > /dev/null 2>&1; then
+    echo "Error: jira command not found" >&2
+    exit 1
+fi
+
+# TSVをJSONに変換する関数
+tsv_to_json() {
+    awk -F'\t' '
+    BEGIN {
+        print "{"
+        print "  \"updated\": \"" strftime("%Y-%m-%dT%H:%M:%S") "\","
+        print "  \"issues\": ["
+        first = 1
+    }
+    {
+        if (!first) print ","
+        first = 0
+        printf "    {\n"
+        printf "      \"key\": \"%s\",\n", $1
+        printf "      \"summary\": \"%s\",\n", $2
+        printf "      \"status\": \"%s\",\n", $3
+        printf "      \"assignee\": \"%s\"\n", $4
+        printf "    }"
+    }
+    END {
+        print ""
+        print "  ]"
+        print "}"
+    }'
+}
+
+# メイン処理
+update_issues() {
+    echo "$(date): Fetching current sprint issues..."
+    
+    # JIRAから情報取得
+    jira issue list \
+        --jql="Sprint in openSprints() AND status != Done AND project = ${JIRA_PROJECT} AND type != エピック" \
+        --plain \
+        --columns=key,summary,status,assignee \
+        --no-headers | tsv_to_json > "$DATA_FILE"
+    
+    local issue_count=$(jq '.issues | length' "$DATA_FILE")
+    echo "$(date): Updated $issue_count issues to $DATA_FILE"
+}
+
+# 5分間隔でループ実行
+while true; do
+    update_issues
+    sleep 300  # 5分
+done
