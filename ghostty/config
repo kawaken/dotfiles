@@ -12,5 +12,5 @@ cursor-opacity = 0.5
 macos-option-as-alt = true
 mouse-hide-while-typing = true
 confirm-close-surface = false
-scrollback-limit = 1000000
+scrollback-limit = 100000000
 keybind = shift+enter=text:\n
