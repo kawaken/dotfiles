@@ -21,7 +21,7 @@ trap cleanup SIGTERM SIGINT
 update_issues() {
     jira issue list \
         --jql="Sprint in openSprints() AND status != Done AND project = ${JIRA_PROJECT} AND type != エピック" \
-        --output-format=json > "$DATA_FILE"
+        > "$DATA_FILE"
 }
 
 while true; do
