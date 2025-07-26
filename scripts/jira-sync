@@ -22,9 +22,6 @@ update_issues() {
     jira issue list \
         --jql="Sprint in openSprints() AND status != Done AND project = ${JIRA_PROJECT} AND type != エピック" \
         --output-format=json > "$DATA_FILE"
-    
-    local issue_count=$(jq '.issues | length' "$DATA_FILE")
-    echo "$(date): Updated $issue_count issues to $DATA_FILE"
 }
 
 while true; do
