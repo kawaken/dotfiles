@@ -1,0 +1,33 @@
+#!/usr/bin/env zsh
+
+set -euo pipefail
+
+DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync"
+DATA_FILE="$DATA_DIR/current_sprint_issues.json"
+
+mkdir -p "$DATA_DIR"
+
+if [[ -z "${JIRA_PROJECT:-}" ]]; then
+    echo "Error: JIRA_PROJECT environment variable is not set" >&2
+    exit 1
+fi
+
+cleanup() {
+    exit 0
+}
+
+trap cleanup SIGTERM SIGKILL
+
+update_issues() {
+    jira issue list \
+        --jql="Sprint in openSprints() AND status != Done AND project = ${JIRA_PROJECT} AND type != エピック" \
+        --output-format=json > "$DATA_FILE"
+    
+    local issue_count=$(jq '.issues | length' "$DATA_FILE")
+    echo "$(date): Updated $issue_count issues to $DATA_FILE"
+}
+
+while true; do
+    update_issues
+    sleep 300
+done
