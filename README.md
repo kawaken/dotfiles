@@ -69,6 +69,10 @@ brew install forgit
 # ghosttyの設定
 mkdir -p .config/ghostty
 ln -s ~/{dotfiles,.config}/ghostty/config
+
+# Claudeの設定
+mkdir -p .claude
+ln -s ~/dotfiles/claude/commands ~/.claude/commands
 ```
 
 ## よく使ってるアプリケーション
