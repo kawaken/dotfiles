@@ -16,7 +16,7 @@ cleanup() {
     exit 0
 }
 
-trap cleanup SIGTERM SIGKILL
+trap cleanup SIGTERM SIGINT
 
 update_issues() {
     jira issue list \
