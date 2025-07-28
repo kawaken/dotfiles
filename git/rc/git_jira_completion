@@ -1,0 +1,64 @@
+#!/usr/bin/env zsh
+
+# git補完でJIRAイシュータイトルを表示する機能
+
+# JIRAデータファイルのパス
+local jira_data_file="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync/current_sprint_issues.json"
+
+# ブランチ名からJIRAタイトルを取得する関数
+__git_describe_branch_with_jira() {
+    local branch="$1"
+    local jira_data_file="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync/current_sprint_issues.json"
+    
+    # JSONファイルが存在しない場合はそのまま返す
+    if [[ ! -f "$jira_data_file" ]]; then
+        echo "$branch"
+        return
+    fi
+    
+    # jqでJSONからタイトルを取得
+    local jira_title=$(jq -r ".[] | select(.key == \"$branch\") | .fields.summary // empty" "$jira_data_file" 2>/dev/null)
+    
+    if [[ -n "$jira_title" ]]; then
+        # タイトルを40文字に制限
+        if [[ ${#jira_title} -gt 40 ]]; then
+            jira_title="${jira_title:0:37}..."
+        fi
+        echo "$branch:$jira_title"
+    else
+        echo "$branch"
+    fi
+}
+
+# 元の__git_branch_names関数を保存
+if (( ${+functions[__git_branch_names]} )); then
+    functions[__git_branch_names_original]=${functions[__git_branch_names]}
+else
+fi
+
+# __git_branch_names関数をオーバーライド
+__git_branch_names() {
+    # 元の関数を呼び出してブランチ一覧を取得
+    local branches
+    if (( ${+functions[__git_branch_names_original]} )); then
+        branches=($(__git_branch_names_original))
+    else
+        # 元の関数がない場合はgitコマンドで直接取得
+        branches=(${(f)"$(git for-each-ref --format='%(refname:short)' refs/heads 2>/dev/null)"})
+    fi
+    
+    # 各ブランチにJIRAタイトルを追加
+    local result=()
+    for branch in $branches; do
+        result+=("$(__git_describe_branch_with_jira "$branch")")
+    done
+    
+    # _describeを使って補完候補を追加
+    _describe 'branch' result
+}
+
+# git補完の表示設定
+zstyle ':completion:*:git-checkout:*' list-packed true
+zstyle ':completion:*:git-switch:*' list-packed true  
+zstyle ':completion:*:git-branch:*' list-packed true
+
