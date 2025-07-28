@@ -19,8 +19,10 @@ cleanup() {
 trap cleanup SIGTERM SIGINT
 
 update_issues() {
-    jira issue list \
+    # 新しいjiraコマンドで--rawオプションを使用してJSONを保存
+    ~/go/bin/jira issue list \
         --jql="Sprint in openSprints() AND status != Done AND project = ${JIRA_PROJECT} AND type != エピック" \
+        --raw \
         > "$DATA_FILE"
 }
 
