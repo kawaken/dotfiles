@@ -25,7 +25,7 @@
   fe = fetch --prune
   ls = ls-files
   mf = merge --ff-only
-  pul = pull --ff-only
+  pul = pull --ff-only --prune
   pur = pull --rebase
   pus = !git rev-parse --abbrev-ref @{u} >/dev/null 2>&1 && git push || git push -u
   puf = push --force-with-lease --force-if-includes
