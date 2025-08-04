@@ -10,10 +10,58 @@ _jira() {
 
 # 現在のスプリントの課題を表示
 current_sprint_issues() {
+  local format_opts="--plain --columns=key,summary --no-headers"
+  
+  # --rawオプションが指定された場合はJSON形式で出力
+  if [[ "$*" == *"--raw"* ]]; then
+    format_opts="--raw"
+  fi
+  
   _jira issue list \
     --jql="Sprint in openSprints() AND status != Done AND project = ${JIRA_PROJECT} AND type != エピック" \
-    --plain \
-    --columns=key,summary \
-    --no-headers
+    $format_opts
+}
+
+# JIRAイシューの詳細を表示（引数なしの場合はブランチ名を使用）
+jira_view() {
+  local key="${1:-}"
+  
+  # 引数がない場合は現在のブランチ名を使用
+  if [[ -z "$key" ]]; then
+    key=$(git branch --show-current 2>/dev/null)
+  fi
+  
+  # JIRAキー形式の確認
+  if [[ ! "$key" =~ ^[A-Z]+-[0-9]+$ ]]; then
+    echo "無効なJIRAキー: $key" >&2
+    return 1
+  fi
+  
+  _jira issue view "$key" --comments
+}
+
+# JIRAデータを手動で同期
+jira_sync() {
+  local data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync"
+  local data_file="$data_dir/current_sprint_issues.json"
+  
+  # 環境変数チェック
+  if [[ -z "${JIRA_PROJECT:-}" ]]; then
+    echo "JIRA_PROJECT environment variable is not set" >&2
+    return 1
+  fi
+  
+  # ディレクトリ作成
+  mkdir -p "$data_dir"
+  
+  # JIRAデータ取得
+  echo "JIRAデータを同期中..."
+  if current_sprint_issues --raw > "$data_file"; then
+    local count=$(jq 'length' "$data_file" 2>/dev/null || echo "0")
+    echo "✓ ${count}件のイシューを同期しました"
+  else
+    echo "同期に失敗しました" >&2
+    return 1
+  fi
 }
 
