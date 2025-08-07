@@ -7,10 +7,6 @@ DATA_FILE="$DATA_DIR/current_sprint_issues.json"
 
 mkdir -p "$DATA_DIR"
 
-if [[ -z "${JIRA_PROJECT:-}" ]]; then
-    echo "Error: JIRA_PROJECT environment variable is not set" >&2
-    exit 1
-fi
 
 cleanup() {
     exit 0
@@ -21,7 +17,7 @@ trap cleanup SIGTERM SIGINT
 update_issues() {
     # 新しいjiraコマンドで--rawオプションを使用してJSONを保存
     ~/go/bin/jira issue list \
-        --jql="Sprint in openSprints() AND status != Done AND project = ${JIRA_PROJECT} AND type != エピック" \
+        --jql="Sprint in openSprints() AND status != Done AND type != エピック" \
         --raw \
         > "$DATA_FILE"
 }

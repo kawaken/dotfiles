@@ -19,7 +19,7 @@ current_sprint_issues() {
   fi
   
   _jira issue list \
-    --jql="Sprint in openSprints() AND status != Done AND project = ${JIRA_PROJECT} AND type != エピック" \
+    --jql="Sprint in openSprints() AND status != Done AND type != エピック" \
     "${format_opts[@]}"
 }
 
@@ -46,11 +46,6 @@ jira_sync() {
   local data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync"
   local data_file="$data_dir/current_sprint_issues.json"
   
-  # 環境変数チェック
-  if [[ -z "${JIRA_PROJECT:-}" ]]; then
-    echo "JIRA_PROJECT environment variable is not set" >&2
-    return 1
-  fi
   
   # ディレクトリ作成
   mkdir -p "$data_dir"
