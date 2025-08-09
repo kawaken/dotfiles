@@ -1,8 +1,6 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
 # JIRAタイトル付きでブランチ一覧を表示するgitサブコマンド
-
-set -euo pipefail
 
 # JIRAデータファイルのパス
 JIRA_DATA_FILE="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync/current_sprint_issues.json"
@@ -28,10 +26,10 @@ get_jira_title() {
 }
 
 # git branchの出力を配列で取得
-mapfile -t lines < <(git branch "$@")
+lines=(${(f)"$(git branch "$@")"})
 
 # 各行を処理
-for line in "${lines[@]}"; do
+for line in $lines; do
     # プレフィックス（*, +, 空白2つ）とブランチ名を分離
     prefix="${line:0:2}"
     branch="${line:2}"

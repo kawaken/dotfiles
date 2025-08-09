@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 # Get the configured WIP head
 wip_head=$(git config --get wip.head)
 
-if [ -z "$wip_head" ]; then
+if [[ -z "$wip_head" ]]; then
     echo "エラー: wip.head が設定されていません" >&2
     exit 1
 fi

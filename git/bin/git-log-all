@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 # フォーマット文字列を分かりやすく定義
 format="%C(yellow)%h%C(reset)"                                    # コミットハッシュ（黄色）
