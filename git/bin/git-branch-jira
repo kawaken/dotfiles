@@ -3,7 +3,7 @@
 # JIRAタイトル付きでブランチ一覧を表示するgitサブコマンド
 
 # JIRAデータファイルのパス
-JIRA_DATA_FILE="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync/current_sprint_issues.json"
+JIRA_DATA_FILE="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync/jira_issues.json"
 
 # ブランチ名からJIRAタイトルを取得する関数
 get_jira_title() {

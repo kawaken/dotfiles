@@ -3,12 +3,12 @@
 # git補完でJIRAイシュータイトルを表示する機能
 
 # JIRAデータファイルのパス
-local jira_data_file="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync/current_sprint_issues.json"
+local jira_data_file="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync/jira_issues.json"
 
 # ブランチ名からJIRAタイトルを取得する関数
 __git_describe_branch_with_jira() {
     local branch="$1"
-    local jira_data_file="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync/current_sprint_issues.json"
+    local jira_data_file="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync/jira_issues.json"
     
     # JSONファイルが存在しない場合はそのまま返す
     if [[ ! -f "$jira_data_file" ]]; then

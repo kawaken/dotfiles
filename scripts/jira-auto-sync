@@ -2,11 +2,8 @@
 
 set -euo pipefail
 
-DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync"
-DATA_FILE="$DATA_DIR/current_sprint_issues.json"
-
-mkdir -p "$DATA_DIR"
-
+# JIRA関数が定義されていない場合のみsource
+[[ -z ${functions[jira_fetch]} ]] && source ~/dotfiles/zsh/plugins/jira
 
 cleanup() {
     exit 0
@@ -14,15 +11,8 @@ cleanup() {
 
 trap cleanup SIGTERM SIGINT
 
-update_issues() {
-    # 新しいjiraコマンドで--rawオプションを使用してJSONを保存
-    ~/go/bin/jira issue list \
-        --jql="Sprint in openSprints() AND status != Done AND type != エピック" \
-        --raw \
-        > "$DATA_FILE"
-}
-
 while true; do
-    update_issues
+    # jira_fetch関数を使用してデータ更新
+    jira_fetch
     sleep 300
 done

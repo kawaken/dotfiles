@@ -1,29 +1,120 @@
-# jira コマンドがあるか確認
-# あれば引数を渡して実行する、なければインストールするように促す
-_jira() {
-  if ! command -v jira > /dev/null 2>&1; then
-    echo "command not found: jira"
+# JIRA API呼び出し共通ライブラリ
+# httpieを使用してJIRA REST APIを直接呼び出し
+
+# 環境変数チェック
+_jira_check_env() {
+  local missing=()
+  
+  [[ -z "$JIRA_API_TOKEN" ]] && missing+=(JIRA_API_TOKEN)
+  [[ -z "$JIRA_URL" ]] && missing+=(JIRA_URL)
+  [[ -z "$JIRA_USER" ]] && missing+=(JIRA_USER)
+  
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    echo "必要な環境変数が設定されていません: ${missing[*]}" >&2
     return 1
   fi
-  jira "$@"
+  
+  # httpieコマンドの存在確認
+  if ! command -v http > /dev/null 2>&1; then
+    echo "httpieがインストールされていません" >&2
+    return 1
+  fi
+  
+  return 0
 }
 
-# 現在のスプリントの課題を表示
-current_sprint_issues() {
-  local -a format_opts
-  format_opts=(--plain --columns=key,summary --no-headers)
+# JIRA API基本呼び出し関数
+_jira_api_call() {
+  local method="$1"
+  local endpoint="$2"
+  shift 2
+  
+  if ! _jira_check_env; then
+    return 1
+  fi
+  
+  # Basic認証でAPI呼び出し
+  http "$method" "${JIRA_URL}${endpoint}" \
+    --auth="${JIRA_USER}:${JIRA_API_TOKEN}" \
+    --json \
+    "$@"
+}
+
+# JIRAデータをJSONファイルに保存（1. JSON取得関数）
+jira_fetch() {
+  local data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync"
+  local data_file="$data_dir/jira_issues.json"
+  local jql="Sprint in openSprints() AND status != Done AND type != エピック"
+  
+  # ディレクトリ作成
+  mkdir -p "$data_dir"
+  
+  echo "JIRAデータを取得中..." >&2
+  
+  # JQL検索でイシュー一覧を取得
+  local response=$(_jira_api_call GET "/rest/api/3/search" \
+    jql=="$jql" \
+    fields=="key,summary,status")
+  
+  if [[ $? -eq 0 ]]; then
+    # issuesの配列部分だけを保存
+    echo "$response" | jq '.issues' > "$data_file"
+    local count=$(jq 'length' "$data_file" 2>/dev/null || echo "0")
+    echo "✓ ${count}件のイシューを取得しました" >&2
+    return 0
+  else
+    echo "JIRAデータの取得に失敗しました" >&2
+    return 1
+  fi
+}
+
+# JSONファイルが古いかチェック（30分以上古い場合はtrue）
+_jira_is_cache_old() {
+  local data_file="$1"
+  
+  # ファイルが存在しない場合は古いとみなす
+  [[ ! -f "$data_file" ]] && return 0
+  
+  # ファイルの最終更新時刻を取得（秒単位）
+  local file_time=$(stat -f %m "$data_file" 2>/dev/null)
+  [[ -z "$file_time" ]] && return 0
+  
+  # 現在時刻を取得（秒単位）
+  local current_time=$(date +%s)
+  
+  # 30分 = 1800秒
+  local threshold=1800
+  local age=$((current_time - file_time))
+  
+  [[ $age -gt $threshold ]]
+}
+
+# 現在のスプリントの課題一覧を表示（2. 一覧表示関数）
+jira_sprint() {
+  local data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync"
+  local data_file="$data_dir/jira_issues.json"
+  
+  # ファイルが古いか存在しない場合は自動更新
+  if _jira_is_cache_old "$data_file"; then
+    if ! jira_fetch; then
+      echo "データ取得に失敗しました" >&2
+      return 1
+    fi
+  fi
   
   # --rawオプションが指定された場合はJSON形式で出力
   if [[ "$*" == *"--raw"* ]]; then
-    format_opts=(--raw)
+    cat "$data_file"
+  else
+    # プレーンテキスト表示
+    jq -r '.[] | "\(.key)\t\(.fields.summary)"' "$data_file" 2>/dev/null || {
+      echo "データファイルの読み込みに失敗しました" >&2
+      return 1
+    }
   fi
-  
-  _jira issue list \
-    --jql="Sprint in openSprints() AND status != Done AND type != エピック" \
-    "${format_opts[@]}"
 }
 
-# JIRAイシューの詳細を表示（引数なしの場合はブランチ名を使用）
+# JIRAイシューの詳細を表示（3. 個別表示関数 - API直接利用）
 jira_view() {
   local key="${1:-}"
   
@@ -38,26 +129,27 @@ jira_view() {
     return 1
   fi
   
-  _jira issue view "$key" --comments
-}
-
-# JIRAデータを手動で同期
-jira_sync() {
-  local data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync"
-  local data_file="$data_dir/current_sprint_issues.json"
+  # イシューの詳細とコメントを取得（API直接呼び出し）
+  local response=$(_jira_api_call GET "/rest/api/3/issue/$key" expand==comments)
   
-  
-  # ディレクトリ作成
-  mkdir -p "$data_dir"
-  
-  # JIRAデータ取得
-  echo "JIRAデータを同期中..."
-  if current_sprint_issues --raw > "$data_file"; then
-    local count=$(jq 'length' "$data_file" 2>/dev/null || echo "0")
-    echo "✓ ${count}件のイシューを同期しました"
+  if [[ $? -eq 0 ]]; then
+    # 基本情報を表示
+    echo "=== $(echo "$response" | jq -r '.key'): $(echo "$response" | jq -r '.fields.summary') ==="
+    echo "Status: $(echo "$response" | jq -r '.fields.status.name')"
+    echo "Assignee: $(echo "$response" | jq -r '.fields.assignee.displayName // "未割り当て"')"
+    echo
+    echo "Description:"
+    echo "$response" | jq -r '.fields.description // "説明なし"'
+    echo
+    
+    # コメントを表示
+    local comments=$(echo "$response" | jq -r '.fields.comment.comments[]? | "[\(.author.displayName)] \(.body)"')
+    if [[ -n "$comments" ]]; then
+      echo "Comments:"
+      echo "$comments"
+    fi
   else
-    echo "同期に失敗しました" >&2
+    echo "イシュー情報の取得に失敗しました: $key" >&2
     return 1
   fi
 }
-
