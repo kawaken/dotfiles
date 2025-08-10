@@ -35,7 +35,9 @@ _jira_api_call() {
   
   http "$method" "${JIRA_URL}${endpoint}" \
     --auth="${JIRA_USER}:${JIRA_API_TOKEN}" \
-    --json \
+    --check-status \
+    --ignore-stdin \
+    --body \
     "$@"
 }
 
@@ -44,8 +46,8 @@ jira_fetch() {
   local jql="Sprint in openSprints() AND status != Done AND type != エピック"
   
   local response=$(_jira_api_call GET "/rest/api/3/search" \
-    jql=="$jql" \
-    fields=="key,summary,status")
+    "jql==$jql" \
+    "fields==key,summary,status")
   
   if [[ $? -eq 0 ]]; then
     echo "$response" | jq '.issues' > "$_JIRA_DATA_FILE"
@@ -58,7 +60,7 @@ jira_fetch() {
 _jira_is_cache_old() {
   [[ ! -f "$_JIRA_DATA_FILE" ]] && return 0
   
-  local file_time=$(stat -f %m "$_JIRA_DATA_FILE" 2>/dev/null)
+  local file_time=$(date -r "$_JIRA_DATA_FILE" +%s 2>/dev/null)
   [[ -z "$file_time" ]] && return 0
   
   local current_time=$(date +%s)
@@ -96,7 +98,7 @@ jira_view() {
     return 1
   fi
   
-  local response=$(_jira_api_call GET "/rest/api/3/issue/$key" expand==comments)
+  local response=$(_jira_api_call GET "/rest/api/3/issue/$key" "expand==comments")
   
   if [[ $? -eq 0 ]]; then
     echo "=== $(echo "$response" | jq -r '.key'): $(echo "$response" | jq -r '.fields.summary') ==="
