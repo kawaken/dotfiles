@@ -1,7 +1,9 @@
 # JIRA API呼び出し共通ライブラリ
-# httpieを使用してJIRA REST APIを直接呼び出し
 
-# 環境変数チェック
+# 共通のデータファイルパス
+_JIRA_DATA_FILE="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync/jira_issues.json"
+mkdir -p "$(dirname "$_JIRA_DATA_FILE")"
+
 _jira_check_env() {
   local missing=()
   
@@ -14,7 +16,6 @@ _jira_check_env() {
     return 1
   fi
   
-  # httpieコマンドの存在確認
   if ! command -v http > /dev/null 2>&1; then
     echo "httpieがインストールされていません" >&2
     return 1
@@ -23,7 +24,6 @@ _jira_check_env() {
   return 0
 }
 
-# JIRA API基本呼び出し関数
 _jira_api_call() {
   local method="$1"
   local endpoint="$2"
@@ -33,107 +33,72 @@ _jira_api_call() {
     return 1
   fi
   
-  # Basic認証でAPI呼び出し
   http "$method" "${JIRA_URL}${endpoint}" \
     --auth="${JIRA_USER}:${JIRA_API_TOKEN}" \
     --json \
     "$@"
 }
 
-# JIRAデータをJSONファイルに保存（1. JSON取得関数）
+# JSONファイルにデータ保存
 jira_fetch() {
-  local data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync"
-  local data_file="$data_dir/jira_issues.json"
   local jql="Sprint in openSprints() AND status != Done AND type != エピック"
   
-  # ディレクトリ作成
-  mkdir -p "$data_dir"
-  
-  echo "JIRAデータを取得中..." >&2
-  
-  # JQL検索でイシュー一覧を取得
   local response=$(_jira_api_call GET "/rest/api/3/search" \
     jql=="$jql" \
     fields=="key,summary,status")
   
   if [[ $? -eq 0 ]]; then
-    # issuesの配列部分だけを保存
-    echo "$response" | jq '.issues' > "$data_file"
-    local count=$(jq 'length' "$data_file" 2>/dev/null || echo "0")
-    echo "✓ ${count}件のイシューを取得しました" >&2
+    echo "$response" | jq '.issues' > "$_JIRA_DATA_FILE"
     return 0
   else
-    echo "JIRAデータの取得に失敗しました" >&2
     return 1
   fi
 }
 
-# JSONファイルが古いかチェック（30分以上古い場合はtrue）
 _jira_is_cache_old() {
-  local data_file="$1"
+  [[ ! -f "$_JIRA_DATA_FILE" ]] && return 0
   
-  # ファイルが存在しない場合は古いとみなす
-  [[ ! -f "$data_file" ]] && return 0
-  
-  # ファイルの最終更新時刻を取得（秒単位）
-  local file_time=$(stat -f %m "$data_file" 2>/dev/null)
+  local file_time=$(stat -f %m "$_JIRA_DATA_FILE" 2>/dev/null)
   [[ -z "$file_time" ]] && return 0
   
-  # 現在時刻を取得（秒単位）
   local current_time=$(date +%s)
-  
-  # 30分 = 1800秒
   local threshold=1800
   local age=$((current_time - file_time))
   
   [[ $age -gt $threshold ]]
 }
 
-# 現在のスプリントの課題一覧を表示（2. 一覧表示関数）
+# スプリント一覧表示
 jira_sprint() {
-  local data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync"
-  local data_file="$data_dir/jira_issues.json"
-  
-  # ファイルが古いか存在しない場合は自動更新
-  if _jira_is_cache_old "$data_file"; then
+  if _jira_is_cache_old; then
     if ! jira_fetch; then
-      echo "データ取得に失敗しました" >&2
       return 1
     fi
   fi
   
-  # --rawオプションが指定された場合はJSON形式で出力
   if [[ "$*" == *"--raw"* ]]; then
-    cat "$data_file"
+    cat "$_JIRA_DATA_FILE"
   else
-    # プレーンテキスト表示
-    jq -r '.[] | "\(.key)\t\(.fields.summary)"' "$data_file" 2>/dev/null || {
-      echo "データファイルの読み込みに失敗しました" >&2
-      return 1
-    }
+    jq -r '.[] | "\(.key)\t\(.fields.summary)"' "$_JIRA_DATA_FILE" 2>/dev/null
   fi
 }
 
-# JIRAイシューの詳細を表示（3. 個別表示関数 - API直接利用）
+# イシュー詳細表示
 jira_view() {
   local key="${1:-}"
   
-  # 引数がない場合は現在のブランチ名を使用
   if [[ -z "$key" ]]; then
     key=$(git branch --show-current 2>/dev/null)
   fi
   
-  # JIRAキー形式の確認
   if [[ ! "$key" =~ ^[A-Z]+-[0-9]+$ ]]; then
     echo "無効なJIRAキー: $key" >&2
     return 1
   fi
   
-  # イシューの詳細とコメントを取得（API直接呼び出し）
   local response=$(_jira_api_call GET "/rest/api/3/issue/$key" expand==comments)
   
   if [[ $? -eq 0 ]]; then
-    # 基本情報を表示
     echo "=== $(echo "$response" | jq -r '.key'): $(echo "$response" | jq -r '.fields.summary') ==="
     echo "Status: $(echo "$response" | jq -r '.fields.status.name')"
     echo "Assignee: $(echo "$response" | jq -r '.fields.assignee.displayName // "未割り当て"')"
@@ -142,14 +107,12 @@ jira_view() {
     echo "$response" | jq -r '.fields.description // "説明なし"'
     echo
     
-    # コメントを表示
     local comments=$(echo "$response" | jq -r '.fields.comment.comments[]? | "[\(.author.displayName)] \(.body)"')
     if [[ -n "$comments" ]]; then
       echo "Comments:"
       echo "$comments"
     fi
   else
-    echo "イシュー情報の取得に失敗しました: $key" >&2
     return 1
   fi
 }
