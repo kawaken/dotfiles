@@ -28,11 +28,6 @@ zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 # Git特有の設定
 # =============================================================================
 
-# 既存の設定を維持（JIRAタイトル表示のため）
-zstyle ':completion:*:git-checkout:*' list-packed true
-zstyle ':completion:*:git-switch:*' list-packed true  
-zstyle ':completion:*:git-branch:*' list-packed true
-
 # 追加のGit設定
 zstyle ':completion:*:git-*:*' tag-order 'heads'       # ブランチを優先表示
 
