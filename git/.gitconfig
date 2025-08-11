@@ -41,6 +41,7 @@
   lr = log-recent
 
   set-upstream = !git branch -u origin/$(git branch --show-current)
+	si = switch-issue
 
 [init]
   defaultBranch = main
