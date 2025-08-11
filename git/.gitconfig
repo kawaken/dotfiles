@@ -36,9 +36,8 @@
   wk = worktree
   asq = rebase --autosquash @{u}
   fi = fixup-wip
-  la = log-all
-  lg = log-unpushed
-  lr = log-recent
+  lg = log --oneline --decorate --stat --graph --date=iso
+  la = log --decorate --stat --graph --date=iso --all
 
   set-upstream = !git branch -u origin/$(git branch --show-current)
 	si = switch-issue
