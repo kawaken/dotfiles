@@ -23,7 +23,7 @@ setopt HIST_VERIFY                   # 履歴から直接実行しない
 setopt SHARE_HISTORY                 # 履歴を共有
 # Input/Output
 unsetopt FLOW_CONTROL                # フローコントロールを無効(Ctrl+Sが使える)
-setopt IGNORE_EOF                    # Ctrl+Dでログアウトしない
+IGNOREEOF=3                          # Ctrl+Dを3回押すとログアウト
 setopt INTERACTIVE_COMMENTS          # #以降をコメントとみなす
 setopt PRINT_EIGHT_BIT               # 補完時の日本語表示
 #setopt PRINT_EXIT_VALUE              # 0以外の終了コードを表示

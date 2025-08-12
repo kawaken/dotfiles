@@ -1,6 +1,7 @@
 [delta]
   navigate = true
   true-color = always
+  line-numbers = true
   
   minus-style = syntax "#3d1a1a"
   minus-emph-style = syntax "#ff5555"
