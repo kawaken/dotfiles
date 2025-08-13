@@ -1,0 +1,23 @@
+#!/usr/bin/env zsh
+# キーバインド関連の設定
+
+# Ctrl+Qを2回連続で押したら終了
+typeset -g __quit_timestamp=0
+
+function _quick_quit() {
+  local current_time=$(date +%s)
+  local time_diff=$((current_time - __quit_timestamp))
+  
+  # 1秒以内に再度押された場合は終了
+  if [[ $time_diff -le 1 ]]; then
+    exit
+  fi
+  
+  # 今回の時刻を記録して、メッセージ表示
+  __quit_timestamp=$current_time
+  zle -M "Press Ctrl+Q again to quit"
+}
+
+# ZLEウィジェットとして登録
+zle -N _quick_quit
+bindkey '^Q' _quick_quit
