@@ -11,6 +11,5 @@ alias crontab='crontab -i'
 alias gi=git
 alias vs='code'
 alias vi=vim
-alias cr='cursor'
-alias cl='claude'
-alias gd='gw cd'
+
+alias cl="$HOME/.claude/local/claude"
