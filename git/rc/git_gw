@@ -142,12 +142,6 @@ function _gw_create() {
         cp -rn "${main_repo_path}/.claude" .
     fi
 
-    # Trust mise configuration if .mise.toml exists
-    if [ -f ".mise.toml" ] && command -v mise > /dev/null 2>&1; then
-        echo "Running mise trust..."
-        mise trust
-    fi
-
     echo "Worktree created and switched to: $worktree_path"
 }
 
