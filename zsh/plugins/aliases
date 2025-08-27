@@ -13,3 +13,4 @@ alias vs='code'
 alias vi=vim
 
 alias cl="$HOME/.claude/local/claude"
+alias claude="$HOME/.claude/local/claude"
