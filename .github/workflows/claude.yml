@@ -39,5 +39,20 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           additional_permissions: |
             actions: read
-          claude_args: '--allowed-tools "Bash(git *),Bash(ln *),Bash(chmod *),Bash(mkdir *),Bash(curl *)"'
+          # MCPサーバーの設定を追加してGitHub操作を有効化
+          mcp_config: |
+            {
+              "mcpServers": {
+                "github-file-ops": {
+                  "command": "npx",
+                  "args": ["-y", "@modelcontextprotocol/server-github"],
+                  "env": {
+                    "GITHUB_TOKEN": "${{ github.token }}",
+                    "GITHUB_REPOSITORY": "${{ github.repository }}"
+                  }
+                }
+              }
+            }
+          # gitコマンドを全て許可し、npmコマンドも追加
+          claude_args: '--allowed-tools "Bash(git *),Bash(ln *),Bash(chmod *),Bash(mkdir *),Bash(curl *),Bash(npm *),Bash(npx *)"'
 
