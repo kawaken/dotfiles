@@ -93,6 +93,12 @@ function _gw_create() {
         return 1
     fi
 
+    # Check if local branch already exists
+    if git show-ref --verify --quiet "refs/heads/${branch_name}"; then
+        echo "エラー: ローカルブランチ '${branch_name}' が既に存在します"
+        return 1
+    fi
+
     # Check if we're in a git repository
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
         echo "エラー: gitリポジトリではありません"
@@ -133,14 +139,13 @@ function _gw_create() {
         git worktree add -b "$branch_name" "$worktree_path" main
     fi
 
+    # Execute .gw.sh if it exists and is executable
+    if [ -x "${main_repo_path}/.gw.sh" ]; then
+        "${main_repo_path}/.gw.sh" "$worktree_path"
+    fi
+
     # Move to new worktree
     cd "$worktree_path"
-
-    # Sync .claude directory
-    if [ -d "${main_repo_path}/.claude" ]; then
-        echo "Syncing .claude directory..."
-        cp -rn "${main_repo_path}/.claude" .
-    fi
 
     echo "Worktree created and switched to: $worktree_path"
 }
