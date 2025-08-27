@@ -17,19 +17,21 @@ on:
 jobs:
   claude:
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude'))) ||
-      (github.event_name == 'discussion_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'discussion' && (contains(github.event.discussion.body, '@claude') || contains(github.event.discussion.title, '@claude')))
+      github.actor == 'kawaken' && (
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+        (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude'))) ||
+        (github.event_name == 'discussion_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'discussion' && (contains(github.event.discussion.body, '@claude') || contains(github.event.discussion.title, '@claude')))
+      )
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: read
-      issues: read
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: read
       id-token: write
-      actions: read # Required for Claude to read CI results on PRs
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -41,6 +43,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          sticky_comments: true
           
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
@@ -50,7 +53,8 @@ jobs:
           # prompt: 'Update the pull request description to include a summary of changes.'
 
           # Optional: Add claude_args to customize behavior and configuration
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://docs.anthropic.com/en/docs/claude-code/sdk#command-line for available options
-          # claude_args: '--model claude-opus-4-1-20250805 --allowed-tools Bash(gh pr:*)'
+          # Documentation: https://docs.anthropic.com/en/docs/claude-code/sdk#command-line
+          # Example: '--model claude-opus-4-1-20250805 --max-turns 10'
+          # claude_args: ''
+          claude_args: '--allowed-tools "Bash(git *),Bash(ln *),Bash(chmod *),Bash(mkdir *),Bash(curl *)"'
 
