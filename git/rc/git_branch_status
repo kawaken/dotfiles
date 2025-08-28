@@ -16,9 +16,9 @@ function get_git_branch_status() {
 
   if [[ -n "$remote" ]]; then
     if [[ "$branch" != "${remote#*/}" ]]; then
-      branch="%F{cyan}${branch}%f-%F{cyan}${remote}%f"
+      branch="%F{69}${branch}%f-%F{69}${remote}%f"
     else
-      branch="%F{cyan}${branch}%f"
+      branch="%F{69}${branch}%f"
     fi
 
     ahead=$(git rev-list "@{upstream}..HEAD" 2>/dev/null | wc -l | tr -d ' ')
@@ -40,7 +40,7 @@ function get_git_branch_status() {
       output+="%F{red}⇣${behind}%f"
     fi
   else
-    branch="%F{white}%K{red}${branch}%k%f"
+    branch="%F{202}${branch}%f"
   fi
 
   status_output=$(git status --porcelain 2>/dev/null)
