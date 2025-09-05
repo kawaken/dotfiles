@@ -5,7 +5,21 @@ function get_git_branch_status() {
   fi
 
   local branch remote ahead behind staged modified untracked email domain output
-  local status_output
+  local status_output special_state
+
+  # Check for special git states
+  local git_dir=$(git rev-parse --git-dir 2>/dev/null)
+  special_state=""
+  
+  if [[ -f "$git_dir/REBASE_HEAD" ]]; then
+    special_state="%F{magenta}REBASE%f"
+  elif [[ -f "$git_dir/MERGE_HEAD" ]]; then
+    special_state="%F{red}MERGE%f"
+  elif [[ -f "$git_dir/CHERRY_PICK_HEAD" ]]; then
+    special_state="%F{cyan}CHERRY-PICK%f"
+  elif [[ -f "$git_dir/REVERT_HEAD" ]]; then
+    special_state="%F{yellow}REVERT%f"
+  fi
 
   branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
   if [[ -z "$branch" ]] || [[ "$branch" == "HEAD" ]]; then
@@ -47,6 +61,7 @@ function get_git_branch_status() {
   staged=0
   modified=0
   untracked=0
+  conflicted=0
 
   if [[ -n "$status_output" ]]; then
     while IFS= read -r line; do
@@ -57,11 +72,17 @@ function get_git_branch_status() {
       local index_status="${line:0:1}"
       local work_tree_status="${line:1:1}"
 
-      if [[ "$index_status" != " " ]] && [[ "$index_status" != "?" ]]; then
+      # Check for conflicts (UU, AA, DD, AU, UA, DU, UD)
+      if [[ "$index_status" == "U" ]] || [[ "$work_tree_status" == "U" ]] || 
+         [[ "$index_status" == "A" && "$work_tree_status" == "A" ]] ||
+         [[ "$index_status" == "D" && "$work_tree_status" == "D" ]]; then
+        ((conflicted++))
+      elif [[ "$index_status" != " " ]] && [[ "$index_status" != "?" ]]; then
         ((staged++))
       fi
 
-      if [[ "$work_tree_status" != " " ]] && [[ "$index_status" != "?" ]]; then
+      if [[ "$work_tree_status" != " " ]] && [[ "$index_status" != "?" ]] && 
+          [[ "$work_tree_status" != "U" ]]; then
         ((modified++))
       fi
 
@@ -77,9 +98,19 @@ function get_git_branch_status() {
     domain="%F{magenta}${domain:0:2}%f"
   fi
 
-  local final_output="%F{white}[%f${branch}${output}%F{white}] %f"
+  local final_output="%F{white}[%f${branch}${output}"
+  
+  # Add special state indicator
+  if [[ -n "$special_state" ]]; then
+    final_output+="|${special_state}"
+  fi
+  
+  final_output+="%F{white}] %f"
 
   local file_status=""
+  if (( conflicted > 0 )); then
+    file_status+="%F{red}!${conflicted}%f"
+  fi
   if (( staged > 0 )); then
     file_status+="%F{green}+${staged}%f"
   fi
