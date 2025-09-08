@@ -7,17 +7,17 @@ function get_git_branch_status() {
   local branch remote ahead behind staged modified untracked email domain output
   local status_output special_state
 
-  # Check for special git states
-  local git_dir=$(git rev-parse --git-dir 2>/dev/null)
   special_state=""
+  local git_status_long
+  git_status_long=$(git status 2>/dev/null)
   
-  if [[ -f "$git_dir/REBASE_HEAD" ]]; then
+  if echo "$git_status_long" | grep -qi "rebase in progress"; then
     special_state="%F{magenta}REBASE%f"
-  elif [[ -f "$git_dir/MERGE_HEAD" ]]; then
+  elif echo "$git_status_long" | grep -qi "merge in progress"; then
     special_state="%F{red}MERGE%f"
-  elif [[ -f "$git_dir/CHERRY_PICK_HEAD" ]]; then
+  elif echo "$git_status_long" | grep -qi "cherry-pick in progress"; then
     special_state="%F{cyan}CHERRY-PICK%f"
-  elif [[ -f "$git_dir/REVERT_HEAD" ]]; then
+  elif echo "$git_status_long" | grep -qi "revert in progress"; then
     special_state="%F{yellow}REVERT%f"
   fi
 
@@ -72,7 +72,6 @@ function get_git_branch_status() {
       local index_status="${line:0:1}"
       local work_tree_status="${line:1:1}"
 
-      # Check for conflicts (UU, AA, DD, AU, UA, DU, UD)
       if [[ "$index_status" == "U" ]] || [[ "$work_tree_status" == "U" ]] || 
          [[ "$index_status" == "A" && "$work_tree_status" == "A" ]] ||
          [[ "$index_status" == "D" && "$work_tree_status" == "D" ]]; then
@@ -100,7 +99,6 @@ function get_git_branch_status() {
 
   local final_output="%F{white}[%f${branch}${output}"
   
-  # Add special state indicator
   if [[ -n "$special_state" ]]; then
     final_output+="|${special_state}"
   fi
