@@ -8,11 +8,12 @@ function get_git_branch_status() {
   local status_output special_state
 
   special_state=""
-  local git_status_long
+  local git_status_long branch_from_status
   git_status_long=$(git status 2>/dev/null)
   
   if echo "$git_status_long" | grep -qi "rebase in progress"; then
     special_state="%F{magenta}REBASE%f"
+    branch_from_status=$(echo "$git_status_long" | grep "rebasing branch" | sed "s/.*rebasing branch '\([^']*\)'.*/\1/")
   elif echo "$git_status_long" | grep -qi "merge in progress"; then
     special_state="%F{red}MERGE%f"
   elif echo "$git_status_long" | grep -qi "cherry-pick in progress"; then
@@ -23,7 +24,7 @@ function get_git_branch_status() {
 
   branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
   if [[ -z "$branch" ]] || [[ "$branch" == "HEAD" ]]; then
-    return 1
+    branch="${branch_from_status:-unknown}"
   fi
 
   remote=$(git rev-parse --verify "@{upstream}" --symbolic-full-name 2>/dev/null | sed 's|refs/remotes/||')
