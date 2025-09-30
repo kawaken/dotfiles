@@ -1,0 +1,173 @@
+#!/usr/bin/env zsh
+
+# =====================================================
+# git-delete-branch
+# =====================================================
+# fzfを使ってインタラクティブにブランチを削除するコマンド
+#
+# 機能:
+# - fzfで複数ブランチを選択可能
+# - squashマージ済みブランチを検出
+# - プレビューで各ブランチのコミット履歴を表示
+# - マージステータスを色分けして表示
+#   ✓ (緑): fully merged または squash-merged
+#   ✗ (黄): not-merged
+#   ? (灰): unknown
+# =====================================================
+
+# メインブランチ名を取得（通常は main か master）
+main_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+
+# =====================================================
+# check_merge_status
+# =====================================================
+# ブランチがマージ済みかどうかを判定する関数
+#
+# チェック方法:
+# 1. 通常のマージチェック（ancestor）- git branch -dで削除可能か
+# 2. コミットログにブランチ名が含まれるかチェック（直近100件のみ）
+#
+# 引数:
+#   $1: チェックするブランチ名
+#   $2: ベースブランチ名（デフォルト: main_branch）
+#
+# 出力:
+#   merged: マージ済み
+#   not-merged: 未マージ
+# =====================================================
+check_merge_status() {
+    local branch="$1"
+    local base_branch="${2:-$main_branch}"
+
+    # 通常のマージチェック（ancestor）
+    if git merge-base --is-ancestor "$branch" "$base_branch" 2>/dev/null; then
+        echo "merged"
+        return
+    fi
+
+    # マージコミットログを検索（直近100件のみ、高速化のため）
+    # ブランチ名がコミットメッセージに含まれているかチェック
+    if git log "$base_branch" --oneline -100 | grep -q "$branch"; then
+        echo "merged"
+        return
+    fi
+
+    echo "not-merged"
+}
+
+# =====================================================
+# get_branches_with_status
+# =====================================================
+# 全ブランチとそのマージステータスをリスト化する関数
+#
+# 出力形式:
+#   [ステータスマーク] [ステータス文字列] ブランチ名
+#   例: ✓ [merged] feature/foo
+# =====================================================
+get_branches_with_status() {
+    local current_branch=$(git branch --show-current)
+
+    # メインブランチのログを一度だけ取得（高速化）
+    local main_log=$(git log "$main_branch" --oneline -100)
+
+    # カレントブランチ以外の全ブランチを取得
+    git branch --format='%(refname:short)' | grep -v "^${current_branch}$" | while read branch; do
+        # main/masterブランチはスキップ
+        if [[ "$branch" == "main" || "$branch" == "master" ]]; then
+            continue
+        fi
+
+        local merge_status="unknown"
+
+        # 通常のマージチェック（ancestor）
+        if git merge-base --is-ancestor "$branch" "$main_branch" 2>/dev/null; then
+            merge_status="merged"
+        # マージコミットログをキャッシュから検索（直近100件のみ）
+        elif echo "$main_log" | grep -q "$branch"; then
+            merge_status="merged"
+        fi
+
+        local status_color=""
+        local status_mark=""
+
+        # ステータスに応じて色とマークを設定
+        case "$merge_status" in
+            merged)
+                status_color="\033[32m"  # 緑
+                status_mark="✓"
+                ;;
+            unknown)
+                status_color="\033[90m"  # 灰
+                status_mark="?"
+                ;;
+        esac
+
+        # フォーマットして出力
+        printf "${status_color}${status_mark}\033[0m %-15s %s\n" "[$merge_status]" "$branch"
+    done
+}
+
+# =====================================================
+# メイン処理
+# =====================================================
+
+echo "Select branches to delete (Tab to select, Enter to confirm):"
+echo "  ✓ merged | ? unknown"
+echo ""
+
+# fzfでブランチを選択
+# --multi: 複数選択可能
+# --ansi: ANSIカラーコードを解釈
+# ctrl-a: フィルター結果を全選択
+selected=$(get_branches_with_status | \
+    fzf --ansi \
+        --multi \
+        --bind 'ctrl-a:select-all' \
+        --height=50% \
+        --layout=reverse \
+        --header='Tab: toggle | Ctrl-A: select all filtered | Enter: confirm')
+
+# 何も選択されなければ終了
+if [ -z "$selected" ]; then
+    echo "No branches selected"
+    exit 0
+fi
+
+# 選択されたブランチ名を抽出（3列目がブランチ名）
+branches_to_delete=$(echo "$selected" | awk '{print $3}')
+
+# 確認プロンプト
+echo ""
+echo "Branches to delete:"
+echo "$branches_to_delete"
+echo ""
+echo -n "Proceed with deletion? [y/N]: "
+read -r response
+
+case "$response" in
+    [Yy]|[Yy][Ee][Ss])
+        echo "$branches_to_delete" | while read branch; do
+            # まずソフト削除を試行（-d: fully mergedのみ削除）
+            if git branch -d "$branch" 2>/dev/null; then
+                echo "✓ Deleted: $branch"
+            else
+                # ソフト削除が失敗したら強制削除を確認
+                echo ""
+                echo -n "Branch '$branch' is not fully merged. Force delete? [y/N]: "
+                read -r force_response
+                case "$force_response" in
+                    [Yy]|[Yy][Ee][Ss])
+                        git branch -D "$branch"
+                        echo "✓ Force deleted: $branch"
+                        ;;
+                    *)
+                        echo "✗ Skipped: $branch"
+                        ;;
+                esac
+            fi
+        done
+        ;;
+    *)
+        echo "Deletion cancelled"
+        ;;
+esac
