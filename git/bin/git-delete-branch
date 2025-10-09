@@ -133,38 +133,46 @@ if [ -z "$selected" ]; then
     exit 0
 fi
 
-# 選択されたブランチ名を抽出（3列目がブランチ名）
-branches_to_delete=$(echo "$selected" | awk '{print $3}')
+# 選択されたブランチ名とステータスを抽出
+branches_with_status=$(echo "$selected" | awk '{print $2, $3}')
 
 # 確認プロンプト
 echo ""
 echo "Branches to delete:"
-echo "$branches_to_delete"
+echo "$branches_with_status" | awk '{print $2}'
 echo ""
 echo -n "Proceed with deletion? [y/N]: "
 read -r response
 
 case "$response" in
     [Yy]|[Yy][Ee][Ss])
-        echo "$branches_to_delete" | while read branch; do
-            # まずソフト削除を試行（-d: fully mergedのみ削除）
-            if git branch -d "$branch" 2>/dev/null; then
-                echo "✓ Deleted: $branch"
-            else
-                # ソフト削除が失敗したら強制削除を確認
-                echo ""
-                echo -n "Branch '$branch' is not fully merged. Force delete? [y/N]: "
-                read -r force_response
-                case "$force_response" in
-                    [Yy]|[Yy][Ee][Ss])
-                        git branch -D "$branch"
-                        echo "✓ Force deleted: $branch"
-                        ;;
-                    *)
-                        echo "✗ Skipped: $branch"
-                        ;;
-                esac
-            fi
+        echo "$branches_with_status" | while read status branch; do
+            # ステータスに応じて削除方法を変える
+            case "$status" in
+                "[merged]")
+                    # mergedと判定されたブランチは-Dで削除（squash merge済みを含む）
+                    if git branch -D "$branch" 2>/dev/null; then
+                        echo "✓ Deleted: $branch"
+                    else
+                        echo "✗ Failed to delete: $branch"
+                    fi
+                    ;;
+                "[unknown]")
+                    # unknownのブランチは個別確認
+                    echo ""
+                    echo -n "Branch '$branch' is not merged. Force delete? [y/N]: "
+                    read -r force_response
+                    case "$force_response" in
+                        [Yy]|[Yy][Ee][Ss])
+                            git branch -D "$branch"
+                            echo "✓ Force deleted: $branch"
+                            ;;
+                        *)
+                            echo "✗ Skipped: $branch"
+                            ;;
+                    esac
+                    ;;
+            esac
         done
         ;;
     *)
