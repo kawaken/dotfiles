@@ -24,6 +24,7 @@ This is a personal dotfiles repository containing shell configurations, Git alia
 - Avoid PIPE with `while read` combinations
 - Minimize `while` loop usage
 - Use ripgrep (`rg`) for search operations instead of `find`/`grep`
+- **Avoid reserved variables**: Do not use `status` as a variable name (it's a read-only special variable in zsh that holds the exit status of the last command)
 
 ### Plugin Structure
 - New plugins go in `zsh/plugins/` as individual files

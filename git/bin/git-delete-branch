@@ -146,9 +146,9 @@ read -r response
 
 case "$response" in
     [Yy]|[Yy][Ee][Ss])
-        echo "$branches_with_status" | while read status branch; do
+        echo "$branches_with_status" | while read branch_status branch; do
             # ステータスに応じて削除方法を変える
-            case "$status" in
+            case "$branch_status" in
                 "[merged]")
                     # mergedと判定されたブランチは-Dで削除（squash merge済みを含む）
                     if git branch -D "$branch" 2>/dev/null; then
