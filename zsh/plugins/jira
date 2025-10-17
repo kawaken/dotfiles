@@ -4,27 +4,19 @@
 _JIRA_DATA_FILE="${XDG_DATA_HOME:-$HOME/.local/share}/jira-sync/jira_issues.json"
 mkdir -p "$(dirname "$_JIRA_DATA_FILE")"
 
-# JIRA環境変数セットアップ
 jira_setup() {
-  echo "JIRA環境変数をセットアップします"
-  echo
-  
-  # JIRA URL
   echo -n "JIRA_URL [${JIRA_URL:-https://your-domain.atlassian.net}]: "
   read input
   export JIRA_URL="${input:-${JIRA_URL:-}}"
-  
-  # JIRA User
+
   echo -n "JIRA_USER [${JIRA_USER:-}]: "
   read input
   export JIRA_USER="${input:-${JIRA_USER:-}}"
-  
-  # JIRA Project
+
   echo -n "JIRA_PROJECT [${JIRA_PROJECT:-}]: "
   read input
   export JIRA_PROJECT="${input:-${JIRA_PROJECT:-}}"
-  
-  # JIRA API Token
+
   if [[ -n "$JIRA_API_TOKEN" ]]; then
     echo -n "JIRA_API_TOKEN [現在の値を使用]: "
     read -s input
@@ -38,13 +30,9 @@ jira_setup() {
     echo
     export JIRA_API_TOKEN
   fi
-  
-  echo
-  echo "環境変数を ~/.zshrc_local に保存します..."
-  
+
   local zshrc_local="$HOME/.zshrc_local"
-  
-  # JIRA設定を追加
+
   {
     echo
     echo "# JIRA Configuration"
@@ -53,8 +41,6 @@ jira_setup() {
     echo "export JIRA_PROJECT=\"$JIRA_PROJECT\""
     echo "export JIRA_API_TOKEN=\"$JIRA_API_TOKEN\""
   } >> "$zshrc_local"
-  
-  echo "設定完了しました"
 }
 
 _jira_check_env() {

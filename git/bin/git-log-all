@@ -1,15 +1,7 @@
 #!/usr/bin/env zsh
 
-# フォーマット文字列を分かりやすく定義
-format="%C(yellow)%h%C(reset)"                                    # コミットハッシュ（黄色）
-format+=" "                                                         # スペース
-format+="%C(cyan)%ad%C(reset)"                                     # 日付（シアン）
-format+=" "                                                         # スペース
-format+="%C(dim)(%ar)%C(reset)"                                    # 相対日付（薄い色）
-format+=" "                                                         # スペース
-format+="%(trailers:key=Co-Authored-By,valueonly,unfold,separator=)" # Co-Authored-By
-format+="%s"                                                        # コミットメッセージ
-format+="%C(auto)%d%C(reset)"                                      # ブランチ・タグ情報（自動色）
+format="%C(yellow)%h%C(reset) %C(cyan)%ad%C(reset) %C(dim)(%ar)%C(reset) "
+format+="%(trailers:key=Co-Authored-By,valueonly,unfold,separator=)%s%C(auto)%d%C(reset)"
 
 git log --color=always --pretty=format:"$format" --date=short --graph --all "$@" \
     | sed 's/Claude <noreply@anthropic.com>/🤖 /' \
