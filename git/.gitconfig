@@ -54,3 +54,4 @@
   conflictStyle = zdiff3
 [advice]
 	forceDeleteBranch = false
+	skippedCherryPicks = false
