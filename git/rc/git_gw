@@ -3,34 +3,28 @@
 # Git worktree management function
 # gw - Git Worktree helper for efficient branch-based development
 
-# Helper function to shorten branch name for worktree path
-function _gw_shorten_branch_name() {
-    local branch_name="$1"
-    local shortened_branch_name="${branch_name//\//-}"  # Replace / with -
-    
-    # If branch name is too long, shorten it to 20 chars
-    if [ ${#shortened_branch_name} -gt 20 ]; then
-        shortened_branch_name="${shortened_branch_name:0:18}__"
+# Helper function to shorten task name for worktree path
+function _gw_shorten_name() {
+    local name="$1"
+    local shortened="${name//\//-}"
+    if [ ${#shortened} -gt 20 ]; then
+        shortened="${shortened:0:18}__"
     fi
-    
-    echo "$shortened_branch_name"
+    echo "$shortened"
 }
 
-# Helper function to get worktree path for a branch
+# Helper function to get worktree path for a task
 function _gw_get_worktree_path() {
-    local branch_name="$1"
-    
-    # Get main repository path
+    local task_name="$1"
     local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
     local repo_name=$(basename "$main_repo_path")
     local parent_dir=$(dirname "$main_repo_path")
-    
-    # Handle special cases
-    if [ -z "$branch_name" ] || [ "$branch_name" = "main" ]; then
+
+    if [ -z "$task_name" ] || [ "$task_name" = "main" ]; then
         echo "$main_repo_path"
     else
-        local shortened_branch_name=$(_gw_shorten_branch_name "$branch_name")
-        echo "${parent_dir}/${repo_name}-${shortened_branch_name}"
+        local shortened_name=$(_gw_shorten_name "$task_name")
+        echo "${parent_dir}/${repo_name}-${shortened_name}"
     fi
 }
 
@@ -72,11 +66,11 @@ function gw() {
             echo "Usage: gw <command> [options]"
             echo ""
             echo "Commands:"
-            echo "  create, c <branch>     Create worktree and switch to it"
+            echo "  create, c <task>       Create worktree and switch to it"
             echo "  list, l                List all worktrees"
-            echo "  remove, rm <branch>    Remove worktree"
-            echo "  cd [branch|-]          Switch to worktree (no args = main, - = previous)"
-            echo "  switch, sw <branch>    Switch to worktree (alias for cd)"
+            echo "  remove, rm <task>      Remove worktree"
+            echo "  cd [task|-]            Switch to worktree (no args = main, - = previous)"
+            echo "  switch, sw <task>      Switch to worktree (alias for cd)"
             echo "  claude-sync, cs        Sync .claude directory from main"
             echo "  workon                 Start work with wip commit on wo/ branch"
             echo "  compact [message]      Compact fixup commits and start new wip"
@@ -87,11 +81,12 @@ function gw() {
 
 # Create new worktree
 function _gw_create() {
-    local branch_name="$1"
-    if [ -z "$branch_name" ]; then
-        echo "エラー: ブランチ名を指定してください"
+    local task_name="$1"
+    if [ -z "$task_name" ]; then
+        echo "エラー: タスク名を指定してください"
         return 1
     fi
+    local branch_name="$task_name"
 
     # Check if local branch already exists
     local local_branch_exists=false
@@ -173,17 +168,16 @@ function _gw_list() {
 
 # Remove worktree
 function _gw_remove() {
-    local branch_name="$1"
-    if [ -z "$branch_name" ]; then
-        echo "エラー: ブランチ名を指定してください"
+    local task_name="$1"
+    if [ -z "$task_name" ]; then
+        echo "エラー: タスク名を指定してください"
         return 1
     fi
 
-    shift  # Remove branch name from arguments
-    local additional_args=("$@")  # Capture additional arguments like --force
+    shift
+    local additional_args=("$@")
 
-    # Get worktree path
-    local worktree_path=$(_gw_get_worktree_path "$branch_name")
+    local worktree_path=$(_gw_get_worktree_path "$task_name")
     local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
 
     if [ ! -d "$worktree_path" ]; then
@@ -230,32 +224,32 @@ function _gw_remove() {
         fi
     fi
 
-    # Move to main repository before removing worktree
+    local current_branch=$(git -C "$worktree_path" branch --show-current 2>/dev/null)
+
     cd "$main_repo_path"
 
-    # Remove worktree with arguments
     git worktree remove "${additional_args[@]}" "$worktree_path"
     echo "Worktree removed: $worktree_path"
+
+    if [[ -n "$current_branch" && "$current_branch" != "main" && "$current_branch" != "master" ]]; then
+        git branch -D "$current_branch" 2>/dev/null && \
+            echo "Branch deleted: $current_branch"
+    fi
 }
 
 # Switch to existing worktree
 function _gw_cd() {
-    local branch_name="$1"
-
-    # Save current path before switching
+    local task_name="$1"
     local current_path=$(pwd)
 
-    # Handle different cases
-    if [ "$branch_name" = "-" ]; then
-        # Dash: go to previous worktree
+    if [ "$task_name" = "-" ]; then
         if [ -z "$GW_PREVIOUS_WORKTREE" ]; then
             echo "エラー: 以前のワークツリーがありません"
             return 1
         fi
         local worktree_path="$GW_PREVIOUS_WORKTREE"
     else
-        # Get worktree path (handles empty, main, and branch names)
-        local worktree_path=$(_gw_get_worktree_path "$branch_name")
+        local worktree_path=$(_gw_get_worktree_path "$task_name")
     fi
 
     if [ ! -d "$worktree_path" ]; then
@@ -483,35 +477,36 @@ function _gw() {
         args)
             case $words[2] in
                 remove|rm|cd|switch|sw)
-                    _gw_worktree_branches
+                    _gw_worktree_tasks
                     ;;
                 create|c)
-                    # No completion for branch name
+                    # No completion for task name
                     ;;
             esac
             ;;
     esac
 }
 
-# Helper function to complete worktree branches
-function _gw_worktree_branches() {
-    local -a branches
-    local worktree_list
+# Helper function to complete worktree task names
+function _gw_worktree_tasks() {
+    local -a tasks
+    local main_repo_path repo_name
 
-    # Get worktree list
-    worktree_list=$(git worktree list 2>/dev/null)
-    if [[ -n "$worktree_list" ]]; then
-        # Always include main as an option
-        branches=("main")
+    main_repo_path=$(git worktree list 2>/dev/null | head -n 1 | awk '{print $1}')
+    [[ -z "$main_repo_path" ]] && return
 
-        # Extract branch names from worktrees (excluding main which is already added)
-        local other_branches=(${(f)"$(echo "$worktree_list" | awk 'NR>1 {print $NF}' | sed 's/\[//;s/\]//')"})
-        branches+=("${other_branches[@]}")
+    repo_name=$(basename "$main_repo_path")
+    tasks=("main")
 
-        if [[ ${#branches[@]} -gt 0 ]]; then
-            _describe -t branches 'worktree branch' branches
+    local worktree_paths=(${(f)"$(git worktree list 2>/dev/null | awk 'NR>1 {print $1}')"})
+    for wt_path in "${worktree_paths[@]}"; do
+        local dir_name=$(basename "$wt_path")
+        if [[ "$dir_name" == "${repo_name}-"* ]]; then
+            tasks+=("${dir_name#${repo_name}-}")
         fi
-    fi
+    done
+
+    [[ ${#tasks[@]} -gt 0 ]] && _describe -t tasks 'worktree task' tasks
 }
 
 # Register completion
