@@ -75,7 +75,3 @@ mkdir -p .claude
 ln -s ~/dotfiles/claude/CLAUDE.md ~/.claude/CLAUDE.md
 ln -s ~/dotfiles/claude/commands ~/.claude/commands
 ```
-
-## よく使ってるアプリケーション
-
-[apps.md](./apps.md) も見てアプリをインストールする
