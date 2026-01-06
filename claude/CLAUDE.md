@@ -17,3 +17,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working in any 
 - 基本的には作業中のリポジトリのコード
 - 依存ライブラリやフレームワーク、ツールなどの情報を参照したい場合、公式リファレンスやリポジトリのコードを優先して確認すること
 
+## ローカル設定
+
+PC固有・プロジェクト固有の設定がある場合は以下のファイルを参照:
+- @~/.claude/CLAUDE.local.md
+

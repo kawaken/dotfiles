@@ -72,6 +72,7 @@ ln -s ~/{dotfiles,.config}/ghostty/config
 
 # Claudeの設定
 mkdir -p .claude
+ln -s ~/dotfiles/claude/CLAUDE.md ~/.claude/CLAUDE.md
 ln -s ~/dotfiles/claude/commands ~/.claude/commands
 ```
 
