@@ -13,11 +13,12 @@ C_YELLOW=$'\e[33m'       # untracked (?)
 # モデル名
 model=$(echo "$input" | jq -r '.model.display_name // "unknown"')
 
-# コンテキスト使用率（total_input_tokens を使用）
+# コンテキスト使用率（current_usage を使用 - auto compactと同じ基準）
 context_size=$(echo "$input" | jq -r '.context_window.context_window_size // 0')
-input_tokens=$(echo "$input" | jq -r '.context_window.total_input_tokens // 0')
+current_usage=$(echo "$input" | jq -r '.context_window.current_usage // {}')
+current_tokens=$(echo "$current_usage" | jq -r '(.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)')
 if [[ $context_size -gt 0 ]]; then
-  context_pct=$((input_tokens * 100 / context_size))
+  context_pct=$((current_tokens * 100 / context_size))
 else
   context_pct=0
 fi
