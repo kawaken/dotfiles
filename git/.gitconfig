@@ -43,6 +43,7 @@
   set-upstream = !git branch -u origin/$(git branch --show-current)
 	si = switch-issue
 	ca = commit --amend --no-edit
+	ro = !git fetch && git rebase origin/main
 
 [init]
   defaultBranch = main
