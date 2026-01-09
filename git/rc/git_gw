@@ -126,9 +126,9 @@ function _gw_create() {
         echo "新しいブランチ '$branch_name' としてworktreeを作成します。"
     fi
 
-    # Update main branch
-    echo "Updating main branch..."
-    (cd "$main_repo_path" && git checkout main && git pull)
+    # Fetch latest main branch
+    echo "Fetching latest changes..."
+    (cd "$main_repo_path" && git fetch origin main)
 
     # Create worktree - use different command based on branch existence
     echo "Creating worktree: $worktree_path"
@@ -139,8 +139,8 @@ function _gw_create() {
         # Remote branch exists, track it without -b
         git worktree add "$worktree_path" "$branch_name"
     else
-        # Create new branch from main
-        git worktree add -b "$branch_name" "$worktree_path" main
+        # Create new branch from origin/main
+        git worktree add -b "$branch_name" "$worktree_path" origin/main
     fi
 
     # Execute .gw.sh if it exists and is executable
