@@ -78,25 +78,9 @@ function gw() {
             shift
             _gw_remove "$@"
             ;;
-        cd|switch|sw)
+        switch|sw)
             shift
-            _gw_cd "$@"
-            ;;
-        claude-sync|cs)
-            shift
-            _gw_claude_sync "$@"
-            ;;
-        workon)
-            shift
-            _gw_workon "$@"
-            ;;
-        compact)
-            shift
-            _gw_compact "$@"
-            ;;
-        done)
-            shift
-            _gw_done "$@"
+            _gw_switch "$@"
             ;;
         describe|desc)
             shift
@@ -108,15 +92,10 @@ function gw() {
             echo "Commands:"
             echo "  create, cr <task> <desc> Create worktree and switch to it"
             echo "  list, ls                 List all worktrees"
-            echo "  remove, rm <task>        Remove worktree"
-            echo "  cd [task|-]              Switch to worktree (no args = main, - = previous)"
-            echo "  switch, sw <task>        Switch to worktree (alias for cd)"
+            echo "  remove, rm [task]        Remove worktree (no args = current)"
+            echo "  switch, sw [task|-]      Switch to worktree (no args = main, - = previous)"
             echo "  describe, desc           Show worktree info"
             echo "    --set purpose=<text>   Set purpose"
-            echo "  claude-sync, cs          Sync .claude directory from main"
-            echo "  workon                   Start work with wip commit on wo/ branch"
-            echo "  compact [message]        Compact fixup commits and start new wip"
-            echo "  done                     Complete work and merge back"
             ;;
     esac
 }
@@ -255,20 +234,42 @@ function _gw_list() {
 # Remove worktree
 function _gw_remove() {
     local task_name="$1"
+    local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
+    local current_path=$(pwd)
+    local confirm_current=false
+
     if [ -z "$task_name" ]; then
-        echo "エラー: タスク名を指定してください"
-        return 1
+        if [ "$current_path" = "$main_repo_path" ]; then
+            echo "エラー: main worktree は削除できません"
+            return 1
+        fi
+        confirm_current=true
+        task_name=$(basename "$current_path")
+        local repo_name=$(basename "$main_repo_path")
+        task_name="${task_name#${repo_name}-}"
     fi
 
-    shift
+    shift 2>/dev/null
     local additional_args=("$@")
 
     local worktree_path=$(_gw_get_worktree_path "$task_name")
-    local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
 
     if [ ! -d "$worktree_path" ]; then
         echo "エラー: Worktree '$worktree_path' が存在しません"
         return 1
+    fi
+
+    if [ "$confirm_current" = true ]; then
+        echo -n "現在の worktree '$worktree_path' を削除しますか? [y/N]: "
+        read -r response
+        case "$response" in
+            [Yy]|[Yy][Ee][Ss])
+                ;;
+            *)
+                echo "Aborted"
+                return 1
+                ;;
+        esac
     fi
 
     # Check if --force is already specified
@@ -324,7 +325,7 @@ function _gw_remove() {
 }
 
 # Switch to existing worktree
-function _gw_cd() {
+function _gw_switch() {
     local task_name="$1"
     local current_path=$(pwd)
 
@@ -399,186 +400,6 @@ function _gw_describe() {
     fi
 }
 
-# Sync .claude directory from main
-function _gw_claude_sync() {
-    # Check if we're in a git repository
-    if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        echo "エラー: gitリポジトリではありません"
-        return 1
-    fi
-
-    # Get main repository path
-    local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
-    local current_path=$(pwd)
-
-    # Check if we're in main repository
-    if [ "$current_path" = "$main_repo_path" ]; then
-        echo "エラー: mainリポジトリでは同期の必要がありません"
-        return 1
-    fi
-
-    # Check if .claude exists in main
-    if [ ! -d "${main_repo_path}/.claude" ]; then
-        echo "エラー: mainリポジトリに.claudeディレクトリが存在しません"
-        return 1
-    fi
-
-    # Sync .claude directory
-    echo "Syncing .claude directory from main..."
-    rm -rf .claude
-    cp -r "${main_repo_path}/.claude" .
-    echo ".claude directory synced successfully"
-}
-
-# Helper function to create wip commit and set wip.head
-function _gw_create_wip_commit() {
-    # Get current branch name for commit message
-    local current_branch=$(git branch --show-current)
-    
-    # Create empty wip commit
-    echo "Creating wip commit..."
-    git commit --allow-empty -m "wo: start at ${current_branch}"
-    
-    # Save commit hash to git config
-    local commit_hash=$(git rev-parse HEAD)
-    git config --local wip.head "${commit_hash}"
-    
-    echo "Created wip commit: ${commit_hash}"
-}
-
-# Start work with wip commit on wo/ branch
-function _gw_workon() {
-    # Check if we're in a git repository
-    if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        echo "エラー: gitリポジトリではありません"
-        return 1
-    fi
-
-    # Get current branch name
-    local current_branch=$(git branch --show-current)
-    if [ -z "$current_branch" ]; then
-        echo "エラー: 現在のブランチ名を取得できません"
-        return 1
-    fi
-
-    # Create wo/ branch name
-    local wo_branch="wo/${current_branch}"
-
-    # Check if wo/ branch already exists
-    if git show-ref --verify --quiet "refs/heads/${wo_branch}"; then
-        echo "エラー: ブランチ '${wo_branch}' が既に存在します"
-        return 1
-    fi
-
-    # Create and checkout wo/ branch
-    echo "Creating and switching to branch: ${wo_branch}"
-    git checkout -b "${wo_branch}"
-
-    # Create wip commit using helper function
-    _gw_create_wip_commit
-
-    echo "Started work on ${wo_branch}"
-}
-
-# Compact fixup commits and start new wip
-function _gw_compact() {
-    local message="$1"
-
-    # Message is optional - will open editor if not provided
-
-    # Check if wip.head is set
-    local wip_head=$(git config --get wip.head)
-    if [ -z "$wip_head" ]; then
-        echo "エラー: wip.head が設定されていません"
-        echo "先に 'gw workon' を実行してください"
-        return 1
-    fi
-
-    # Check if wip commit exists
-    if ! git cat-file -e "${wip_head}" 2>/dev/null; then
-        echo "エラー: wip.head のコミット '${wip_head}' が存在しません"
-        return 1
-    fi
-
-    # Rebase with autosquash to compact fixup commits
-    echo "Compacting fixup commits..."
-    git rebase --autosquash "${wip_head}^"
-
-    # Update the wip commit message
-    echo "Updating commit message..."
-    if [ -z "$message" ]; then
-        # Open editor if no message provided
-        git commit --amend
-    else
-        git commit --amend -m "$message"
-    fi
-
-    # Create new wip commit using helper function
-    _gw_create_wip_commit
-
-    echo "Compacted commits and created new wip"
-}
-
-# Complete work and merge back
-function _gw_done() {
-    # Check if wip.head is set
-    local wip_head=$(git config --get wip.head)
-    if [ -z "$wip_head" ]; then
-        echo "エラー: wip.head が設定されていません"
-        return 1
-    fi
-
-    # Get current branch name
-    local current_branch=$(git branch --show-current)
-    if [[ ! "$current_branch" =~ ^wo/ ]]; then
-        echo "エラー: wo/ ブランチで作業していません"
-        return 1
-    fi
-
-    # Extract original branch name
-    local original_branch=${current_branch#wo/}
-
-    # Check if there's only wip.head commit (empty wip)
-    local commit_count=$(git rev-list "${wip_head}^..HEAD" --count 2>/dev/null || echo "0")
-    if [ "$commit_count" = "1" ]; then
-        # Check if the only commit is the wip.head itself
-        local head_hash=$(git rev-parse HEAD)
-        if [ "$head_hash" = "$wip_head" ]; then
-            # Check if it's an empty commit with wo: start message
-            local commit_message=$(git log -1 --pretty=%s HEAD)
-            if [[ "$commit_message" =~ ^"wo: start at " ]]; then
-                echo "Removing empty wip commit..."
-                git reset --hard HEAD^
-            fi
-        fi
-    else
-        # Check for remaining fixup commits
-        local fixup_count=$(git log --oneline "${wip_head}^..HEAD" | grep -c "^[^ ]* fixup!" || true)
-        if [ "$fixup_count" -gt 0 ]; then
-            echo "エラー: 未処理の fixup コミットが ${fixup_count} 件あります"
-            echo "先に 'gw compact' を実行してください"
-            return 1
-        fi
-    fi
-
-    # Switch back to original branch
-    echo "Switching back to ${original_branch}..."
-    git checkout "${original_branch}"
-
-    # Rebase wo/ branch commits onto original branch
-    echo "Rebasing commits..."
-    git rebase "${current_branch}"
-
-    # Delete wo/ branch
-    echo "Deleting work branch ${current_branch}..."
-    git branch -D "${current_branch}"
-
-    # Remove wip.head config
-    git config --unset wip.head
-
-    echo "Work completed and merged back to ${original_branch}"
-}
-
 # Completion function
 function _gw() {
     local -a subcommands
@@ -591,16 +412,10 @@ function _gw() {
         'ls:List worktrees (alias)'
         'remove:Remove worktree'
         'rm:Remove worktree (alias)'
-        'cd:Change to worktree directory'
-        'switch:Switch to worktree (alias for cd)'
+        'switch:Switch to worktree'
         'sw:Switch to worktree (alias)'
         'describe:Show or set description'
         'desc:Show or set description (alias)'
-        'claude-sync:Sync .claude directory from main'
-        'cs:Sync .claude directory (alias)'
-        'workon:Start work with wip commit on wo/ branch'
-        'compact:Compact fixup commits and start new wip'
-        'done:Complete work and merge back'
     )
 
     _arguments -C \
@@ -613,11 +428,10 @@ function _gw() {
             ;;
         args)
             case $words[2] in
-                remove|rm|cd|switch|sw)
+                remove|rm|switch|sw)
                     _gw_worktree_tasks
                     ;;
-                create|c)
-                    # No completion for task name
+                create|cr)
                     ;;
             esac
             ;;
@@ -649,6 +463,4 @@ function _gw_worktree_tasks() {
 # Register completion
 if (( $+functions[compdef] )); then
     compdef _gw gw
-    # Also register completion for gd alias
-    compdef _gw gd
 fi
