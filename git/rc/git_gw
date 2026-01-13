@@ -30,11 +30,11 @@ function _gw_get_worktree_path() {
 
 function gw() {
     case "$1" in
-        create|c)
+        create|cr)
             shift
             _gw_create "$@"
             ;;
-        list|l)
+        list|ls)
             shift
             _gw_list "$@"
             ;;
@@ -66,8 +66,8 @@ function gw() {
             echo "Usage: gw <command> [options]"
             echo ""
             echo "Commands:"
-            echo "  create, c <task>       Create worktree and switch to it"
-            echo "  list, l                List all worktrees"
+            echo "  create, cr <task>      Create worktree and switch to it"
+            echo "  list, ls               List all worktrees"
             echo "  remove, rm <task>      Remove worktree"
             echo "  cd [task|-]            Switch to worktree (no args = main, - = previous)"
             echo "  switch, sw <task>      Switch to worktree (alias for cd)"
@@ -451,9 +451,9 @@ function _gw() {
 
     subcommands=(
         'create:Create new worktree and switch to it'
-        'c:Create new worktree (alias)'
+        'cr:Create new worktree (alias)'
         'list:List all worktrees'
-        'l:List worktrees (alias)'
+        'ls:List worktrees (alias)'
         'remove:Remove worktree'
         'rm:Remove worktree (alias)'
         'cd:Change to worktree directory'
