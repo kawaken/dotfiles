@@ -28,6 +28,42 @@ function _gw_get_worktree_path() {
     fi
 }
 
+# Helper function to get description file path for a worktree
+function _gw_get_description_path() {
+    local worktree_path="$1"
+    local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
+    local worktree_name=$(basename "$worktree_path")
+    echo "${main_repo_path}/.git/worktrees/${worktree_name}/description"
+}
+
+# Helper function to get description for a worktree
+function _gw_get_description() {
+    local worktree_path="$1"
+    local desc_path=$(_gw_get_description_path "$worktree_path")
+    if [ -f "$desc_path" ]; then
+        cat "$desc_path"
+    fi
+}
+
+# Helper function to set description for a worktree
+function _gw_set_description() {
+    local worktree_path="$1"
+    local description="$2"
+    local desc_path=$(_gw_get_description_path "$worktree_path")
+    echo "$description" > "$desc_path"
+}
+
+# Helper function to truncate text with ellipsis
+function _gw_truncate_text() {
+    local text="$1"
+    local max_len="$2"
+    if [ ${#text} -gt $max_len ]; then
+        echo "${text:0:$((max_len - 3))}..."
+    else
+        echo "$text"
+    fi
+}
+
 function gw() {
     case "$1" in
         create|cr)
@@ -62,19 +98,25 @@ function gw() {
             shift
             _gw_done "$@"
             ;;
+        describe|desc)
+            shift
+            _gw_describe "$@"
+            ;;
         *)
             echo "Usage: gw <command> [options]"
             echo ""
             echo "Commands:"
-            echo "  create, cr <task>      Create worktree and switch to it"
-            echo "  list, ls               List all worktrees"
-            echo "  remove, rm <task>      Remove worktree"
-            echo "  cd [task|-]            Switch to worktree (no args = main, - = previous)"
-            echo "  switch, sw <task>      Switch to worktree (alias for cd)"
-            echo "  claude-sync, cs        Sync .claude directory from main"
-            echo "  workon                 Start work with wip commit on wo/ branch"
-            echo "  compact [message]      Compact fixup commits and start new wip"
-            echo "  done                   Complete work and merge back"
+            echo "  create, cr <task> <desc> Create worktree and switch to it"
+            echo "  list, ls                 List all worktrees"
+            echo "  remove, rm <task>        Remove worktree"
+            echo "  cd [task|-]              Switch to worktree (no args = main, - = previous)"
+            echo "  switch, sw <task>        Switch to worktree (alias for cd)"
+            echo "  describe, desc           Show worktree info"
+            echo "    --set purpose=<text>   Set purpose"
+            echo "  claude-sync, cs          Sync .claude directory from main"
+            echo "  workon                   Start work with wip commit on wo/ branch"
+            echo "  compact [message]        Compact fixup commits and start new wip"
+            echo "  done                     Complete work and merge back"
             ;;
     esac
 }
@@ -82,10 +124,21 @@ function gw() {
 # Create new worktree
 function _gw_create() {
     local task_name="$1"
+    local description="$2"
     if [ -z "$task_name" ]; then
         echo "エラー: タスク名を指定してください"
         return 1
     fi
+
+    if [ -z "$description" ]; then
+        echo -n "目的を入力してください: "
+        read -r description
+        if [ -z "$description" ]; then
+            echo "エラー: 目的は必須です"
+            return 1
+        fi
+    fi
+
     local branch_name="$task_name"
 
     # Check if local branch already exists
@@ -148,21 +201,41 @@ function _gw_create() {
         "${main_repo_path}/.gw.sh" "$worktree_path"
     fi
 
+    # Save description
+    _gw_set_description "$worktree_path" "$description"
+
     # Move to new worktree
     cd "$worktree_path"
 
     echo "Worktree created and switched to: $worktree_path"
+    echo "目的: $description"
 }
 
 # List worktrees
 function _gw_list() {
+    local term_width=${COLUMNS:-$(tput cols)}
     local lines=("${(@f)$(git worktree list)}")
     for line in "${lines[@]}"; do
         local fields=($line)
         local worktree_path="${fields[1]}"
+        local branch="${fields[3]}"
         local shortened_path=$(_shorten_path "$worktree_path")
-        echo -n "$shortened_path"
-        echo " ${fields[@]:1}"
+        local description=$(_gw_get_description "$worktree_path")
+
+        local prefix="${shortened_path} ${branch}"
+        local prefix_len=${#prefix}
+
+        if [ -n "$description" ]; then
+            local desc_max=$((term_width - prefix_len - 3))
+            if [ $desc_max -gt 10 ]; then
+                local truncated=$(_gw_truncate_text "$description" $desc_max)
+                echo "${prefix}  ${truncated}"
+            else
+                echo "$prefix"
+            fi
+        else
+            echo "$prefix"
+        fi
     done
 }
 
@@ -262,6 +335,55 @@ function _gw_cd() {
 
     cd "$worktree_path"
     echo "Switched to: $worktree_path"
+
+    local description=$(_gw_get_description "$worktree_path")
+    if [ -n "$description" ]; then
+        echo "目的: $description"
+    fi
+}
+
+# Show or set description for current worktree
+function _gw_describe() {
+    local current_path=$(pwd)
+
+    if ! git rev-parse --git-dir > /dev/null 2>&1; then
+        echo "エラー: gitリポジトリではありません"
+        return 1
+    fi
+
+    if [ "$1" = "--set" ]; then
+        local key_value="$2"
+        if [ -z "$key_value" ]; then
+            echo "エラー: --set には key=value を指定してください"
+            return 1
+        fi
+
+        local key="${key_value%%=*}"
+        local value="${key_value#*=}"
+
+        case "$key" in
+            purpose)
+                if [ -z "$value" ]; then
+                    echo "エラー: 値を指定してください"
+                    return 1
+                fi
+                _gw_set_description "$current_path" "$value"
+                echo "purposeを設定しました: $value"
+                ;;
+            *)
+                echo "エラー: 不明なキー '$key'"
+                echo "設定可能なキー: purpose"
+                return 1
+                ;;
+        esac
+    else
+        local purpose=$(_gw_get_description "$current_path")
+        if [ -n "$purpose" ]; then
+            echo "purpose: $purpose"
+        else
+            echo "情報が設定されていません"
+        fi
+    fi
 }
 
 # Sync .claude directory from main
@@ -459,6 +581,8 @@ function _gw() {
         'cd:Change to worktree directory'
         'switch:Switch to worktree (alias for cd)'
         'sw:Switch to worktree (alias)'
+        'describe:Show or set description'
+        'desc:Show or set description (alias)'
         'claude-sync:Sync .claude directory from main'
         'cs:Sync .claude directory (alias)'
         'workon:Start work with wip commit on wo/ branch'
