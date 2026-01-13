@@ -211,31 +211,44 @@ function _gw_create() {
     echo "目的: $description"
 }
 
+# Helper function to format worktree info line
+function _gw_format_worktree_line() {
+    local worktree_path="$1"
+    local branch="$2"
+    local max_width="${3:-0}"
+    local show_branch="${4:-auto}"
+
+    local shortened_path=$(_shorten_path "$worktree_path")
+    local purpose=$(_gw_get_description "$worktree_path")
+
+    local dir_name=$(basename "$worktree_path")
+    local branch_name="${branch#\[}"
+    branch_name="${branch_name%\]}"
+
+    local prefix="$shortened_path"
+    if [ "$show_branch" = "always" ] || { [ "$show_branch" = "auto" ] && [ "$dir_name" != "$dir_name%-*}-${branch_name}" ] && [[ "$dir_name" != *"-${branch_name}" ]]; }; then
+        prefix="${shortened_path} ${branch}"
+    fi
+
+    if [ "$max_width" -gt 0 ] && [ -n "$purpose" ]; then
+        local prefix_len=${#prefix}
+        local desc_max=$((max_width - prefix_len - 2))
+        if [ $desc_max -gt 10 ]; then
+            local truncated=$(_gw_truncate_text "$purpose" $desc_max)
+            echo "${prefix} ${truncated}"
+            return
+        fi
+    fi
+    echo "$prefix"
+}
+
 # List worktrees
 function _gw_list() {
     local term_width=${COLUMNS:-$(tput cols)}
-    local lines=("${(@f)$(git worktree list)}")
-    for line in "${lines[@]}"; do
-        local fields=($line)
-        local worktree_path="${fields[1]}"
-        local branch="${fields[3]}"
-        local shortened_path=$(_shorten_path "$worktree_path")
-        local description=$(_gw_get_description "$worktree_path")
-
-        local prefix="${shortened_path} ${branch}"
-        local prefix_len=${#prefix}
-
-        if [ -n "$description" ]; then
-            local desc_max=$((term_width - prefix_len - 3))
-            if [ $desc_max -gt 10 ]; then
-                local truncated=$(_gw_truncate_text "$description" $desc_max)
-                echo "${prefix}  ${truncated}"
-            else
-                echo "$prefix"
-            fi
-        else
-            echo "$prefix"
-        fi
+    git worktree list | while IFS= read -r line; do
+        local worktree_path=$(echo "$line" | awk '{print $1}')
+        local branch=$(echo "$line" | awk '{print $3}')
+        _gw_format_worktree_line "$worktree_path" "$branch" "$term_width"
     done
 }
 
@@ -377,12 +390,12 @@ function _gw_describe() {
                 ;;
         esac
     else
+        local branch=$(git branch --show-current)
         local purpose=$(_gw_get_description "$current_path")
-        if [ -n "$purpose" ]; then
-            echo "purpose: $purpose"
-        else
-            echo "情報が設定されていません"
-        fi
+
+        echo "path: $current_path"
+        echo "branch: $branch"
+        echo "purpose: ${purpose:-（未設定）}"
     fi
 }
 
