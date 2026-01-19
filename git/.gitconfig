@@ -18,6 +18,7 @@
   ad = add
   ba = branch -a
   br = branch
+  bt = branch --sort=committerdate --format='%(committerdate:short) %(refname:short)'
   ci = commit
   cl = config --list
   co = checkout
