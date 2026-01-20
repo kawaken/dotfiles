@@ -45,22 +45,54 @@ jira_setup() {
 
 _jira_check_env() {
   local missing=()
-  
+
   [[ -z "$JIRA_API_TOKEN" ]] && missing+=(JIRA_API_TOKEN)
   [[ -z "$JIRA_URL" ]] && missing+=(JIRA_URL)
   [[ -z "$JIRA_USER" ]] && missing+=(JIRA_USER)
-  
+
   if [[ ${#missing[@]} -gt 0 ]]; then
     echo "必要な環境変数が設定されていません: ${missing[*]}" >&2
     return 1
   fi
-  
+
   if ! command -v http > /dev/null 2>&1; then
     echo "httpieがインストールされていません" >&2
     return 1
   fi
-  
+
   return 0
+}
+
+jira_status() {
+  local vars=(JIRA_URL JIRA_USER JIRA_API_TOKEN JIRA_PROJECT)
+  local has_error=0
+
+  for var in $vars; do
+    if [[ -n "${(P)var}" ]]; then
+      if [[ "$var" == "JIRA_API_TOKEN" ]]; then
+        echo "✓ $var: (設定済み)"
+      else
+        echo "✓ $var: ${(P)var}"
+      fi
+    else
+      if [[ "$var" == "JIRA_PROJECT" ]]; then
+        echo "- $var: (未設定・オプション)"
+      else
+        echo "✗ $var: (未設定)"
+        has_error=1
+      fi
+    fi
+  done
+
+  echo
+  if command -v http > /dev/null 2>&1; then
+    echo "✓ httpie: インストール済み"
+  else
+    echo "✗ httpie: 未インストール"
+    has_error=1
+  fi
+
+  return $has_error
 }
 
 _jira_api_call() {
