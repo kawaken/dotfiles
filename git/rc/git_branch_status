@@ -29,8 +29,13 @@ function get_git_branch_status() {
 
   remote=$(git rev-parse --verify "@{upstream}" --symbolic-full-name 2>/dev/null | sed 's|refs/remotes/||')
 
+  local is_worktree=false
+  [[ "$(git rev-parse --git-dir 2>/dev/null)" == *"/worktrees/"* ]] && is_worktree=true
+
   if [[ -n "$remote" ]]; then
-    if [[ "$branch" != "${remote#*/}" ]]; then
+    if $is_worktree; then
+      branch="%F{cyan}${branch}%f"
+    elif [[ "$branch" != "${remote#*/}" ]]; then
       branch="%F{69}${branch}%f-%F{69}${remote}%f"
     else
       branch="%F{69}${branch}%f"
@@ -54,6 +59,8 @@ function get_git_branch_status() {
     elif (( behind > 0 )); then
       output+="%F{red}⇣${behind}%f"
     fi
+  elif $is_worktree; then
+    branch="%F{cyan}${branch}%f"
   else
     branch="%F{202}${branch}%f"
   fi
