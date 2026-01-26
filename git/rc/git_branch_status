@@ -33,12 +33,13 @@ function get_git_branch_status() {
   [[ "$(git rev-parse --git-dir 2>/dev/null)" == *"/worktrees/"* ]] && is_worktree=true
 
   if [[ -n "$remote" ]]; then
-    if $is_worktree; then
-      branch="%F{cyan}${branch}%f"
-    elif [[ "$branch" != "${remote#*/}" ]]; then
-      branch="%F{69}${branch}%f-%F{69}${remote}%f"
+    local color="69"
+    $is_worktree && color="cyan"
+
+    if [[ "$branch" != "${remote#*/}" ]]; then
+      branch="%F{${color}}${branch}%f-%F{yellow}${remote}%f"
     else
-      branch="%F{69}${branch}%f"
+      branch="%F{${color}}${branch}%f"
     fi
 
     ahead=$(git rev-list "@{upstream}..HEAD" 2>/dev/null | wc -l | tr -d ' ')
