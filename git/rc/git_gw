@@ -84,6 +84,23 @@ function _gw_truncate_text() {
     fi
 }
 
+# Helper function to extract PR number from URL or number
+function _gw_extract_pr_number() {
+    local input="$1"
+    # URL: https://github.com/owner/repo/pull/123
+    if [[ "$input" =~ ^https://github\.com/.+/pull/([0-9]+) ]]; then
+        echo "${match[1]}"
+    # #123 形式
+    elif [[ "$input" =~ ^#([0-9]+)$ ]]; then
+        echo "${match[1]}"
+    # 数字のみ
+    elif [[ "$input" =~ ^[0-9]+$ ]]; then
+        echo "$input"
+    else
+        return 1
+    fi
+}
+
 function gw() {
     case "$1" in
         create|cr)
@@ -106,6 +123,10 @@ function gw() {
             shift
             _gw_describe "$@"
             ;;
+        review|rv)
+            shift
+            _gw_review "$@"
+            ;;
         *)
             echo "Usage: gw <command> [options]"
             echo ""
@@ -116,6 +137,7 @@ function gw() {
             echo "  switch, sw [task|-]      Switch to worktree (no args = main, - = previous)"
             echo "  describe, desc           Show worktree info"
             echo "    --set purpose=<text>   Set purpose"
+            echo "  review, rv <pr|url>      Create worktree for PR review"
             ;;
     esac
 }
@@ -392,6 +414,81 @@ function _gw_switch() {
     fi
 }
 
+# Create worktree for PR review
+function _gw_review() {
+    local input="$1"
+    if [ -z "$input" ]; then
+        echo "エラー: PR番号またはURLを指定してください"
+        echo "使い方: gw review <pr-number|url>"
+        return 1
+    fi
+
+    if ! command -v gh &> /dev/null; then
+        echo "エラー: gh コマンドが見つかりません"
+        return 1
+    fi
+
+    local pr_number=$(_gw_extract_pr_number "$input")
+    if [ -z "$pr_number" ]; then
+        echo "エラー: PR番号を抽出できませんでした: $input"
+        return 1
+    fi
+
+    local pr_info
+    pr_info=$(gh pr view "$pr_number" --json number,title,headRefName,url 2>&1)
+    if [ $? -ne 0 ]; then
+        echo "エラー: PR情報の取得に失敗しました"
+        echo "$pr_info"
+        return 1
+    fi
+
+    local pr_title=$(echo "$pr_info" | jq -r '.title')
+    local pr_branch=$(echo "$pr_info" | jq -r '.headRefName')
+    local pr_url=$(echo "$pr_info" | jq -r '.url')
+
+    local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
+    local repo_name=$(basename "$main_repo_path")
+    local parent_dir=$(dirname "$main_repo_path")
+    local pr_container="${parent_dir}/${repo_name}-PR"
+    local worktree_path="${pr_container}/${pr_number}"
+
+    if [ -d "$worktree_path" ]; then
+        echo "既存のworktreeに移動します: $worktree_path"
+        cd "$worktree_path"
+        return 0
+    fi
+
+    if [ ! -d "$pr_container" ]; then
+        mkdir -p "$pr_container"
+    fi
+
+    echo "PRブランチをfetchしています..."
+    if ! (cd "$main_repo_path" && git fetch origin "$pr_branch"); then
+        echo "エラー: ブランチのfetchに失敗しました"
+        return 1
+    fi
+
+    echo "Worktreeを作成しています: $worktree_path"
+    if ! git worktree add "$worktree_path" "$pr_branch"; then
+        echo "エラー: worktreeの作成に失敗しました"
+        return 1
+    fi
+
+    if [ -x "${main_repo_path}/.gw.sh" ]; then
+        "${main_repo_path}/.gw.sh" "$worktree_path"
+    fi
+
+    _gw_set_value "$worktree_path" "pr_number" "$pr_number"
+    _gw_set_value "$worktree_path" "pr_title" "$pr_title"
+    _gw_set_value "$worktree_path" "pr_url" "$pr_url"
+    _gw_set_value "$worktree_path" "original_branch" "$pr_branch"
+    _gw_set_value "$worktree_path" "purpose" "#${pr_number}: ${pr_title}"
+
+    cd "$worktree_path"
+    echo "PR #${pr_number} のworktreeを作成しました: $worktree_path"
+    echo "タイトル: $pr_title"
+}
+
 # Show or set description for current worktree
 function _gw_describe() {
     local current_path=$(pwd)
@@ -430,11 +527,17 @@ function _gw_describe() {
         local branch=$(git branch --show-current)
         local purpose=$(_gw_get_description "$current_path")
         local original_branch=$(_gw_get_value "$current_path" "original_branch")
+        local pr_number=$(_gw_get_value "$current_path" "pr_number")
+        local pr_url=$(_gw_get_value "$current_path" "pr_url")
 
         echo "path: $current_path"
         echo "branch: $branch"
         echo "purpose: ${purpose:-（未設定）}"
         echo "original_branch: ${original_branch:-（未設定）}"
+        if [ -n "$pr_number" ]; then
+            echo "pr_number: $pr_number"
+            echo "pr_url: $pr_url"
+        fi
     fi
 }
 
@@ -454,6 +557,8 @@ function _gw() {
         'sw:Switch to worktree (alias)'
         'describe:Show or set description'
         'desc:Show or set description (alias)'
+        'review:Create worktree for PR review'
+        'rv:Create worktree for PR review (alias)'
     )
 
     _arguments -C \
@@ -469,7 +574,7 @@ function _gw() {
                 remove|rm|switch|sw)
                     _gw_worktree_tasks
                     ;;
-                create|cr)
+                create|cr|review|rv)
                     ;;
             esac
             ;;
