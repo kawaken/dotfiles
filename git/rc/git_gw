@@ -230,7 +230,9 @@ function _gw_create() {
 
     # Execute .gw.sh if it exists and is executable
     if [ -x "${main_repo_path}/.gw.sh" ]; then
+        echo "=== Running .gw.sh ==="
         "${main_repo_path}/.gw.sh" "$worktree_path"
+        echo "=== Done .gw.sh ==="
     fi
 
     # Save description and original branch
@@ -241,7 +243,6 @@ function _gw_create() {
     cd "$worktree_path"
 
     echo "Worktree created and switched to: $worktree_path"
-    echo "目的: $description"
 }
 
 # Helper function to format worktree info line
