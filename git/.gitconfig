@@ -58,3 +58,5 @@
 [advice]
 	forceDeleteBranch = false
 	skippedCherryPicks = false
+[pull]
+	ff = only
