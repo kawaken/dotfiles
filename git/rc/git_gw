@@ -200,11 +200,19 @@ function _gw_create() {
         echo "新しいブランチ '$branch_name' としてworktreeを作成します。"
     fi
 
-    # Fetch and update local main branch
-    echo "Fetching latest changes..."
-    if ! (cd "$main_repo_path" && git fetch origin main:main); then
-        echo "エラー: ローカルmainの更新に失敗しました"
-        return 1
+    # Update local main branch
+    echo "Updating local main branch..."
+    local main_checked_out=$(cd "$main_repo_path" && git branch --show-current)
+    if [ "$main_checked_out" = "main" ]; then
+        if ! (cd "$main_repo_path" && git pull origin main); then
+            echo "エラー: ローカルmainの更新に失敗しました"
+            return 1
+        fi
+    else
+        if ! (cd "$main_repo_path" && git fetch origin main:main); then
+            echo "エラー: ローカルmainの更新に失敗しました"
+            return 1
+        fi
     fi
 
     # Create worktree - use different command based on branch existence
