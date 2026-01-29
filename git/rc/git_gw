@@ -84,6 +84,49 @@ function _gw_truncate_text() {
     fi
 }
 
+# Helper function to resolve worktree path from query using git worktree list
+function _gw_resolve_worktree() {
+    local query="$1"
+    local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
+    local repo_name=$(basename "$main_repo_path")
+
+    if [ -z "$query" ] || [ "$query" = "main" ]; then
+        echo "$main_repo_path"
+        return 0
+    fi
+
+    local result
+    result=$(git worktree list | awk '{print $1}' | while IFS= read -r wt_path; do
+        local dir_name=$(basename "$wt_path")
+        local parent_name=$(basename "$(dirname "$wt_path")")
+
+        # 完全一致: basename が query と一致
+        if [ "$dir_name" = "$query" ]; then
+            echo "$wt_path"
+            return 0
+        fi
+        # ${repo_name}-${query} パターン
+        if [ "$dir_name" = "${repo_name}-${query}" ]; then
+            echo "$wt_path"
+            return 0
+        fi
+        # PR worktree: parent が ${repo_name}-PR で basename が query
+        # PR-123, #123, 123 いずれでもマッチ
+        local q="${query#PR-}"
+        q="${q#\#}"
+        if [ "$parent_name" = "${repo_name}-PR" ] && [ "$dir_name" = "$q" ]; then
+            echo "$wt_path"
+            return 0
+        fi
+    done)
+
+    if [ -n "$result" ]; then
+        echo "$result"
+        return 0
+    fi
+    return 1
+}
+
 # Helper function to extract PR number from URL or number
 function _gw_extract_pr_number() {
     local input="$1"
@@ -314,21 +357,30 @@ function _gw_remove() {
     local current_path=$(pwd)
     local confirm_current=false
 
+    local worktree_path
+
     if [ -z "$task_name" ]; then
         if [ "$current_path" = "$main_repo_path" ]; then
             echo "エラー: main worktree は削除できません"
             return 1
         fi
+        # カレントディレクトリが worktree か確認
+        if ! git worktree list | awk '{print $1}' | grep -qxF "$current_path"; then
+            echo "エラー: 現在のディレクトリはworktreeではありません"
+            return 1
+        fi
         confirm_current=true
-        task_name=$(basename "$current_path")
-        local repo_name=$(basename "$main_repo_path")
-        task_name="${task_name#${repo_name}-}"
+        worktree_path="$current_path"
+    else
+        worktree_path=$(_gw_resolve_worktree "$task_name")
+        if [ $? -ne 0 ] || [ -z "$worktree_path" ]; then
+            echo "エラー: Worktree '$task_name' が見つかりません"
+            return 1
+        fi
     fi
 
     shift 2>/dev/null
     local additional_args=("$@")
-
-    local worktree_path=$(_gw_get_worktree_path "$task_name")
 
     if [ ! -d "$worktree_path" ]; then
         echo "エラー: Worktree '$worktree_path' が存在しません"
@@ -412,7 +464,11 @@ function _gw_switch() {
         fi
         local worktree_path="$GW_PREVIOUS_WORKTREE"
     else
-        local worktree_path=$(_gw_get_worktree_path "$task_name")
+        local worktree_path=$(_gw_resolve_worktree "$task_name")
+        if [ $? -ne 0 ] || [ -z "$worktree_path" ]; then
+            echo "エラー: Worktree '$task_name' が見つかりません"
+            return 1
+        fi
     fi
 
     if [ ! -d "$worktree_path" ]; then
@@ -608,8 +664,15 @@ function _gw_worktree_tasks() {
     local worktree_paths=(${(f)"$(git worktree list 2>/dev/null | awk 'NR>1 {print $1}')"})
     for wt_path in "${worktree_paths[@]}"; do
         local dir_name=$(basename "$wt_path")
-        if [[ "$dir_name" == "${repo_name}-"* ]]; then
+        local parent_name=$(basename "$(dirname "$wt_path")")
+
+        if [[ "$parent_name" == "${repo_name}-PR" ]]; then
+            # PR worktree: PR-123 形式で表示
+            tasks+=("PR-${dir_name}")
+        elif [[ "$dir_name" == "${repo_name}-"* ]]; then
             tasks+=("${dir_name#${repo_name}-}")
+        else
+            tasks+=("$dir_name")
         fi
     done
 
