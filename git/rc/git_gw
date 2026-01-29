@@ -186,7 +186,7 @@ function gw() {
             shift
             _gw_describe "$@"
             ;;
-        review|rv)
+        pr)
             shift
             _gw_review "$@"
             ;;
@@ -200,7 +200,7 @@ function gw() {
             echo "  switch, sw [task|-]      Switch to worktree (no args = main, - = previous)"
             echo "  describe, desc           Show worktree info"
             echo "    --set purpose=<text>   Set purpose"
-            echo "  review, rv <pr|url>      Create worktree for PR review"
+            echo "  pr <pr|url>              Create worktree for PR review"
             ;;
     esac
 }
@@ -626,8 +626,7 @@ function _gw() {
         'sw:Switch to worktree (alias)'
         'describe:Show or set description'
         'desc:Show or set description (alias)'
-        'review:Create worktree for PR review'
-        'rv:Create worktree for PR review (alias)'
+        'pr:Create worktree for PR review'
     )
 
     _arguments -C \
@@ -643,7 +642,7 @@ function _gw() {
                 remove|rm|switch|sw)
                     _gw_worktree_tasks
                     ;;
-                create|cr|review|rv)
+                create|cr|pr)
                     ;;
             esac
             ;;
@@ -662,17 +661,24 @@ function _gw_worktree_tasks() {
     tasks=("main")
 
     local worktree_paths=(${(f)"$(git worktree list 2>/dev/null | awk 'NR>1 {print $1}')"})
+    local dir_name parent_name purpose wt_label
     for wt_path in "${worktree_paths[@]}"; do
-        local dir_name=$(basename "$wt_path")
-        local parent_name=$(basename "$(dirname "$wt_path")")
+        dir_name=$(basename "$wt_path")
+        parent_name=$(basename "$(dirname "$wt_path")")
+        purpose=$(_gw_get_description "$wt_path")
 
         if [[ "$parent_name" == "${repo_name}-PR" ]]; then
-            # PR worktree: PR-123 形式で表示
-            tasks+=("PR-${dir_name}")
+            wt_label="PR-${dir_name}"
         elif [[ "$dir_name" == "${repo_name}-"* ]]; then
-            tasks+=("${dir_name#${repo_name}-}")
+            wt_label="${dir_name#${repo_name}-}"
         else
-            tasks+=("$dir_name")
+            wt_label="$dir_name"
+        fi
+
+        if [[ -n "$purpose" ]]; then
+            tasks+=("${wt_label}:${purpose//:/\\:}")
+        else
+            tasks+=("$wt_label")
         fi
     done
 
