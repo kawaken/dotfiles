@@ -101,6 +101,26 @@ function _gw_extract_pr_number() {
     fi
 }
 
+function _gw_setup_worktree() {
+    local worktree_path="$1"
+    shift
+    local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
+
+    if [ -x "${main_repo_path}/.gw.sh" ]; then
+        echo "=== Running .gw.sh ==="
+        "${main_repo_path}/.gw.sh" "$worktree_path"
+        echo "=== Done .gw.sh ==="
+    fi
+
+    for kv in "$@"; do
+        local key="${kv%%=*}"
+        local value="${kv#*=}"
+        _gw_set_value "$worktree_path" "$key" "$value"
+    done
+
+    cd "$worktree_path"
+}
+
 function gw() {
     case "$1" in
         create|cr)
@@ -228,20 +248,9 @@ function _gw_create() {
         git worktree add -b "$branch_name" "$worktree_path" main
     fi
 
-    # Execute .gw.sh if it exists and is executable
-    if [ -x "${main_repo_path}/.gw.sh" ]; then
-        echo "=== Running .gw.sh ==="
-        "${main_repo_path}/.gw.sh" "$worktree_path"
-        echo "=== Done .gw.sh ==="
-    fi
-
-    # Save description and original branch
-    _gw_set_description "$worktree_path" "$description"
-    _gw_set_value "$worktree_path" "original_branch" "$branch_name"
-
-    # Move to new worktree
-    cd "$worktree_path"
-
+    _gw_setup_worktree "$worktree_path" \
+        "purpose=${description}" \
+        "original_branch=${branch_name}"
     echo "Worktree created and switched to: $worktree_path"
 }
 
@@ -483,17 +492,12 @@ function _gw_review() {
         return 1
     fi
 
-    if [ -x "${main_repo_path}/.gw.sh" ]; then
-        "${main_repo_path}/.gw.sh" "$worktree_path"
-    fi
-
-    _gw_set_value "$worktree_path" "pr_number" "$pr_number"
-    _gw_set_value "$worktree_path" "pr_title" "$pr_title"
-    _gw_set_value "$worktree_path" "pr_url" "$pr_url"
-    _gw_set_value "$worktree_path" "original_branch" "$pr_branch"
-    _gw_set_value "$worktree_path" "purpose" "#${pr_number}: ${pr_title}"
-
-    cd "$worktree_path"
+    _gw_setup_worktree "$worktree_path" \
+        "purpose=#${pr_number}: ${pr_title}" \
+        "original_branch=${pr_branch}" \
+        "pr_number=${pr_number}" \
+        "pr_title=${pr_title}" \
+        "pr_url=${pr_url}"
     echo "PR #${pr_number} のworktreeを作成しました: $worktree_path"
     echo "タイトル: $pr_title"
 }
