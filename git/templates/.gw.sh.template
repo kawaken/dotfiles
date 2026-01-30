@@ -1,0 +1,22 @@
+#!/bin/zsh
+
+WORKTREE_DIR="$1"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+cp -v -i "$SCRIPT_DIR/backend/.env" "$WORKTREE_DIR/backend/"
+
+cd "$SCRIPT_DIR"
+target_files=(
+    $(git ls-files --others --ignored --exclude-standard .claude/ | grep -v '^\.claude/sessions/')
+)
+
+for f in "${target_files[@]}"; do
+    mkdir -p "$WORKTREE_DIR/$(dirname "$f")"
+    cp -v "$f" "$WORKTREE_DIR/$f"
+done
+
+# Claude Code: trust worktree directory
+cp ~/.claude.json ~/.claude.json.bk
+jq --arg path "$WORKTREE_DIR" '.projects[$path].hasTrustDialogAccepted = true' ~/.claude.json.bk > ~/.claude.json
+
+mise trust "$WORKTREE_DIR/"

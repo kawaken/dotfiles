@@ -190,6 +190,10 @@ function gw() {
             shift
             _gw_review "$@"
             ;;
+        setup)
+            shift
+            _gw_setup_template "$@"
+            ;;
         *)
             echo "Usage: gw <command> [options]"
             echo ""
@@ -201,6 +205,7 @@ function gw() {
             echo "  describe, desc           Show worktree info"
             echo "    --set purpose=<text>   Set purpose"
             echo "  pr <pr|url>              Create worktree for PR review"
+            echo "  setup                    Install .gw.sh template to repository"
             ;;
     esac
 }
@@ -556,6 +561,20 @@ function _gw_review() {
         "pr_url=${pr_url}"
     echo "PR #${pr_number} のworktreeを作成しました: $worktree_path"
     echo "タイトル: $pr_title"
+}
+
+# Install .gw.sh template to repository root
+function _gw_setup_template() {
+    local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
+    local template="${${(%):-%x}:A:h}/../templates/.gw.sh.template"
+
+    if [ ! -f "$template" ]; then
+        echo "エラー: テンプレートが見つかりません: $template"
+        return 1
+    fi
+
+    cp -v "$template" "${main_repo_path}/.gw.sh"
+    chmod +x "${main_repo_path}/.gw.sh"
 }
 
 # Show or set description for current worktree
