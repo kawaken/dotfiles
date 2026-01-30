@@ -11,4 +11,4 @@ alias crontab='crontab -i'
 alias gi=git
 alias vs='code'
 alias vi=vim
-
+alias pc='pwd | pbcopy'
