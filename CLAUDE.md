@@ -25,6 +25,7 @@ This is a personal dotfiles repository containing shell configurations, Git alia
 - Minimize `while` loop usage
 - Use ripgrep (`rg`) for search operations instead of `find`/`grep`
 - **Avoid reserved variables**: Do not use `status` as a variable name (it's a read-only special variable in zsh that holds the exit status of the last command)
+- **No `local` inside loops**: zsh's `local`/`typeset` prints the current value when re-declaring an existing local variable. Always declare `local` before the loop and assign inside it
 - **Minimize output**: Avoid unnecessary messages and verbose output; keep comments to essential minimum
 - **Avoid redundant implementations**: Do not add unnecessary code or duplicate existing functionality
 
