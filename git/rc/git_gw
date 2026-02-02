@@ -253,24 +253,22 @@ function _gw_prune() {
     local candidates=()
 
     local worktree_lines=(${(f)"$(git worktree list)"})
+    local wt_path reason dir_name parent_name label purpose display
     for line in "${worktree_lines[@]}"; do
-        local wt_path=$(echo "$line" | awk '{print $1}')
+        wt_path=$(echo "$line" | awk '{print $1}')
 
         # Skip main worktree
         if [ "$wt_path" = "$main_repo_path" ]; then
             continue
         fi
 
-        local reason
-        reason=$(_gw_check_worktree_status "$wt_path")
-        if [ $? -ne 0 ]; then
+        if ! reason=$(_gw_check_worktree_status "$wt_path"); then
             continue
         fi
 
         # Build label
-        local dir_name=$(basename "$wt_path")
-        local parent_name=$(basename "$(dirname "$wt_path")")
-        local label
+        dir_name=$(basename "$wt_path")
+        parent_name=$(basename "$(dirname "$wt_path")")
         if [[ "$parent_name" == "${repo_name}-PR" ]]; then
             label="PR-${dir_name}"
         elif [[ "$dir_name" == "${repo_name}-"* ]]; then
@@ -279,11 +277,11 @@ function _gw_prune() {
             label="$dir_name"
         fi
 
-        local purpose=$(_gw_get_description "$wt_path")
+        purpose=$(_gw_get_description "$wt_path")
         [ -n "$purpose" ] && purpose=$(_gw_truncate_text "$purpose" 40)
 
         # Format: label  purpose  [reasons]  path
-        local display="${label}"
+        display="${label}"
         [ -n "$purpose" ] && display="${display}\t${purpose}"
         display="${display}\t[${reason}]"
 
@@ -308,13 +306,13 @@ function _gw_prune() {
         return 0
     fi
 
-    local wt_path
+    local wt_path branch
     echo "$selected" | while IFS= read -r line; do
         wt_path="${line##*$'\t'}"
         if [ -z "$wt_path" ] || [ ! -d "$wt_path" ]; then
             continue
         fi
-        local branch=$(git -C "$wt_path" branch --show-current 2>/dev/null)
+        branch=$(git -C "$wt_path" branch --show-current 2>/dev/null)
         git worktree remove --force "$wt_path" && \
             echo "Worktree removed: $wt_path"
         if [[ -n "$branch" && "$branch" != "main" && "$branch" != "master" ]]; then
