@@ -164,6 +164,166 @@ function _gw_setup_worktree() {
     cd "$worktree_path"
 }
 
+# Check worktree status for prune candidates
+# Returns comma-separated reasons or empty string if not a candidate
+function _gw_check_worktree_status() {
+    local worktree_path="$1"
+    local branch=$(git -C "$worktree_path" branch --show-current 2>/dev/null)
+    [ -z "$branch" ] && return 1
+
+    local pr_number=$(_gw_get_value "$worktree_path" "pr_number")
+    local reasons=()
+
+    # Check: remote branch gone
+    local remote_check
+    remote_check=$(git ls-remote --heads origin "$branch" 2>/dev/null)
+    if [ $? -ne 0 ]; then
+        return 1
+    fi
+    if [ -z "$remote_check" ]; then
+        reasons+=("branch gone")
+    fi
+
+    # Check: PR merged (by branch name)
+    if command -v gh &> /dev/null; then
+        local merged_check
+        merged_check=$(gh pr list --state merged --head "$branch" --json number --jq '.[0].number' 2>/dev/null)
+        if [ $? -ne 0 ]; then
+            return 1
+        fi
+        if [ -n "$merged_check" ]; then
+            reasons+=("merged")
+        fi
+
+        # PR-specific checks
+        if [ -n "$pr_number" ]; then
+            local pr_json
+            pr_json=$(gh pr view "$pr_number" --json state,reviewDecision 2>/dev/null)
+            if [ $? -ne 0 ]; then
+                return 1
+            fi
+
+            local pr_state=$(echo "$pr_json" | jq -r '.state')
+            local review_decision=$(echo "$pr_json" | jq -r '.reviewDecision')
+
+            if [ "$pr_state" = "CLOSED" ]; then
+                reasons+=("closed")
+            fi
+            if [ "$review_decision" = "APPROVED" ]; then
+                reasons+=("approved")
+            fi
+        fi
+    fi
+
+    # Check: JIRA done (via cache)
+    local jira_key=""
+    if [[ "$branch" =~ ([A-Z]+-[0-9]+) ]]; then
+        jira_key="${match[1]}"
+    fi
+    if [ -n "$jira_key" ]; then
+        local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
+        local cache_file="${main_repo_path}/.git/gw_jira_cache.json"
+        if [ -f "$cache_file" ]; then
+            local jira_status
+            jira_status=$(jq -r --arg key "$jira_key" '.[$key] // empty' "$cache_file" 2>/dev/null)
+            if [ "$jira_status" = "Done" ] || [ "$jira_status" = "done" ]; then
+                reasons+=("jira done")
+            fi
+        fi
+    fi
+
+    if [ ${#reasons[@]} -eq 0 ]; then
+        return 1
+    fi
+
+    local IFS=", "
+    echo "${reasons[*]}"
+    return 0
+}
+
+# Prune stale worktrees
+function _gw_prune() {
+    if ! command -v fzf &> /dev/null; then
+        echo "エラー: fzf コマンドが見つかりません"
+        return 1
+    fi
+
+    local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
+    local repo_name=$(basename "$main_repo_path")
+    local candidates=()
+
+    local worktree_lines=(${(f)"$(git worktree list)"})
+    for line in "${worktree_lines[@]}"; do
+        local wt_path=$(echo "$line" | awk '{print $1}')
+
+        # Skip main worktree
+        if [ "$wt_path" = "$main_repo_path" ]; then
+            continue
+        fi
+
+        local reason
+        reason=$(_gw_check_worktree_status "$wt_path")
+        if [ $? -ne 0 ]; then
+            continue
+        fi
+
+        # Build label
+        local dir_name=$(basename "$wt_path")
+        local parent_name=$(basename "$(dirname "$wt_path")")
+        local label
+        if [[ "$parent_name" == "${repo_name}-PR" ]]; then
+            label="PR-${dir_name}"
+        elif [[ "$dir_name" == "${repo_name}-"* ]]; then
+            label="${dir_name#${repo_name}-}"
+        else
+            label="$dir_name"
+        fi
+
+        local purpose=$(_gw_get_description "$wt_path")
+        [ -n "$purpose" ] && purpose=$(_gw_truncate_text "$purpose" 40)
+
+        # Format: label  purpose  [reasons]  path
+        local display="${label}"
+        [ -n "$purpose" ] && display="${display}\t${purpose}"
+        display="${display}\t[${reason}]"
+
+        candidates+=("${display}\t${wt_path}")
+    done
+
+    if [ ${#candidates[@]} -eq 0 ]; then
+        echo "削除対象のworktreeはありません"
+        return 0
+    fi
+
+    # fzf input: display columns separated by tab, last column is path (hidden)
+    local selected
+    selected=$(printf '%s\n' "${candidates[@]}" | \
+        fzf --multi --bind 'start:select-all' \
+            --header='Tab: toggle, Enter: delete selected, ESC: cancel' \
+            --with-nth='1..-2' \
+            --delimiter=$'\t')
+
+    if [ -z "$selected" ]; then
+        echo "キャンセルしました"
+        return 0
+    fi
+
+    local wt_path
+    echo "$selected" | while IFS= read -r line; do
+        wt_path="${line##*$'\t'}"
+        if [ -z "$wt_path" ] || [ ! -d "$wt_path" ]; then
+            continue
+        fi
+        local branch=$(git -C "$wt_path" branch --show-current 2>/dev/null)
+        git worktree remove --force "$wt_path" && \
+            echo "Worktree removed: $wt_path"
+        if [[ -n "$branch" && "$branch" != "main" && "$branch" != "master" ]]; then
+            git branch -D "$branch" 2>/dev/null && \
+                echo "Branch deleted: $branch"
+        fi
+    done
+}
+
 function gw() {
     case "$1" in
         create|cr)
@@ -190,6 +350,10 @@ function gw() {
             shift
             _gw_review "$@"
             ;;
+        prune)
+            shift
+            _gw_prune "$@"
+            ;;
         setup)
             shift
             _gw_setup_template "$@"
@@ -205,6 +369,7 @@ function gw() {
             echo "  describe, desc           Show worktree info"
             echo "    --set purpose=<text>   Set purpose"
             echo "  pr <pr|url>              Create worktree for PR review"
+            echo "  prune                    Remove stale worktrees (merged, closed, etc.)"
             echo "  setup                    Install .gw.sh template to repository"
             ;;
     esac
@@ -646,6 +811,7 @@ function _gw() {
         'describe:Show or set description'
         'desc:Show or set description (alias)'
         'pr:Create worktree for PR review'
+        'prune:Remove stale worktrees'
     )
 
     _arguments -C \
