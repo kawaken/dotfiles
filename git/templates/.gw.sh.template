@@ -5,15 +5,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 cp -v -i "$SCRIPT_DIR/backend/.env" "$WORKTREE_DIR/backend/"
 
-cd "$SCRIPT_DIR"
-target_files=(
-    $(git ls-files --others --ignored --exclude-standard .claude/ | grep -v '^\.claude/sessions/')
-)
-
-for f in "${target_files[@]}"; do
-    mkdir -p "$WORKTREE_DIR/$(dirname "$f")"
-    cp -v "$f" "$WORKTREE_DIR/$f"
-done
+# gitignore対象ファイルを同期
+(cd "$WORKTREE_DIR" && gw sync --to-worktree)
 
 # Claude Code: trust worktree directory
 cp ~/.claude.json ~/.claude.json.bk
