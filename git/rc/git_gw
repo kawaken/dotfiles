@@ -55,7 +55,11 @@ function _gw_set_value() {
 
     if [ -f "$metadata_path" ]; then
         local tmp=$(grep -v "^${key}=" "$metadata_path" 2>/dev/null || true)
-        echo "$tmp" > "$metadata_path"
+        if [ -n "$tmp" ]; then
+            echo "$tmp" > "$metadata_path"
+        else
+            : > "$metadata_path"
+        fi
     fi
     echo "${key}=${value}" >> "$metadata_path"
 }
@@ -95,10 +99,11 @@ function _gw_resolve_worktree() {
         return 0
     fi
 
-    local result
-    result=$(git worktree list | awk '{print $1}' | while IFS= read -r wt_path; do
-        local dir_name=$(basename "$wt_path")
-        local parent_name=$(basename "$(dirname "$wt_path")")
+    local worktree_paths=(${(f)"$(git worktree list | awk '{print $1}')"})
+    local dir_name parent_name q
+    for wt_path in "${worktree_paths[@]}"; do
+        dir_name=$(basename "$wt_path")
+        parent_name=$(basename "$(dirname "$wt_path")")
 
         # 完全一致: basename が query と一致
         if [ "$dir_name" = "$query" ]; then
@@ -112,18 +117,13 @@ function _gw_resolve_worktree() {
         fi
         # PR worktree: parent が ${repo_name}-PR で basename が query
         # PR-123, #123, 123 いずれでもマッチ
-        local q="${query#PR-}"
+        q="${query#PR-}"
         q="${q#\#}"
         if [ "$parent_name" = "${repo_name}-PR" ] && [ "$dir_name" = "$q" ]; then
             echo "$wt_path"
             return 0
         fi
-    done)
-
-    if [ -n "$result" ]; then
-        echo "$result"
-        return 0
-    fi
+    done
     return 1
 }
 
@@ -155,9 +155,10 @@ function _gw_setup_worktree() {
         echo "=== Done .gw.sh ==="
     fi
 
+    local key value
     for kv in "$@"; do
-        local key="${kv%%=*}"
-        local value="${kv#*=}"
+        key="${kv%%=*}"
+        value="${kv#*=}"
         _gw_set_value "$worktree_path" "$key" "$value"
     done
 
@@ -306,8 +307,9 @@ function _gw_prune() {
         return 0
     fi
 
+    local selected_lines=(${(f)"$selected"})
     local wt_path branch
-    echo "$selected" | while IFS= read -r line; do
+    for line in "${selected_lines[@]}"; do
         wt_path="${line##*$'\t'}"
         if [ -z "$wt_path" ] || [ ! -d "$wt_path" ]; then
             continue
@@ -516,9 +518,11 @@ function _gw_format_worktree_line() {
 # List worktrees
 function _gw_list() {
     local term_width=${COLUMNS:-$(tput cols)}
-    git worktree list | while IFS= read -r line; do
-        local worktree_path=$(echo "$line" | awk '{print $1}')
-        local branch=$(echo "$line" | awk '{print $3}')
+    local lines=(${(f)"$(git worktree list)"})
+    local worktree_path branch
+    for line in "${lines[@]}"; do
+        worktree_path=$(echo "$line" | awk '{print $1}')
+        branch=$(echo "$line" | awk '{print $3}')
         _gw_format_worktree_line "$worktree_path" "$branch" "$term_width"
     done
 }
@@ -666,7 +670,7 @@ function _gw_review() {
     local input="$1"
     if [ -z "$input" ]; then
         echo "エラー: PR番号またはURLを指定してください"
-        echo "使い方: gw review <pr-number|url>"
+        echo "使い方: gw pr <pr-number|url>"
         return 1
     fi
 
@@ -864,7 +868,9 @@ function _gw_sync() {
         return 0
     fi
 
-    echo "$selected" | while IFS= read -r line; do
+    local selected_lines=(${(f)"$selected"})
+    local file
+    for line in "${selected_lines[@]}"; do
         file="${line##*$'\t'}"
         [ -z "$file" ] && continue
         _gw_sync_file "${src_dir}/${file}" "${dst_dir}/${file}"
