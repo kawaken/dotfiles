@@ -60,3 +60,5 @@
 	skippedCherryPicks = false
 [pull]
 	ff = only
+[rebase]
+	autoStash = true
