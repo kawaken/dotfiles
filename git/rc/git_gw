@@ -144,10 +144,52 @@ function _gw_extract_pr_number() {
     fi
 }
 
+# Symlink .claude/ subdirectories from main to worktree
+function _gw_symlink_claude_dirs() {
+    local worktree_path="$1"
+    local main_repo_path="$2"
+    local claude_dirs=(commands skills agents hooks)
+
+    [ ! -d "${main_repo_path}/.claude" ] && return 0
+
+    local dir main_dir wt_dir wt_claude
+    wt_claude="${worktree_path}/.claude"
+    for dir in "${claude_dirs[@]}"; do
+        main_dir="${main_repo_path}/.claude/${dir}"
+        wt_dir="${wt_claude}/${dir}"
+
+        # main側に存在しない → スキップ
+        [ ! -d "$main_dir" ] && continue
+
+        # gitignore対象でない → スキップ
+        if ! git -C "$main_repo_path" check-ignore -q ".claude/${dir}" 2>/dev/null; then
+            continue
+        fi
+
+        # 既にsymlink → スキップ（冪等）
+        [ -L "$wt_dir" ] && continue
+
+        # ディレクトリあり（中身あり） → 警告してスキップ
+        if [ -d "$wt_dir" ]; then
+            if [ -z "$(ls -A "$wt_dir" 2>/dev/null)" ]; then
+                rmdir "$wt_dir"
+            else
+                echo "警告: ${wt_dir} は空でないためsymlinkをスキップします"
+                continue
+            fi
+        fi
+
+        mkdir -p "$wt_claude"
+        ln -s "$main_dir" "$wt_dir"
+    done
+}
+
 function _gw_setup_worktree() {
     local worktree_path="$1"
     shift
     local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
+
+    _gw_symlink_claude_dirs "$worktree_path" "$main_repo_path"
 
     if [ -x "${main_repo_path}/.gw.sh" ]; then
         echo "=== Running .gw.sh ==="
@@ -746,6 +788,15 @@ function _gw_list_ignored_files() {
         '\.tmp$'
         '\.swp$'
     )
+
+    # symlink済み .claude/ サブディレクトリを除外
+    local claude_dirs=(commands skills agents hooks)
+    local cdir
+    for cdir in "${claude_dirs[@]}"; do
+        if [ -L "${dir}/.claude/${cdir}" ]; then
+            exclude_patterns+=("^\\.claude/${cdir}/")
+        fi
+    done
 
     local combined_pattern
     combined_pattern=$(printf '%s|' "${exclude_patterns[@]}")
