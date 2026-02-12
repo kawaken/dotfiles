@@ -190,6 +190,7 @@ function _gw_setup_worktree() {
     local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
 
     _gw_symlink_claude_dirs "$worktree_path" "$main_repo_path"
+    _gw_copy_sync_files "$worktree_path" "$main_repo_path"
 
     if [ -x "${main_repo_path}/.gw.sh" ]; then
         echo "=== Running .gw.sh ==="
@@ -417,7 +418,7 @@ function gw() {
             echo "  pr <pr|url>              Create worktree for PR review"
             echo "  prune                    Remove stale worktrees (merged, closed, etc.)"
             echo "  setup                    Install .gw.sh template to repository"
-            echo "  sync -m|-w               Sync gitignored files (main↔worktree)"
+            echo "  sync -m|-w               Sync files listed in .gw-sync-files (main↔worktree)"
             ;;
     esac
 }
@@ -777,33 +778,23 @@ function _gw_review() {
     echo "タイトル: $pr_title"
 }
 
-# List gitignored files for sync
-function _gw_list_ignored_files() {
+# List sync target files from .gw-sync-files
+function _gw_list_sync_files() {
     local dir="$1"
-    local exclude_patterns=(
-        '\.claude/sessions/'
-        '\.log$'
-        'cache'
-        '\.DS_Store$'
-        '\.tmp$'
-        '\.swp$'
-    )
+    local main_repo_path
+    main_repo_path=$(git -C "$dir" worktree list | head -n 1 | awk '{print $1}')
+    local sync_file="${main_repo_path}/.gw-sync-files"
 
-    # symlink済み .claude/ サブディレクトリを除外
-    local claude_dirs=(commands skills agents hooks)
-    local cdir
-    for cdir in "${claude_dirs[@]}"; do
-        if [ -L "${dir}/.claude/${cdir}" ]; then
-            exclude_patterns+=("^\\.claude/${cdir}/")
-        fi
+    if [ ! -f "$sync_file" ]; then
+        return 0
+    fi
+
+    local line
+    for line in ${(f)"$(< "$sync_file")"}; do
+        [[ "$line" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "${line// }" ]] && continue
+        echo "$line"
     done
-
-    local combined_pattern
-    combined_pattern=$(printf '%s|' "${exclude_patterns[@]}")
-    combined_pattern="${combined_pattern%|}"
-
-    (cd "$dir" && git ls-files --others --ignored --exclude-standard) | \
-        grep -vE "$combined_pattern"
 }
 
 # Sync single file between source and target
@@ -822,7 +813,7 @@ function _gw_sync_file() {
     fi
 }
 
-# Sync gitignored files between main and worktree
+# Sync files listed in .gw-sync-files between main and worktree
 function _gw_sync() {
     local direction=""
 
@@ -875,7 +866,7 @@ function _gw_sync() {
         dst_dir="$current_path"
     fi
 
-    local src_files=(${(f)"$(_gw_list_ignored_files "$src_dir")"})
+    local src_files=(${(f)"$(_gw_list_sync_files "$src_dir")"})
     if [ ${#src_files[@]} -eq 0 ]; then
         echo "同期対象ファイルがありません"
         return 0
@@ -1013,7 +1004,7 @@ function _gw() {
         'pr:Create worktree for PR review'
         'prune:Remove stale worktrees'
         'setup:Install .gw.sh template'
-        'sync:Sync gitignored files'
+        'sync:Sync files listed in .gw-sync-files'
     )
 
     _arguments -C \
