@@ -6,3 +6,4 @@ Thumbs.db
 secrethub.env
 .jira_enabled
 .gw.sh
+.gw-sync-files
