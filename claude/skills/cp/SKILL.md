@@ -1,3 +1,7 @@
+---
+allowed-tools: Bash(printf *), Bash(echo *)
+---
+
 # clipboard-copy
 
 ## Description
@@ -16,13 +20,12 @@ yes
 
 macOS の pbcopy コマンドを使用してテキストをクリップボードにコピーする。
 
-1. 引数で渡されたテキストを一時ファイルに書き出す
-2. pbcopy コマンドでクリップボードにコピー
-3. 一時ファイルを削除
-4. コピー完了をユーザーに通知
+**禁止: heredoc (`<<EOF`)、cat は絶対に使わないこと。**
+
+以下のように `printf` でパイプする:
 
 ```bash
-echo -n "$text" | pbcopy
+printf '%s' "テキスト" | pbcopy
 ```
 
 コピー完了後、「クリップボードにコピーしたで！」とユーザーに伝える。
