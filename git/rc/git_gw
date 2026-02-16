@@ -786,13 +786,8 @@ function _gw_sync_files() {
         [[ "$file" =~ ^[[:space:]]*# ]] && continue
         [[ -z "${file// }" ]] && continue
         [ ! -f "${main_repo_path}/${file}" ] && continue
-        if [ -f "${worktree_path}/${file}" ]; then
-            echo "既に存在します: ${file}"
-            read -q "?上書きしますか? [y/N] " || { echo; continue; }
-            echo
-        fi
         mkdir -p "$(dirname "${worktree_path}/${file}")"
-        cp "${main_repo_path}/${file}" "${worktree_path}/${file}"
+        cp -i "${main_repo_path}/${file}" "${worktree_path}/${file}"
     done
 }
 
