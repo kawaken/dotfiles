@@ -144,53 +144,12 @@ function _gw_extract_pr_number() {
     fi
 }
 
-# Symlink .claude/ subdirectories from main to worktree
-function _gw_symlink_claude_dirs() {
-    local worktree_path="$1"
-    local main_repo_path="$2"
-    local claude_dirs=(commands skills agents hooks)
-
-    [ ! -d "${main_repo_path}/.claude" ] && return 0
-
-    local dir main_dir wt_dir wt_claude
-    wt_claude="${worktree_path}/.claude"
-    for dir in "${claude_dirs[@]}"; do
-        main_dir="${main_repo_path}/.claude/${dir}"
-        wt_dir="${wt_claude}/${dir}"
-
-        # main側に存在しない → スキップ
-        [ ! -d "$main_dir" ] && continue
-
-        # gitignore対象でない → スキップ
-        if ! git -C "$main_repo_path" check-ignore -q ".claude/${dir}" 2>/dev/null; then
-            continue
-        fi
-
-        # 既にsymlink → スキップ（冪等）
-        [ -L "$wt_dir" ] && continue
-
-        # ディレクトリあり（中身あり） → 警告してスキップ
-        if [ -d "$wt_dir" ]; then
-            if [ -z "$(ls -A "$wt_dir" 2>/dev/null)" ]; then
-                rmdir "$wt_dir"
-            else
-                echo "警告: ${wt_dir} は空でないためsymlinkをスキップします"
-                continue
-            fi
-        fi
-
-        mkdir -p "$wt_claude"
-        ln -s "$main_dir" "$wt_dir"
-    done
-}
-
 function _gw_setup_worktree() {
     local worktree_path="$1"
     shift
     local main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
 
-    _gw_symlink_claude_dirs "$worktree_path" "$main_repo_path"
-    _gw_sync_files "$worktree_path" "$main_repo_path"
+    _gw_sync_files "$main_repo_path" "$worktree_path"
 
     if [ -x "${main_repo_path}/.gw.sh" ]; then
         echo "=== Running .gw.sh ==="
@@ -773,21 +732,29 @@ function _gw_review() {
     echo "タイトル: $pr_title"
 }
 
-# Copy files listed in .gw-sync-files from main to worktree
+# Sync files listed in .gw-sync-files from source to destination
 function _gw_sync_files() {
-    local worktree_path="$1"
-    local main_repo_path="$2"
-    local sync_file="${main_repo_path}/.gw-sync-files"
+    local from="$1"
+    local to="$2"
+    local sync_file="${from}/.gw-sync-files"
 
     [ ! -f "$sync_file" ] && return 0
 
     local file
-    for file in ${(f)"$(< "$sync_file")"}; do
-        [[ "$file" =~ ^[[:space:]]*# ]] && continue
-        [[ -z "${file// }" ]] && continue
-        [ ! -f "${main_repo_path}/${file}" ] && continue
-        mkdir -p "$(dirname "${worktree_path}/${file}")"
-        cp -i "${main_repo_path}/${file}" "${worktree_path}/${file}"
+
+    # copy
+    for file in ${(f)"$(awk '/^copy:/ { sub(/^copy:[[:space:]]*/, ""); print }' "$sync_file")"}; do
+        [ ! -e "${from}/${file}" ] && continue
+        mkdir -p "$(dirname "${to}/${file}")"
+        cp -i "${from}/${file}" "${to}/${file}"
+    done
+
+    # symlink
+    for file in ${(f)"$(awk '/^symlink:/ { sub(/^symlink:[[:space:]]*/, ""); print }' "$sync_file")"}; do
+        [ ! -e "${from}/${file}" ] && continue
+        [ -L "${to}/${file}" ] || [ -e "${to}/${file}" ] && continue
+        mkdir -p "$(dirname "${to}/${file}")"
+        ln -s "${from}/${file}" "${to}/${file}"
     done
 }
 

@@ -1,12 +1,6 @@
 #!/bin/zsh
 
 WORKTREE_DIR="$1"
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-
-cp -v -i "$SCRIPT_DIR/backend/.env" "$WORKTREE_DIR/backend/"
-
-# gitignore対象ファイルを同期
-(cd "$WORKTREE_DIR" && gw sync --to-worktree)
 
 # Claude Code: trust worktree directory
 cp ~/.claude.json ~/.claude.json.bk
