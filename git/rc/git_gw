@@ -195,8 +195,13 @@ function _gw_prune() {
 
     local older_days=0
     if [[ "$1" == "--older" ]]; then
-        older_days="${2:-7}"
-        shift 2
+        if [[ "$2" =~ ^[0-9]+$ ]]; then
+            older_days="$2"
+            shift 2
+        else
+            older_days=7
+            shift 1
+        fi
     fi
 
     local main_repo_path
