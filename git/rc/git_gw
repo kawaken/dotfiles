@@ -859,13 +859,19 @@ function _gw_worktree_tasks() {
     tasks=("main")
 
     local worktree_paths=(${(f)"$(git worktree list 2>/dev/null | awk 'NR>1 {print $1}')"})
-    local purpose wt_label
+    local purpose wt_label age desc
     for wt_path in "${worktree_paths[@]}"; do
         wt_label=$(_gw_make_label "$wt_path" "$repo_name")
         purpose=$(_gw_get_description "$wt_path")
+        age=$(git -C "$wt_path" log -1 --format='%cr' 2>/dev/null)
+        age="${age% ago}"
 
-        if [[ -n "$purpose" ]]; then
-            tasks+=("${wt_label}:${purpose//:/\\:}")
+        desc=""
+        [[ -n "$age" ]] && desc="(${age})"
+        [[ -n "$purpose" ]] && desc="${desc:+${desc} }${purpose}"
+
+        if [[ -n "$desc" ]]; then
+            tasks+=("${wt_label}:${desc//:/\\:}")
         else
             tasks+=("$wt_label")
         fi
