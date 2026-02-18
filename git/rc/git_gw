@@ -536,7 +536,8 @@ function _gw_remove_single() {
 function _gw_remove() {
     local main_repo_path
     main_repo_path=$(git worktree list | head -n 1 | awk '{print $1}')
-    local current_path=$(pwd)
+    local current_path
+    current_path=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
     local opts=() task_names=() worktree_paths=()
     local arg wt_path has_force=false confirm_current
     local current_wt_index i current_wt failed
