@@ -171,7 +171,7 @@ function _gw_sync_files() {
     # symlink
     for file in ${(f)"$(awk '/^symlink:/ { sub(/^symlink:[[:space:]]*/, ""); print }' "$sync_file")"}; do
         [ ! -e "${from}/${file}" ] && continue
-        [ -L "${to}/${file}" ] || [ -e "${to}/${file}" ] && continue
+        { [ -L "${to}/${file}" ] || [ -e "${to}/${file}" ]; } && continue
         mkdir -p "$(dirname "${to}/${file}")"
         ln -s "${from}/${file}" "${to}/${file}"
     done
@@ -325,15 +325,15 @@ function _gw_create() {
 
     local branch_name="$task_name"
 
+    if ! git rev-parse --git-dir > /dev/null 2>&1; then
+        echo "Error: not a git repository"
+        return 1
+    fi
+
     # Check if local branch already exists
     local local_branch_exists=false
     if git show-ref --verify --quiet "refs/heads/${branch_name}"; then
         local_branch_exists=true
-    fi
-
-    if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        echo "Error: not a git repository"
-        return 1
     fi
 
     local worktree_path=$(_gw_get_worktree_path "$branch_name")
@@ -347,7 +347,7 @@ function _gw_create() {
 
     # Check if remote branch exists
     local remote_exists=false
-    if git ls-remote --heads origin "$branch_name" | grep -q "$branch_name"; then
+    if git ls-remote --heads origin "$branch_name" | grep -q "refs/heads/${branch_name}$"; then
         remote_exists=true
     fi
 
@@ -371,6 +371,11 @@ function _gw_create() {
             echo "Error: failed to update local main"
             return 1
         fi
+    fi
+
+    if [ "$remote_exists" = true ] && [ "$local_branch_exists" = false ]; then
+        echo "Fetching remote branch..."
+        (cd "$main_repo_path" && git fetch origin "$branch_name")
     fi
 
     echo "Creating worktree: $worktree_path"
@@ -711,7 +716,7 @@ function _gw_prune() {
         if [ -z "$wt_path" ] || [ ! -d "$wt_path" ]; then
             continue
         fi
-        _gw_remove_single "$wt_path" "false" "true" "$main_repo_path"
+        _gw_remove_single "$wt_path" "false" "false" "$main_repo_path"
     done
 }
 
