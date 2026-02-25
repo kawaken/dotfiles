@@ -298,8 +298,11 @@ function _gw_remove_single() {
     echo "Worktree removed: $worktree_path"
 
     if [[ -n "$current_branch" && "$current_branch" != "main" && "$current_branch" != "master" ]]; then
-        git branch -D "$current_branch" && \
+        if git branch -D "$current_branch" 2>/dev/null; then
             echo "Branch deleted: $current_branch"
+        else
+            echo "Note: branch '$current_branch' was not deleted (may be in use elsewhere)"
+        fi
     fi
 }
 
@@ -392,9 +395,12 @@ function _gw_create() {
         fi
     fi
 
-    _gw_setup_worktree "$worktree_path" \
+    if ! _gw_setup_worktree "$worktree_path" \
         "purpose=${description}" \
-        "original_branch=${branch_name}"
+        "original_branch=${branch_name}"; then
+        echo "Error: worktree created but setup failed"
+        return 1
+    fi
     echo "Worktree created and switched to: $worktree_path"
 }
 
@@ -585,12 +591,15 @@ function _gw_review() {
         return 1
     fi
 
-    _gw_setup_worktree "$worktree_path" \
+    if ! _gw_setup_worktree "$worktree_path" \
         "purpose=#${pr_number}: ${pr_title}" \
         "original_branch=${pr_branch}" \
         "pr_number=${pr_number}" \
         "pr_title=${pr_title}" \
-        "pr_url=${pr_url}"
+        "pr_url=${pr_url}"; then
+        echo "Error: worktree created but setup failed"
+        return 1
+    fi
     echo "Created worktree for PR #${pr_number}: $worktree_path"
     echo "Title: $pr_title"
 }
@@ -737,6 +746,14 @@ function _gw_setup_template() {
         return 1
     fi
 
+    if [ -f "${main_repo_path}/.gw.sh" ]; then
+        echo -n "Overwrite existing .gw.sh? [y/N]: "
+        read -r response
+        case "$response" in
+            [Yy]|[Yy][Ee][Ss]) ;;
+            *) echo "Aborted"; return 1 ;;
+        esac
+    fi
     cp -v "$template" "${main_repo_path}/.gw.sh"
     chmod +x "${main_repo_path}/.gw.sh"
 }
