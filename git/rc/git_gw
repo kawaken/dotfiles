@@ -329,8 +329,7 @@ function _gw_create() {
     fi
 
     if [ -z "$description" ]; then
-        echo -n "Enter purpose: "
-        read -r description
+        vared -p "Enter purpose: " description
         if [ -z "$description" ]; then
             echo "Error: purpose is required"
             return 1
