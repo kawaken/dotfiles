@@ -579,14 +579,14 @@ function _gw_review() {
         mkdir -p "$pr_container"
     fi
 
-    echo "Fetching PR branch..."
-    if ! (cd "$main_repo_path" && git fetch origin "$pr_branch"); then
-        echo "Error: failed to fetch branch"
+    echo "Fetching PR head..."
+    if ! (cd "$main_repo_path" && git fetch origin "pull/${pr_number}/head"); then
+        echo "Error: failed to fetch PR #${pr_number}"
         return 1
     fi
 
     echo "Creating worktree: $worktree_path"
-    if ! git worktree add "$worktree_path" "$pr_branch"; then
+    if ! git worktree add "$worktree_path" FETCH_HEAD; then
         echo "Error: failed to create worktree"
         return 1
     fi
@@ -629,7 +629,10 @@ function _gw_describe() {
                     echo "Error: value is required"
                     return 1
                 fi
-                _gw_set_value "$current_path" "$key" "$value"
+                if ! _gw_set_value "$current_path" "$key" "$value"; then
+                    echo "Error: failed to set ${key}"
+                    return 1
+                fi
                 echo "Set ${key}: $value"
                 ;;
             *)
@@ -754,7 +757,10 @@ function _gw_setup_template() {
             *) echo "Aborted"; return 1 ;;
         esac
     fi
-    cp -v "$template" "${main_repo_path}/.gw.sh"
+    if ! cp -v "$template" "${main_repo_path}/.gw.sh"; then
+        echo "Error: failed to install .gw.sh"
+        return 1
+    fi
     chmod +x "${main_repo_path}/.gw.sh"
 }
 
