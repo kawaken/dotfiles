@@ -165,7 +165,10 @@ function _gw_sync_files() {
     for file in ${(f)"$(awk '/^copy:/ { sub(/^copy:[[:space:]]*/, ""); print }' "$sync_file")"}; do
         [ ! -e "${from}/${file}" ] && continue
         mkdir -p "$(dirname "${to}/${file}")"
-        cp -n "${from}/${file}" "${to}/${file}"
+        if ! cp -n "${from}/${file}" "${to}/${file}"; then
+            echo "Error: failed to copy '${file}'"
+            return 1
+        fi
     done
 
     # symlink
@@ -173,7 +176,10 @@ function _gw_sync_files() {
         [ ! -e "${from}/${file}" ] && continue
         { [ -L "${to}/${file}" ] || [ -e "${to}/${file}" ]; } && continue
         mkdir -p "$(dirname "${to}/${file}")"
-        ln -s "${from}/${file}" "${to}/${file}"
+        if ! ln -s "${from}/${file}" "${to}/${file}"; then
+            echo "Error: failed to symlink '${file}'"
+            return 1
+        fi
     done
 }
 
@@ -183,7 +189,9 @@ function _gw_setup_worktree() {
     shift
     local main_repo_path=$(_gw_main_repo_path)
 
-    _gw_sync_files "$main_repo_path" "$worktree_path"
+    if ! _gw_sync_files "$main_repo_path" "$worktree_path"; then
+        return 1
+    fi
 
     if [ -x "${main_repo_path}/.gw.sh" ]; then
         echo "=== Running .gw.sh ==="
@@ -195,7 +203,10 @@ function _gw_setup_worktree() {
     for kv in "$@"; do
         key="${kv%%=*}"
         value="${kv#*=}"
-        _gw_set_value "$worktree_path" "$key" "$value"
+        if ! _gw_set_value "$worktree_path" "$key" "$value"; then
+            echo "Error: failed to write metadata key '${key}'"
+            return 1
+        fi
     done
 
     cd "$worktree_path"
@@ -730,13 +741,15 @@ function _gw_prune() {
     fi
 
     local selected_lines=(${(f)"$selected"})
+    local failed=0
     for line in "${selected_lines[@]}"; do
         wt_path="${line##*$'\x1f'}"
         if [ -z "$wt_path" ] || [ ! -d "$wt_path" ]; then
             continue
         fi
-        _gw_remove_single "$wt_path" "false" "false" "$main_repo_path"
+        _gw_remove_single "$wt_path" "false" "false" "$main_repo_path" || (( failed++ ))
     done
+    [[ $failed -gt 0 ]] && return 1
 }
 
 # Install .gw.sh template to repository root
@@ -761,7 +774,10 @@ function _gw_setup_template() {
         echo "Error: failed to install .gw.sh"
         return 1
     fi
-    chmod +x "${main_repo_path}/.gw.sh"
+    if ! chmod +x "${main_repo_path}/.gw.sh"; then
+        echo "Error: failed to make .gw.sh executable"
+        return 1
+    fi
 }
 
 # ─── Dispatcher ────────────────────────────────────────────
