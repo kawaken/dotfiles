@@ -31,7 +31,9 @@ function _gw_get_worktree_path() {
         echo "$main_repo_path"
     else
         local shortened_name=$(_gw_shorten_name "$task_name")
-        echo "${parent_dir}/${repo_name}-${shortened_name}"
+        local wt_dir="${parent_dir}/${repo_name}-wt"
+        mkdir -p "$wt_dir"
+        echo "${wt_dir}/${shortened_name}"
     fi
 }
 
@@ -84,10 +86,8 @@ function _gw_make_label() {
     local dir_name=$(basename "$wt_path")
     local parent_name=$(basename "$(dirname "$wt_path")")
 
-    if [[ "$parent_name" == "${repo_name}-PR" ]]; then
-        echo "PR-${dir_name}"
-    elif [[ "$dir_name" == "${repo_name}-"* ]]; then
-        echo "${dir_name#${repo_name}-}"
+    if [[ "$parent_name" == "${repo_name}-wt" ]]; then
+        echo "$dir_name"
     elif [[ "$dir_name" == "$repo_name" ]]; then
         echo "main"
     else
@@ -117,16 +117,16 @@ function _gw_resolve_worktree() {
             echo "$wt_path"
             return 0
         fi
-        # ${repo_name}-${query} pattern
-        if [ "$dir_name" = "${repo_name}-${query}" ]; then
+        # Task worktree: parent is ${repo_name}-wt and basename matches query
+        if [ "$parent_name" = "${repo_name}-wt" ] && [ "$dir_name" = "$query" ]; then
             echo "$wt_path"
             return 0
         fi
-        # PR worktree: parent is ${repo_name}-PR and basename is query
+        # PR worktree: parent is ${repo_name}-wt and basename is PR-${number}
         # Match PR-123, #123, or 123
         q="${query#PR-}"
         q="${q#\#}"
-        if [ "$parent_name" = "${repo_name}-PR" ] && [ "$dir_name" = "$q" ]; then
+        if [ "$parent_name" = "${repo_name}-wt" ] && [ "$dir_name" = "PR-${q}" ]; then
             echo "$wt_path"
             return 0
         fi
@@ -577,8 +577,8 @@ function _gw_review() {
     local main_repo_path=$(_gw_main_repo_path)
     local repo_name=$(basename "$main_repo_path")
     local parent_dir=$(dirname "$main_repo_path")
-    local pr_container="${parent_dir}/${repo_name}-PR"
-    local worktree_path="${pr_container}/${pr_number}"
+    local wt_dir="${parent_dir}/${repo_name}-wt"
+    local worktree_path="${wt_dir}/PR-${pr_number}"
 
     if [ -d "$worktree_path" ]; then
         echo "Moving to existing worktree: $worktree_path"
@@ -586,9 +586,7 @@ function _gw_review() {
         return 0
     fi
 
-    if [ ! -d "$pr_container" ]; then
-        mkdir -p "$pr_container"
-    fi
+    mkdir -p "$wt_dir"
 
     echo "Fetching PR head..."
     if ! (cd "$main_repo_path" && git fetch origin "pull/${pr_number}/head"); then
