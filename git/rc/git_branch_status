@@ -1,36 +1,39 @@
 #!/usr/bin/env zsh
 function get_git_branch_status() {
-  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    return 1
-  fi
+  local rev_info
+  rev_info=$(git rev-parse --is-inside-work-tree --git-dir --abbrev-ref HEAD 2>/dev/null) || return 1
+  local -a rev_lines=("${(@f)rev_info}")
+  local git_dir="${rev_lines[2]}"
+  local branch="${rev_lines[3]}"
 
-  local branch remote ahead behind staged modified untracked email domain output
+  local remote ahead behind staged modified untracked email domain output
   local status_output special_state
 
+  local is_worktree=false
+  [[ "$git_dir" == *"/worktrees/"* ]] && is_worktree=true
+
   special_state=""
-  local git_status_long branch_from_status
-  git_status_long=$(git status 2>/dev/null)
-  
-  if echo "$git_status_long" | grep -qi "rebase in progress"; then
+  local branch_from_status
+  if [[ -d "$git_dir/rebase-merge" ]] || [[ -d "$git_dir/rebase-apply" ]]; then
     special_state="%F{magenta}REBASE%f"
-    branch_from_status=$(echo "$git_status_long" | grep "rebasing branch" | sed "s/.*rebasing branch '\([^']*\)'.*/\1/")
-  elif echo "$git_status_long" | grep -qi "merge in progress"; then
+    if [[ -f "$git_dir/rebase-merge/head-name" ]]; then
+      branch_from_status=$(< "$git_dir/rebase-merge/head-name")
+      branch_from_status="${branch_from_status#refs/heads/}"
+    fi
+  elif [[ -f "$git_dir/MERGE_HEAD" ]]; then
     special_state="%F{red}MERGE%f"
-  elif echo "$git_status_long" | grep -qi "cherry-pick in progress"; then
+  elif [[ -f "$git_dir/CHERRY_PICK_HEAD" ]]; then
     special_state="%F{cyan}CHERRY-PICK%f"
-  elif echo "$git_status_long" | grep -qi "revert in progress"; then
+  elif [[ -f "$git_dir/REVERT_HEAD" ]]; then
     special_state="%F{yellow}REVERT%f"
   fi
 
-  branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
   if [[ -z "$branch" ]] || [[ "$branch" == "HEAD" ]]; then
     branch="${branch_from_status:-unknown}"
   fi
 
-  remote=$(git rev-parse --verify "@{upstream}" --symbolic-full-name 2>/dev/null | sed 's|refs/remotes/||')
-
-  local is_worktree=false
-  [[ "$(git rev-parse --git-dir 2>/dev/null)" == *"/worktrees/"* ]] && is_worktree=true
+  remote=$(git rev-parse --verify "@{upstream}" --symbolic-full-name 2>/dev/null)
+  remote="${remote#refs/remotes/}"
 
   if [[ -n "$remote" ]]; then
     local color="69"
@@ -42,8 +45,10 @@ function get_git_branch_status() {
       branch="%F{${color}}${branch}%f"
     fi
 
-    ahead=$(git rev-list "@{upstream}..HEAD" 2>/dev/null | wc -l | tr -d ' ')
-    behind=$(git rev-list "HEAD..@{upstream}" 2>/dev/null | wc -l | tr -d ' ')
+    local lr
+    lr=$(git rev-list --left-right --count "@{upstream}...HEAD" 2>/dev/null)
+    behind="${lr%%	*}"
+    ahead="${lr##*	}"
 
     if (( ahead > 0 )) || (( behind > 0 )); then
       output+=":"
@@ -73,45 +78,33 @@ function get_git_branch_status() {
   conflicted=0
 
   if [[ -n "$status_output" ]]; then
-    while IFS= read -r line; do
-      if [[ -z "$line" ]]; then
-        continue
-      fi
-
-      local index_status="${line:0:1}"
-      local work_tree_status="${line:1:1}"
-
-      if [[ "$index_status" == "U" ]] || [[ "$work_tree_status" == "U" ]] || 
-         [[ "$index_status" == "A" && "$work_tree_status" == "A" ]] ||
-         [[ "$index_status" == "D" && "$work_tree_status" == "D" ]]; then
-        ((conflicted++))
-      elif [[ "$index_status" != " " ]] && [[ "$index_status" != "?" ]]; then
-        ((staged++))
-      fi
-
-      if [[ "$work_tree_status" != " " ]] && [[ "$index_status" != "?" ]] && 
-          [[ "$work_tree_status" != "U" ]]; then
-        ((modified++))
-      fi
-
-      if [[ "$index_status" == "?" ]]; then
-        ((untracked++))
-      fi
-    done <<< "$status_output"
+    read staged modified untracked conflicted <<< $(
+      echo "$status_output" | awk '{
+        x = substr($0,1,1); y = substr($0,2,1)
+        if (x=="U"||y=="U"||(x=="A"&&y=="A")||(x=="D"&&y=="D")) c++
+        else if (x!=" "&&x!="?") s++
+        if (y!=" "&&x!="?"&&y!="U") m++
+        if (x=="?") u++
+      } END { print s+0, m+0, u+0, c+0 }'
+    )
   fi
 
-  email=$(git config user.email 2>/dev/null)
+  if [[ "$PWD" != "$_git_email_cache_dir" ]]; then
+    _git_email_cache=$(git config user.email 2>/dev/null)
+    _git_email_cache_dir="$PWD"
+  fi
+  email="$_git_email_cache"
   if [[ -n "$email" ]]; then
     domain="${email##*@}"
     domain="%F{magenta}${domain:0:2}%f"
   fi
 
   local final_output="%F{white}[%f${branch}${output}"
-  
+
   if [[ -n "$special_state" ]]; then
     final_output+="|${special_state}"
   fi
-  
+
   final_output+="%F{white}] %f"
 
   local file_status=""

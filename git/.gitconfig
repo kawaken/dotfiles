@@ -14,6 +14,8 @@
   pager = delta
   excludesFile = ~/dotfiles/git/ignore-global
   quotepath = false
+	fsmonitor = true
+	untrackedCache = true
 [alias]
   ad = add
   ba = branch -a
