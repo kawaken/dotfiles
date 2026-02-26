@@ -219,7 +219,7 @@ function _gw_format_worktree_line() {
     local branch="$2"
     local label="$3"
     local show_branch="${4:-auto}"
-    local verbose="${5:-0}"
+    local mode="${5:-normal}"
 
     local purpose=$(_gw_get_description "$worktree_path")
     local age
@@ -246,13 +246,14 @@ function _gw_format_worktree_line() {
 
     [[ -n "$purpose" ]] && right="${right:+${right} }${purpose}"
 
+    if [[ "$mode" == "verbose" ]]; then
+        right="${right:+${right} }${worktree_path}"
+    fi
+
     if [[ -n "$right" ]]; then
         printf '%s\t%s\n' "$left" "$right"
     else
         printf '%s\n' "$left"
-    fi
-    if [[ "$verbose" == "1" ]]; then
-        printf '  %s\n' "$worktree_path"
     fi
 }
 
@@ -420,18 +421,29 @@ function _gw_create() {
 
 # List worktrees
 function _gw_list() {
-    local show_path=0
-    [[ "$1" == "--path" ]] && show_path=1
+    local mode="normal"
+    case "$1" in
+        --path) mode="path" ;;
+        -v) mode="verbose" ;;
+    esac
     local main_repo_path
     main_repo_path=$(_gw_main_repo_path)
     local repo_name=$(basename "$main_repo_path")
     local lines=(${(f)"$(git worktree list)"})
-    local worktree_path branch label
+    local worktree_path branch label age left
     for line in "${lines[@]}"; do
         worktree_path=$(echo "$line" | awk '{print $1}')
         branch=$(echo "$line" | awk '{print $3}')
         label=$(_gw_make_label "$worktree_path" "$repo_name")
-        _gw_format_worktree_line "$worktree_path" "$branch" "$label" "auto" "$show_path"
+        if [[ "$mode" == "path" ]]; then
+            age=$(git -C "$worktree_path" log -1 --format='%cr' 2>/dev/null)
+            age="${age% ago}"
+            left="${label}"
+            [[ -n "$age" ]] && left="${label} (${age})"
+            printf '%s\t%s\n' "$left" "$worktree_path"
+        else
+            _gw_format_worktree_line "$worktree_path" "$branch" "$label" "auto" "$mode"
+        fi
     done
 }
 
@@ -824,7 +836,7 @@ function gw() {
             echo ""
             echo "Commands:"
             echo "  create, cr <task> <desc> Create worktree and switch to it"
-            echo "  list, ls [--path]        List all worktrees (--path: show paths)"
+            echo "  list, ls [--path|-v]     List worktrees (--path: paths, -v: verbose)"
             echo "  remove, rm [task...]     Remove worktree(s) (no args = current)"
             echo "  switch, sw [task|-]      Switch to worktree (no args = main, - = previous)"
             echo "  describe, desc           Show worktree info"
