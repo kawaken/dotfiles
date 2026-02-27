@@ -605,14 +605,14 @@ function _gw_review() {
 
     mkdir -p "$wt_dir"
 
-    echo "Fetching PR head..."
-    if ! (cd "$main_repo_path" && git fetch origin "pull/${pr_number}/head"); then
+    echo "Fetching PR branch..."
+    if ! (cd "$main_repo_path" && git fetch origin "$pr_branch"); then
         echo "Error: failed to fetch PR #${pr_number}"
         return 1
     fi
 
     echo "Creating worktree: $worktree_path"
-    if ! git worktree add "$worktree_path" FETCH_HEAD; then
+    if ! (cd "$main_repo_path" && git worktree add "$worktree_path" "origin/$pr_branch"); then
         echo "Error: failed to create worktree"
         return 1
     fi
