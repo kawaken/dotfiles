@@ -75,3 +75,22 @@ mkdir -p .claude
 ln -s ~/dotfiles/claude/CLAUDE.md ~/.claude/CLAUDE.md
 ln -s ~/dotfiles/claude/commands ~/.claude/commands
 ```
+
+### Claude Code ステータスライン
+
+gitリポジトリ情報、モデル名、コンテキスト使用率、TODO進捗をステータスラインに表示するスクリプト。
+
+表示例: `dotfiles [main] :: [Sonnet 4.6] 23%`
+
+依存: `jq`
+
+`~/.claude/settings.json` に以下を追加:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "~/dotfiles/claude/statusline.sh"
+  }
+}
+```
