@@ -8,6 +8,8 @@ allowed-tools: Bash(printf *), Bash(echo *)
 
 指定されたテキストをクリップボードにコピーするスキル
 
+TRIGGER when: user asks to copy text to clipboard (e.g. "コピーして", "クリップボードに入れて", "copy this")
+
 ## User Invocable
 
 yes
