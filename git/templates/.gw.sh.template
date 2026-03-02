@@ -1,9 +1,0 @@
-#!/bin/zsh
-
-WORKTREE_DIR="$1"
-
-# Claude Code: trust worktree directory
-cp ~/.claude.json ~/.claude.json.bk
-jq --arg path "$WORKTREE_DIR" '.projects[$path].hasTrustDialogAccepted = true' ~/.claude.json.bk > ~/.claude.json
-
-mise trust "$WORKTREE_DIR/"
