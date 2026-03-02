@@ -62,9 +62,8 @@ ln -s dotfiles/zsh/_zshenv .zshenv
 brew install fzf
 echo 'source <(fzf --zsh)' >> .zshrc_local
 
-## delta,forgit
+## delta
 brew install delta
-brew install forgit
 
 # ghosttyの設定
 mkdir -p .config/ghostty
@@ -74,6 +73,7 @@ ln -s ~/{dotfiles,.config}/ghostty/config
 mkdir -p .claude
 ln -s ~/dotfiles/claude/CLAUDE.md ~/.claude/CLAUDE.md
 ln -s ~/dotfiles/claude/commands ~/.claude/commands
+ln -s ~/dotfiles/claude/skills ~/.claude/skills
 ```
 
 ### Claude Code ステータスライン
