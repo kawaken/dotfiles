@@ -38,3 +38,7 @@ This is a personal dotfiles repository containing shell configurations, Git alia
 - Place in `git/bin/` with `git-` prefix
 - Make executable and use zsh shebang
 - Follow existing naming patterns
+
+### Git Command Execution
+- Do NOT chain commands with `&&` when running git in a different directory
+- Run each step as a separate Bash call: first `pwd` to check current location, then `cd <directory>`, then `git subcommand`
