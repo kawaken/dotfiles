@@ -612,7 +612,7 @@ function _gw_review() {
     fi
 
     echo "Creating worktree: $worktree_path"
-    if ! (cd "$main_repo_path" && git worktree add "$worktree_path" "origin/$pr_branch"); then
+    if ! (cd "$main_repo_path" && git worktree add "$worktree_path" "$pr_branch"); then
         echo "Error: failed to create worktree"
         return 1
     fi
