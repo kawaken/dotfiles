@@ -326,19 +326,20 @@ function _gw_remove_single() {
 
 # Create new worktree
 function _gw_create() {
+    local description=""
+    if [[ "$1" == "-p" ]]; then
+        description="$2"
+        shift 2
+    fi
+
     local task_name="$1"
-    local description="$2"
     if [ -z "$task_name" ]; then
         echo "Error: task name is required"
         return 1
     fi
 
     if [ -z "$description" ]; then
-        vared -p "Enter purpose: " description
-        if [ -z "$description" ]; then
-            echo "Error: purpose is required"
-            return 1
-        fi
+        vared -p "Enter purpose (optional): " description
     fi
 
     local branch_name="$task_name"
@@ -410,9 +411,9 @@ function _gw_create() {
         fi
     fi
 
-    if ! _gw_setup_worktree "$worktree_path" \
-        "purpose=${description}" \
-        "original_branch=${branch_name}"; then
+    local setup_args=("$worktree_path" "original_branch=${branch_name}")
+    [[ -n "$description" ]] && setup_args+=("purpose=${description}")
+    if ! _gw_setup_worktree "${setup_args[@]}"; then
         echo "Error: worktree created but setup failed"
         return 1
     fi
@@ -803,7 +804,7 @@ function gw() {
             echo "Usage: gw <command> [options]"
             echo ""
             echo "Commands:"
-            echo "  create, cr <task> <desc> Create worktree and switch to it"
+            echo "  create, cr [-p <purpose>] <task>  Create worktree and switch to it"
             echo "  list, ls [--path|-v]     List worktrees (--path: paths, -v: verbose)"
             echo "  remove, rm [task...]     Remove worktree(s) (no args = current)"
             echo "  switch, sw [task|-]      Switch to worktree (no args = main, - = previous)"
