@@ -157,29 +157,47 @@ function _gw_sync_files() {
     local to="$2"
     local sync_file="${from}/.gw/config"
 
-    [ ! -f "$sync_file" ] && return 0
+    if [ ! -f "$sync_file" ]; then
+        echo "No .gw/config found"
+        return 0
+    fi
 
     local file
 
     # copy
     for file in ${(f)"$(awk '/^copy:/ { sub(/^copy:[[:space:]]*/, ""); print }' "$sync_file")"}; do
-        [ ! -e "${from}/${file}" ] && continue
+        if [ ! -e "${from}/${file}" ]; then
+            echo "copy: ${file} → skipped (source not found)"
+            continue
+        fi
+        if [ -e "${to}/${file}" ]; then
+            echo "copy: ${file} → skipped (already exists)"
+            continue
+        fi
         mkdir -p "$(dirname "${to}/${file}")"
-        if ! cp -n "${from}/${file}" "${to}/${file}"; then
+        if ! cp "${from}/${file}" "${to}/${file}"; then
             echo "Error: failed to copy '${file}'"
             return 1
         fi
+        echo "copy: ${file} → done"
     done
 
     # symlink
     for file in ${(f)"$(awk '/^symlink:/ { sub(/^symlink:[[:space:]]*/, ""); print }' "$sync_file")"}; do
-        [ ! -e "${from}/${file}" ] && continue
-        { [ -L "${to}/${file}" ] || [ -e "${to}/${file}" ]; } && continue
+        if [ ! -e "${from}/${file}" ]; then
+            echo "symlink: ${file} → skipped (source not found)"
+            continue
+        fi
+        if { [ -L "${to}/${file}" ] || [ -e "${to}/${file}" ]; }; then
+            echo "symlink: ${file} → skipped (already exists)"
+            continue
+        fi
         mkdir -p "$(dirname "${to}/${file}")"
         if ! ln -s "${from}/${file}" "${to}/${file}"; then
             echo "Error: failed to symlink '${file}'"
             return 1
         fi
+        echo "symlink: ${file} → done"
     done
 }
 
@@ -800,6 +818,16 @@ function gw() {
             shift
             _gw_prune "$@"
             ;;
+        sync)
+            local current main
+            current=$(git rev-parse --show-toplevel 2>/dev/null)
+            main=$(_gw_main_repo_path)
+            if [[ "$current" == "$main" ]]; then
+                echo "Error: run from a worktree, not the main repository" >&2
+                return 1
+            fi
+            _gw_sync_files "$main" "$current"
+            ;;
         *)
             echo "Usage: gw <command> [options]"
             echo ""
@@ -812,6 +840,7 @@ function gw() {
             echo "    --set purpose=<text>   Set purpose"
             echo "  pr <pr|url>              Create worktree for PR review"
             echo "  prune [--older N]        Select and remove worktrees (--older N: show only N+ days old, default 7)"
+            echo "  sync                     Sync files from main to current worktree"
             ;;
     esac
 }
@@ -869,6 +898,7 @@ function _gw() {
         'desc:Show or set description (alias)'
         'pr:Create worktree for PR review'
         'prune:Select and remove worktrees interactively'
+        'sync:Sync files from main to current worktree'
     )
 
     _arguments -C \
