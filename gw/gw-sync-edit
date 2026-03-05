@@ -39,7 +39,7 @@ if ! command -v fzf > /dev/null 2>&1; then
     exit 1
 fi
 
-repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
+repo_root=$(git worktree list 2>/dev/null | head -n 1 | awk '{print $1}')
 if [[ -z "$repo_root" ]]; then
     echo "Error: not in a git repository" >&2
     exit 1
