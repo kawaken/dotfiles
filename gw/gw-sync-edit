@@ -61,7 +61,7 @@ fi
 state_file="${TMPDIR:-/tmp}/gw-sync-edit.$$"
 trap 'rm -f "$state_file" "${state_file}.tmp"' EXIT INT TERM
 
-sync_file="${repo_root}/.gw-sync-files"
+sync_file="${repo_root}/.gw/config"
 
 typeset -A seen
 if [[ -f "$sync_file" ]]; then

@@ -7,3 +7,4 @@ secrethub.env
 .jira_enabled
 .gw.sh
 .gw-*
+.gw/

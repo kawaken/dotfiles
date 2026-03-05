@@ -151,11 +151,11 @@ function _gw_extract_pr_number() {
     fi
 }
 
-# Sync files listed in .gw-sync-files from source to destination
+# Sync files listed in .gw/config from source to destination
 function _gw_sync_files() {
     local from="$1"
     local to="$2"
-    local sync_file="${from}/.gw-sync-files"
+    local sync_file="${from}/.gw/config"
 
     [ ! -f "$sync_file" ] && return 0
 
@@ -193,10 +193,10 @@ function _gw_setup_worktree() {
         return 1
     fi
 
-    if [ -x "${main_repo_path}/.gw-post-create" ]; then
-        echo "=== Running .gw-post-create ==="
-        "${main_repo_path}/.gw-post-create" "$worktree_path" || return 1
-        echo "=== Done .gw-post-create ==="
+    if [ -x "${main_repo_path}/.gw/hooks/post-create" ]; then
+        echo "=== Running .gw/hooks/post-create ==="
+        "${main_repo_path}/.gw/hooks/post-create" "$worktree_path" || return 1
+        echo "=== Done .gw/hooks/post-create ==="
     fi
 
     local key value
