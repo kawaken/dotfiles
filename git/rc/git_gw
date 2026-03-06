@@ -167,11 +167,11 @@ function _gw_sync_files() {
     # copy
     for file in ${(f)"$(awk '/^copy:/ { sub(/^copy:[[:space:]]*/, ""); print }' "$sync_file")"}; do
         if [ ! -e "${from}/${file}" ]; then
-            echo "copy: ${file} → skipped (source not found)"
+            echo "[SKIP] copy: ${file} (source not found)"
             continue
         fi
         if [ -e "${to}/${file}" ]; then
-            echo "copy: ${file} → skipped (already exists)"
+            echo "[SKIP] copy: ${file} (already exists)"
             continue
         fi
         mkdir -p "$(dirname "${to}/${file}")"
@@ -179,17 +179,17 @@ function _gw_sync_files() {
             echo "Error: failed to copy '${file}'"
             return 1
         fi
-        echo "copy: ${file} → done"
+        echo "[DONE] copy: ${file}"
     done
 
     # symlink
     for file in ${(f)"$(awk '/^symlink:/ { sub(/^symlink:[[:space:]]*/, ""); print }' "$sync_file")"}; do
         if [ ! -e "${from}/${file}" ]; then
-            echo "symlink: ${file} → skipped (source not found)"
+            echo "[SKIP] symlink: ${file} (source not found)"
             continue
         fi
         if { [ -L "${to}/${file}" ] || [ -e "${to}/${file}" ]; }; then
-            echo "symlink: ${file} → skipped (already exists)"
+            echo "[SKIP] symlink: ${file} (already exists)"
             continue
         fi
         mkdir -p "$(dirname "${to}/${file}")"
@@ -197,7 +197,7 @@ function _gw_sync_files() {
             echo "Error: failed to symlink '${file}'"
             return 1
         fi
-        echo "symlink: ${file} → done"
+        echo "[DONE] symlink: ${file}"
     done
 }
 
