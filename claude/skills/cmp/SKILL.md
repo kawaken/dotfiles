@@ -1,8 +1,16 @@
 # Commit and Push
 
+## Description
+
 変更をコミットしてプッシュする。
 
-## 手順
+TRIGGER when: user invokes `/cmp`, "コミットしてプッシュ", "コミットして"
+
+## User Invocable
+
+yes
+
+## Instructions
 
 1. `git status` で変更を確認
 2. 変更がなければ終了

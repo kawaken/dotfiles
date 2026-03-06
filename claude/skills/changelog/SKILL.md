@@ -1,8 +1,16 @@
 # Claude Code Changelog
 
+## Description
+
 Claude Codeの最近のアップデート内容を確認する。
 
-## 手順
+TRIGGER when: user invokes `/changelog`, "最近のアップデート", "更新内容", "何が変わった"
+
+## User Invocable
+
+yes
+
+## Instructions
 
 1. WebFetchで `https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md` を取得する
    - 失敗した場合は「ネットワークに接続できへんから、手動で確認してな」と伝えて終了
