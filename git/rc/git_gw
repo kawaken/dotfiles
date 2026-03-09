@@ -320,6 +320,12 @@ function _gw_remove_single() {
         fi
     fi
 
+    if [ -x "${main_repo_path}/.gw/hooks/pre-remove" ]; then
+        echo "=== Running .gw/hooks/pre-remove ==="
+        "${main_repo_path}/.gw/hooks/pre-remove" "$worktree_path" || return 1
+        echo "=== Done .gw/hooks/pre-remove ==="
+    fi
+
     current_branch=$(git -C "$worktree_path" branch --show-current 2>/dev/null)
 
     cd "$main_repo_path"
