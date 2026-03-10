@@ -76,6 +76,32 @@ ln -s ~/dotfiles/claude/commands ~/.claude/commands
 ln -s ~/dotfiles/claude/skills ~/.claude/skills
 ```
 
+### Claude Code Hooks
+
+Bashコマンドのバリデーション（cd チェイン防止等）を行うフック。
+
+依存: `jq`
+
+`~/.claude/settings.json` に以下を追加:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/dotfiles/claude/hooks/validate-bash.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
 ### Claude Code ステータスライン
 
 gitリポジトリ情報、モデル名、コンテキスト使用率、TODO進捗をステータスラインに表示するスクリプト。
