@@ -95,7 +95,7 @@ function _gw_make_label() {
     fi
 }
 
-# Return all worktrees sorted by most recent commit as lines: path\x1fbranch\x1fage\x1ftimestamp
+# Return all worktrees sorted by most recent commit as lines: path\tbranch\tage\ttimestamp
 function _gw_sorted_worktrees() {
     local -a entries=()
     local lines=(${(f)"$(git worktree list)"})
@@ -107,9 +107,9 @@ function _gw_sorted_worktrees() {
         ts="${log_output%% *}"
         age="${log_output#* }"
         age="${age% ago}"
-        entries+=("${ts:-0}"$'\x1f'"${wt_path}"$'\x1f'"${branch}"$'\x1f'"${age}"$'\x1f'"${ts:-0}")
+        entries+=("${ts:-0}"$'\t'"${wt_path}"$'\t'"${branch}"$'\t'"${age}"$'\t'"${ts:-0}")
     done
-    printf '%s\n' "${entries[@]}" | sort -rnk1 -t $'\x1f' | cut -d $'\x1f' -f2-
+    printf '%s\n' "${entries[@]}" | sort -rnk1 -t $'\t' | cut -d $'\t' -f2-
 }
 
 # Resolve worktree path from query using git worktree list
@@ -474,15 +474,10 @@ function _gw_list() {
     main_repo_path=$(_gw_main_repo_path)
     local repo_name=$(basename "$main_repo_path")
 
-    local sep=$'\x1f'
     local sorted_lines=(${(f)"$(_gw_sorted_worktrees)"})
-    local worktree_path wt_br wt_age label left rest
+    local worktree_path wt_br wt_age label left
     for line in "${sorted_lines[@]}"; do
-        worktree_path="${line%%${sep}*}"
-        rest="${line#*${sep}}"
-        wt_br="${rest%%${sep}*}"
-        rest="${rest#*${sep}}"
-        wt_age="${rest%%${sep}*}"
+        IFS=$'\t' read -r worktree_path wt_br wt_age _ <<< "$line"
         label=$(_gw_make_label "$worktree_path" "$repo_name")
         if [[ "$mode" == "path" ]]; then
             left="${label}"
@@ -753,20 +748,15 @@ function _gw_prune() {
     local main_repo_path
     main_repo_path=$(_gw_main_repo_path)
     local repo_name=$(basename "$main_repo_path")
-    local candidates=()
+    local -a wt_paths=()
+    local -a display=()
     local now=$(date +%s)
 
-    local sep=$'\x1f'
     local sorted_lines=(${(f)"$(_gw_sorted_worktrees)"})
-    local wt_path wt_br wt_age wt_ts label formatted elapsed_days rest
+    local wt_path wt_br wt_age wt_ts label formatted elapsed_days
     for line in "${sorted_lines[@]}"; do
-        wt_path="${line%%${sep}*}"
+        IFS=$'\t' read -r wt_path wt_br wt_age wt_ts <<< "$line"
         [[ "$wt_path" == "$main_repo_path" ]] && continue
-        rest="${line#*${sep}}"
-        wt_br="${rest%%${sep}*}"
-        rest="${rest#*${sep}}"
-        wt_age="${rest%%${sep}*}"
-        wt_ts="${rest#*${sep}}"
 
         if [[ $older_days -gt 0 ]]; then
             if [[ -z "$wt_ts" ]] || [[ "$wt_ts" == "0" ]]; then
@@ -780,39 +770,45 @@ function _gw_prune() {
 
         label=$(_gw_make_label "$wt_path" "$repo_name")
         formatted=$(_gw_format_worktree_line "$wt_path" "$wt_br" "$label" "auto" "normal" "$wt_age")
-        candidates+=("${formatted}"$'\x1f'"${wt_path}")
+        wt_paths+=("$wt_path")
+        display+=("$formatted")
     done
 
-    if [ ${#candidates[@]} -eq 0 ]; then
+    if [ ${#wt_paths[@]} -eq 0 ]; then
         echo "No worktrees to prune"
         return 0
     fi
 
     local selected
-    selected=$(printf '%s\n' "${candidates[@]}" | \
+    selected=$(
+        for (( i=1; i<=${#display[@]}; i++ )); do
+            printf '%d\t%s\n' "$i" "${display[$i]}"
+        done | \
         fzf --multi \
             --no-mouse \
+            --tac \
             --height='~40%' \
             --header='Tab: toggle, Ctrl-A: select all, Ctrl-D: deselect all, Enter: delete, ESC: cancel' \
             --bind 'ctrl-a:select-all,ctrl-d:deselect-all' \
-            --with-nth=1 \
-            --delimiter=$'\x1f')
+            --with-nth=2.. \
+            --delimiter=$'\t')
 
     if [ -z "$selected" ]; then
         echo "Cancelled"
         return 0
     fi
 
-    local selected_lines=(${(f)"$selected"})
+    local -a indices
+    indices=($(awk -F'\t' '{print $1}' <<< "$selected"))
     local failed=0
-    for line in "${selected_lines[@]}"; do
-        wt_path="${line##*$'\x1f'}"
+    for idx in "${indices[@]}"; do
+        wt_path="${wt_paths[$idx]}"
         if [ -z "$wt_path" ] || [ ! -d "$wt_path" ]; then
             continue
         fi
         _gw_remove_single "$wt_path" "false" "false" "$main_repo_path" || (( failed++ ))
     done
-    [[ $failed -gt 0 ]] && return 1
+    [[ $failed -gt 0 ]] && return 1 || return 0
 }
 
 # ─── Dispatcher ────────────────────────────────────────────
@@ -887,14 +883,10 @@ function _gw_worktree_tasks() {
     repo_name=$(basename "$main_repo_path")
     tasks=()
 
-    local sep=$'\x1f'
     local sorted_lines=(${(f)"$(_gw_sorted_worktrees 2>/dev/null)"})
-    local wt_path wt_age purpose wt_label desc rest
+    local wt_path wt_age purpose wt_label desc
     for line in "${sorted_lines[@]}"; do
-        wt_path="${line%%${sep}*}"
-        rest="${line#*${sep}}"
-        rest="${rest#*${sep}}"
-        wt_age="${rest%%${sep}*}"
+        IFS=$'\t' read -r wt_path _ wt_age _ <<< "$line"
         wt_label=$(_gw_make_label "$wt_path" "$repo_name")
         purpose=$(_gw_get_description "$wt_path")
 
@@ -909,7 +901,7 @@ function _gw_worktree_tasks() {
         fi
     done
 
-    [[ ${#tasks[@]} -gt 0 ]] && _describe -t tasks 'worktree task' tasks
+    [[ ${#tasks[@]} -gt 0 ]] && _describe -V -t tasks 'worktree task' tasks
 }
 
 # Completion function
