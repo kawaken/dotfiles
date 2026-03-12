@@ -95,6 +95,23 @@ function _gw_make_label() {
     fi
 }
 
+# Return all worktrees sorted by most recent commit as lines: path\x1fbranch\x1fage\x1ftimestamp
+function _gw_sorted_worktrees() {
+    local -a entries=()
+    local lines=(${(f)"$(git worktree list)"})
+    local wt_path branch ts age log_output
+    for line in "${lines[@]}"; do
+        wt_path=$(echo "$line" | awk '{print $1}')
+        branch=$(echo "$line" | awk '{print $3}')
+        log_output=$(git -C "$wt_path" log -1 --format='%ct %cr' 2>/dev/null)
+        ts="${log_output%% *}"
+        age="${log_output#* }"
+        age="${age% ago}"
+        entries+=("${ts:-0}"$'\x1f'"${wt_path}"$'\x1f'"${branch}"$'\x1f'"${age}"$'\x1f'"${ts:-0}")
+    done
+    printf '%s\n' "${entries[@]}" | sort -rnk1 -t $'\x1f' | cut -d $'\x1f' -f2-
+}
+
 # Resolve worktree path from query using git worktree list
 function _gw_resolve_worktree() {
     local query="$1"
@@ -238,11 +255,13 @@ function _gw_format_worktree_line() {
     local label="$3"
     local show_branch="${4:-auto}"
     local mode="${5:-normal}"
+    local age="${6:-}"
 
     local purpose=$(_gw_get_description "$worktree_path")
-    local age
-    age=$(git -C "$worktree_path" log -1 --format='%cr' 2>/dev/null)
-    age="${age% ago}"
+    if [[ -z "$age" ]]; then
+        age=$(git -C "$worktree_path" log -1 --format='%cr' 2>/dev/null)
+        age="${age% ago}"
+    fi
 
     local branch_name="${branch#\[}"
     branch_name="${branch_name%\]}"
@@ -454,20 +473,20 @@ function _gw_list() {
     local main_repo_path
     main_repo_path=$(_gw_main_repo_path)
     local repo_name=$(basename "$main_repo_path")
-    local lines=(${(f)"$(git worktree list)"})
-    local worktree_path branch label age left
-    for line in "${lines[@]}"; do
-        worktree_path=$(echo "$line" | awk '{print $1}')
-        branch=$(echo "$line" | awk '{print $3}')
+
+    local sorted_lines=(${(f)"$(_gw_sorted_worktrees)"})
+    local worktree_path wt_br wt_age label left
+    for line in "${sorted_lines[@]}"; do
+        worktree_path="${line%%$'\x1f'*}"
+        wt_br="${${line#*$'\x1f'}%%$'\x1f'*}"
+        wt_age="${${line#*$'\x1f'*$'\x1f'}%%$'\x1f'*}"
         label=$(_gw_make_label "$worktree_path" "$repo_name")
         if [[ "$mode" == "path" ]]; then
-            age=$(git -C "$worktree_path" log -1 --format='%cr' 2>/dev/null)
-            age="${age% ago}"
             left="${label}"
-            [[ -n "$age" ]] && left="${label} (${age})"
+            [[ -n "$wt_age" ]] && left="${label} (${wt_age})"
             printf '%s\t%s\n' "$left" "$worktree_path"
         else
-            _gw_format_worktree_line "$worktree_path" "$branch" "$label" "auto" "$mode"
+            _gw_format_worktree_line "$worktree_path" "$wt_br" "$label" "auto" "$mode" "$wt_age"
         fi
     done
 }
@@ -734,29 +753,27 @@ function _gw_prune() {
     local candidates=()
     local now=$(date +%s)
 
-    local worktree_lines=(${(f)"$(git worktree list)"})
-    local wt_path branch label formatted commit_ts elapsed_days
-    for line in "${worktree_lines[@]}"; do
-        wt_path=$(echo "$line" | awk '{print $1}')
-        branch=$(echo "$line" | awk '{print $3}')
-
-        if [ "$wt_path" = "$main_repo_path" ]; then
-            continue
-        fi
+    local sorted_lines=(${(f)"$(_gw_sorted_worktrees)"})
+    local wt_path wt_br wt_age wt_ts label formatted elapsed_days
+    for line in "${sorted_lines[@]}"; do
+        wt_path="${line%%$'\x1f'*}"
+        [[ "$wt_path" == "$main_repo_path" ]] && continue
+        wt_br="${${line#*$'\x1f'}%%$'\x1f'*}"
+        wt_age="${${line#*$'\x1f'*$'\x1f'}%%$'\x1f'*}"
+        wt_ts="${line##*$'\x1f'}"
 
         if [[ $older_days -gt 0 ]]; then
-            commit_ts=$(git -C "$wt_path" log -1 --format='%ct' 2>/dev/null)
-            if [[ -z "$commit_ts" ]]; then
+            if [[ -z "$wt_ts" ]] || [[ "$wt_ts" == "0" ]]; then
                 continue
             fi
-            elapsed_days=$(( (now - commit_ts) / 86400 ))
+            elapsed_days=$(( (now - wt_ts) / 86400 ))
             if [[ $elapsed_days -lt $older_days ]]; then
                 continue
             fi
         fi
 
         label=$(_gw_make_label "$wt_path" "$repo_name")
-        formatted=$(_gw_format_worktree_line "$wt_path" "$branch" "$label")
+        formatted=$(_gw_format_worktree_line "$wt_path" "$wt_br" "$label" "auto" "normal" "$wt_age")
         candidates+=("${formatted}"$'\x1f'"${wt_path}")
     done
 
@@ -862,18 +879,18 @@ function _gw_worktree_tasks() {
     [[ -z "$main_repo_path" ]] && return
 
     repo_name=$(basename "$main_repo_path")
-    tasks=("main")
+    tasks=()
 
-    local worktree_paths=(${(f)"$(git worktree list 2>/dev/null | awk 'NR>1 {print $1}')"})
-    local purpose wt_label age desc
-    for wt_path in "${worktree_paths[@]}"; do
+    local sorted_lines=(${(f)"$(_gw_sorted_worktrees 2>/dev/null)"})
+    local wt_path wt_br wt_age purpose wt_label desc
+    for line in "${sorted_lines[@]}"; do
+        wt_path="${line%%$'\x1f'*}"
+        wt_age="${${line#*$'\x1f'*$'\x1f'}%%$'\x1f'*}"
         wt_label=$(_gw_make_label "$wt_path" "$repo_name")
         purpose=$(_gw_get_description "$wt_path")
-        age=$(git -C "$wt_path" log -1 --format='%cr' 2>/dev/null)
-        age="${age% ago}"
 
         desc=""
-        [[ -n "$age" ]] && desc="(${age})"
+        [[ -n "$wt_age" ]] && desc="(${wt_age})"
         [[ -n "$purpose" ]] && desc="${desc:+${desc} }${purpose}"
 
         if [[ -n "$desc" ]]; then
