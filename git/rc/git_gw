@@ -670,6 +670,10 @@ function _gw_review() {
     fi
     echo "Created worktree for PR #${pr_number}: $worktree_path"
     echo "Title: $pr_title"
+
+    if [ -x "${main_repo_path}/.gw/hooks/post-review" ]; then
+        "${main_repo_path}/.gw/hooks/post-review" "$worktree_path" "$pr_number" "$pr_url"
+    fi
 }
 
 # Show or set description for current worktree
@@ -835,7 +839,7 @@ function gw() {
             shift
             _gw_describe "$@"
             ;;
-        pr)
+        review|pr)
             shift
             _gw_review "$@"
             ;;
@@ -863,7 +867,7 @@ function gw() {
             echo "  switch, sw [task|-]      Switch to worktree (no args = main, - = previous)"
             echo "  describe, desc           Show worktree info"
             echo "    --set purpose=<text>   Set purpose"
-            echo "  pr <pr|url>              Create worktree for PR review"
+            echo "  review, pr <pr|url>      Create worktree for PR review"
             echo "  prune [--older N]        Select and remove worktrees (--older N: show only N+ days old, default 7)"
             echo "  sync                     Sync files from main to current worktree"
             ;;
@@ -920,7 +924,8 @@ function _gw() {
         'sw:Switch to worktree (alias)'
         'describe:Show or set description'
         'desc:Show or set description (alias)'
-        'pr:Create worktree for PR review'
+        'review:Create worktree for PR review'
+        'pr:Create worktree for PR review (alias)'
         'prune:Select and remove worktrees interactively'
         'sync:Sync files from main to current worktree'
     )
@@ -938,7 +943,7 @@ function _gw() {
                 remove|rm|switch|sw)
                     _gw_worktree_tasks
                     ;;
-                create|cr|pr)
+                create|cr|review|pr)
                     ;;
             esac
             ;;
