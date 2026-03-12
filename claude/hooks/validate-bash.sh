@@ -2,6 +2,12 @@
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command')
 
+# 連続したクォート文字をブロック（'" や "' は複雑なクォーティングの兆候）
+if [[ "$COMMAND" == *"'\""* ]] || [[ "$COMMAND" == *"\"'"* ]]; then
+  echo "Blocked: 連続したクォート文字 ('\" or \"') を検出しました。クォーティングを見直し、複雑なフィルターは別ファイルに書いてください。" >&2
+  exit 2
+fi
+
 # cd と他コマンドのチェインをブロック（cd は単独のBash呼び出しで実行すべき）
 if echo "$COMMAND" | grep -qE 'cd\s+.*&&|cd\s+.*;'; then
   echo "Blocked: cd は単独のBash呼び出しで実行してください。&& や ; で他のコマンドとチェインしないでください。" >&2
