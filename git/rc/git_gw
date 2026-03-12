@@ -474,12 +474,15 @@ function _gw_list() {
     main_repo_path=$(_gw_main_repo_path)
     local repo_name=$(basename "$main_repo_path")
 
+    local sep=$'\x1f'
     local sorted_lines=(${(f)"$(_gw_sorted_worktrees)"})
-    local worktree_path wt_br wt_age label left
+    local worktree_path wt_br wt_age label left rest
     for line in "${sorted_lines[@]}"; do
-        worktree_path="${line%%$'\x1f'*}"
-        wt_br="${${line#*$'\x1f'}%%$'\x1f'*}"
-        wt_age="${${line#*$'\x1f'*$'\x1f'}%%$'\x1f'*}"
+        worktree_path="${line%%${sep}*}"
+        rest="${line#*${sep}}"
+        wt_br="${rest%%${sep}*}"
+        rest="${rest#*${sep}}"
+        wt_age="${rest%%${sep}*}"
         label=$(_gw_make_label "$worktree_path" "$repo_name")
         if [[ "$mode" == "path" ]]; then
             left="${label}"
@@ -753,14 +756,17 @@ function _gw_prune() {
     local candidates=()
     local now=$(date +%s)
 
+    local sep=$'\x1f'
     local sorted_lines=(${(f)"$(_gw_sorted_worktrees)"})
-    local wt_path wt_br wt_age wt_ts label formatted elapsed_days
+    local wt_path wt_br wt_age wt_ts label formatted elapsed_days rest
     for line in "${sorted_lines[@]}"; do
-        wt_path="${line%%$'\x1f'*}"
+        wt_path="${line%%${sep}*}"
         [[ "$wt_path" == "$main_repo_path" ]] && continue
-        wt_br="${${line#*$'\x1f'}%%$'\x1f'*}"
-        wt_age="${${line#*$'\x1f'*$'\x1f'}%%$'\x1f'*}"
-        wt_ts="${line##*$'\x1f'}"
+        rest="${line#*${sep}}"
+        wt_br="${rest%%${sep}*}"
+        rest="${rest#*${sep}}"
+        wt_age="${rest%%${sep}*}"
+        wt_ts="${rest#*${sep}}"
 
         if [[ $older_days -gt 0 ]]; then
             if [[ -z "$wt_ts" ]] || [[ "$wt_ts" == "0" ]]; then
@@ -881,11 +887,14 @@ function _gw_worktree_tasks() {
     repo_name=$(basename "$main_repo_path")
     tasks=()
 
+    local sep=$'\x1f'
     local sorted_lines=(${(f)"$(_gw_sorted_worktrees 2>/dev/null)"})
-    local wt_path wt_br wt_age purpose wt_label desc
+    local wt_path wt_age purpose wt_label desc rest
     for line in "${sorted_lines[@]}"; do
-        wt_path="${line%%$'\x1f'*}"
-        wt_age="${${line#*$'\x1f'*$'\x1f'}%%$'\x1f'*}"
+        wt_path="${line%%${sep}*}"
+        rest="${line#*${sep}}"
+        rest="${rest#*${sep}}"
+        wt_age="${rest%%${sep}*}"
         wt_label=$(_gw_make_label "$wt_path" "$repo_name")
         purpose=$(_gw_get_description "$wt_path")
 
