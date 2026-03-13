@@ -26,6 +26,12 @@ if echo "$COMMAND" | grep -qE '\bjq\b' && ! echo "$COMMAND" | grep -qE '\bjq\s+(
   fi
 fi
 
+# 絶対パスでの bin/rails, bin/rubocop 実行をブロック（cd してから実行すべき）
+if echo "$COMMAND" | grep -qE '^/.*bin/(rails|rubocop)'; then
+  echo "Blocked: 絶対パスでの bin/rails / bin/rubocop 実行は禁止です。cd でディレクトリ移動してから実行してください。" >&2
+  exit 2
+fi
+
 # gh --jq の長いフィルターをブロック
 if echo "$COMMAND" | grep -qE 'gh\s+.*--jq\s'; then
   GH_JQ_FILTER=$(echo "$COMMAND" | grep -oE "\-\-jq\s+'[^']*'" | head -1 | grep -oE "'[^']*'" | tr -d "'")
