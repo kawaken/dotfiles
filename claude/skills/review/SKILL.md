@@ -1,6 +1,6 @@
-# PR Review Skill
-1. Read the PR diff only (use `git diff main...HEAD` or provided diff)
-2. Only comment on files in the diff - never mention out-of-scope files
-3. Check for: security issues, logic errors, missing tests, naming consistency
-4. Output format: list findings as [CRITICAL], [SUGGESTION], or [NIT]
-5. If no issues found, say "クリーンなPRです" with brief summary
+# PRレビュースキル
+1. PRのdiffのみを読む（`git diff main...HEAD` または提供されたdiffを使用）
+2. diff内のファイルのみコメントする - スコープ外のファイルには言及しない
+3. セキュリティ問題・ロジックエラー・テスト不足・命名の一貫性を確認する
+4. 出力形式：指摘を [CRITICAL]、[SUGGESTION]、[NIT] で分類してリスト表示する
+5. 問題がなければ「クリーンなPRです」と簡潔なサマリーを表示する

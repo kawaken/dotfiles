@@ -1,7 +1,7 @@
-# PR Creation Skill
-1. Run tests/type-checks before proceeding
-2. Generate PR title using conventional commits (feat/fix/refactor) based on actual changes
-3. PR body: summarize ONLY what the diff changes from base branch
-4. Never include local file paths or implementation speculation
-5. Create as draft PR unless told otherwise
-6. Always confirm title prefix with user before creating
+# PR作成スキル
+1. 実行前にテスト・型チェックを実行する
+2. 実際の変更内容に基づきconventional commits（feat/fix/refactor）でPRタイトルを生成する
+3. PR本文：ベースブランチからのdiffで変わった内容のみを要約する
+4. ローカルファイルパスや実装の推測は含めない
+5. 特に指示がなければdraft PRとして作成する
+6. 作成前に必ずタイトルのプレフィックスをユーザーに確認する
