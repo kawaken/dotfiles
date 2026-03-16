@@ -26,9 +26,15 @@ if echo "$COMMAND" | grep -qE '\bjq\b' && ! echo "$COMMAND" | grep -qE '\bjq\s+(
   fi
 fi
 
-# 絶対パスでの bin/rails, bin/rubocop 実行をブロック（cd してから実行すべき）
-if echo "$COMMAND" | grep -qE '^/.*bin/(rails|rubocop)'; then
-  echo "Blocked: 絶対パスでの bin/rails / bin/rubocop 実行は禁止です。cd でディレクトリ移動してから実行してください。" >&2
+# コマンド自体がフルパス（/ で始まる）での実行をブロック（cd してから実行すべき）
+if echo "$COMMAND" | grep -qE '^/'; then
+  echo "Blocked: コマンドをフルパスで実行しないでください。cd でディレクトリ移動してから実行してください。" >&2
+  exit 2
+fi
+
+# 作業ディレクトリ指定オプション + 絶対パスをブロック（git -C, yarn --cwd, npm --prefix 等）
+if echo "$COMMAND" | grep -qE '(-C|--cwd|--prefix|--directory)\s+/'; then
+  echo "Blocked: -C / --cwd / --prefix 等のオプションでフルパスを指定しないでください。cd でディレクトリ移動してから実行してください。" >&2
   exit 2
 fi
 

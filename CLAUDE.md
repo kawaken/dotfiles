@@ -42,3 +42,5 @@ This is a personal dotfiles repository containing shell configurations, Git alia
 ### Git Command Execution
 - Do NOT chain commands with `&&` when running git in a different directory
 - Run each step as a separate Bash call: first `pwd` to check current location, then `cd <directory>`, then `git subcommand`
+- Do NOT use `-C`, `--cwd`, `--prefix`, or `--directory` options with absolute paths (e.g., `git -C /path/to/repo`)
+- Do NOT execute commands using absolute paths (e.g., `/path/to/bin/rails`); use `cd` first, then run with relative path
