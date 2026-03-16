@@ -739,15 +739,27 @@ function _gw_prune() {
     fi
 
     local older_days=0
-    if [[ "$1" == "--older" ]]; then
-        if [[ "$2" =~ ^[0-9]+$ ]]; then
-            older_days="$2"
-            shift 2
-        else
-            older_days=7
-            shift 1
-        fi
-    fi
+    local has_force=false
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --older)
+                if [[ "$2" =~ ^[0-9]+$ ]]; then
+                    older_days="$2"
+                    shift 2
+                else
+                    older_days=7
+                    shift 1
+                fi
+                ;;
+            --force|-f)
+                has_force=true
+                shift
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
 
     local main_repo_path
     main_repo_path=$(_gw_main_repo_path)
@@ -804,13 +816,20 @@ function _gw_prune() {
 
     local -a indices
     indices=($(awk -F'\t' '{print $1}' <<< "$selected"))
+    echo "Removing:"
+    for idx in "${indices[@]}"; do
+        wt_path="${wt_paths[$idx]}"
+        [[ -z "$wt_path" ]] || [[ ! -d "$wt_path" ]] && continue
+        echo "  ${display[$idx]}"
+    done
+    echo ""
     local failed=0
     for idx in "${indices[@]}"; do
         wt_path="${wt_paths[$idx]}"
         if [ -z "$wt_path" ] || [ ! -d "$wt_path" ]; then
             continue
         fi
-        _gw_remove_single "$wt_path" "false" "false" "$main_repo_path" || (( failed++ ))
+        _gw_remove_single "$wt_path" "false" "$has_force" "$main_repo_path" || (( failed++ ))
     done
     [[ $failed -gt 0 ]] && return 1 || return 0
 }
