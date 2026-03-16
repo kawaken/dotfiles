@@ -168,6 +168,44 @@ function _gw_extract_pr_number() {
     fi
 }
 
+# Run a hook script with common GW_* environment variables
+# Usage: _gw_run_hook <hook_path> <subcommand> <worktree_path> <main_repo_path> [KEY=val ...] -- [hook args...]
+function _gw_run_hook() {
+    local hook_path="$1"
+    local subcommand="$2"
+    local worktree_path="$3"
+    local main_repo_path="$4"
+    shift 4
+    [ -x "$hook_path" ] || return 0
+
+    local -a extra_env=() hook_args=()
+    local found_sep=false
+    local arg
+    for arg in "$@"; do
+        if [[ "$arg" == "--" ]]; then
+            found_sep=true
+            continue
+        fi
+        if $found_sep; then
+            hook_args+=("$arg")
+        else
+            extra_env+=("$arg")
+        fi
+    done
+
+    local hook_name=$(basename "$hook_path")
+    echo "=== Running .gw/hooks/${hook_name} ==="
+    env \
+        GW_SUBCOMMAND="$subcommand" \
+        GW_TASK_NAME="$(basename "$worktree_path")" \
+        GW_WORKTREE_PATH="$worktree_path" \
+        GW_MAIN_REPO="$main_repo_path" \
+        GW_DESCRIPTION="$(_gw_get_description "$worktree_path")" \
+        "${extra_env[@]}" \
+        "$hook_path" "${hook_args[@]}" || return 1
+    echo "=== Done .gw/hooks/${hook_name} ==="
+}
+
 # Sync files listed in .gw/config from source to destination
 function _gw_sync_files() {
     local from="$1"
@@ -228,12 +266,6 @@ function _gw_setup_worktree() {
         return 1
     fi
 
-    if [ -x "${main_repo_path}/.gw/hooks/post-create" ]; then
-        echo "=== Running .gw/hooks/post-create ==="
-        "${main_repo_path}/.gw/hooks/post-create" "$worktree_path" || return 1
-        echo "=== Done .gw/hooks/post-create ==="
-    fi
-
     local key value
     for kv in "$@"; do
         key="${kv%%=*}"
@@ -243,6 +275,9 @@ function _gw_setup_worktree() {
             return 1
         fi
     done
+
+    _gw_run_hook "${main_repo_path}/.gw/hooks/post-create" create "$worktree_path" "$main_repo_path" \
+        -- "$worktree_path" || return 1
 
     cd "$worktree_path"
 }
@@ -339,11 +374,8 @@ function _gw_remove_single() {
         fi
     fi
 
-    if [ -x "${main_repo_path}/.gw/hooks/pre-remove" ]; then
-        echo "=== Running .gw/hooks/pre-remove ==="
-        "${main_repo_path}/.gw/hooks/pre-remove" "$worktree_path" || return 1
-        echo "=== Done .gw/hooks/pre-remove ==="
-    fi
+    _gw_run_hook "${main_repo_path}/.gw/hooks/pre-remove" remove "$worktree_path" "$main_repo_path" \
+        -- "$worktree_path" || return 1
 
     current_branch=$(git -C "$worktree_path" branch --show-current 2>/dev/null)
 
@@ -671,9 +703,9 @@ function _gw_review() {
     echo "Created worktree for PR #${pr_number}: $worktree_path"
     echo "Title: $pr_title"
 
-    if [ -x "${main_repo_path}/.gw/hooks/post-review" ]; then
-        "${main_repo_path}/.gw/hooks/post-review" "$worktree_path" "$pr_number" "$pr_url"
-    fi
+    _gw_run_hook "${main_repo_path}/.gw/hooks/post-review" review "$worktree_path" "$main_repo_path" \
+        GW_PR_NUMBER="$pr_number" GW_PR_URL="$pr_url" GW_PR_TITLE="$pr_title" \
+        -- "$worktree_path" "$pr_number" "$pr_url"
 }
 
 # Show or set description for current worktree
