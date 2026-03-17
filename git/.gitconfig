@@ -47,6 +47,7 @@
 	si = switch-issue
 	ca = commit --amend --no-edit
 	ro = !git fetch && git rebase --autostash origin/main
+	skipped = !git ls-files -v | grep \"^S\"
 
 [init]
   defaultBranch = main
