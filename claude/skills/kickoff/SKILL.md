@@ -28,6 +28,8 @@ yes
 
 例: `/rename add-permission-check`、`/rename fix-login-bug`、`/rename refactor-auth`
 
+**重要**: `/rename` を提示したら、そこで一旦出力を止めてユーザーの応答を待つこと。リネーム完了後またはスキップの意思表示を受けてから、ステップ1以降に進む。
+
 ---
 
 ### ステップ1: タスク規模の確認
