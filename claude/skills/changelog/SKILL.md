@@ -1,3 +1,7 @@
+---
+allowed-tools: WebFetch
+---
+
 # Claude Code Changelog
 
 ## Description
