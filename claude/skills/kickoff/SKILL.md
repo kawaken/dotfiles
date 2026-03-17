@@ -28,7 +28,42 @@ yes
 
 例: `/rename add-permission-check`、`/rename fix-login-bug`、`/rename refactor-auth`
 
-**重要**: `/rename` を提示したら、そこで一旦出力を止めてユーザーの応答を待つこと。リネーム完了後またはスキップの意思表示を受けてから、ステップ1以降に進む。
+**重要**: `/rename` を提示したら、そこで一旦出力を止めてユーザーの応答を待つこと。リネーム完了後またはスキップの意思表示を受けてから、ステップ0.5以降に進む。
+
+---
+
+### ステップ0.5: 開発環境セットアップ確認（worktree環境のみ）
+
+**条件**: 以下の手順でworktree環境かどうかを判定し、該当する場合のみ実行する。
+
+#### worktree判定
+
+以下のコマンドで判定する:
+
+```bash
+git rev-parse --show-toplevel      # 現在のworktreeのルート
+git rev-parse --git-common-dir     # 共通の.gitディレクトリ
+```
+
+- `--git-common-dir` の結果が `--show-toplevel`/.git と異なる（例: `../.git/worktrees/xxx`）場合はworktree環境
+
+#### セットアップ確認手順
+
+worktree環境の場合、以下を確認する:
+
+| 依存管理ファイル | 対応する依存ディレクトリ | インストールコマンド |
+|---|---|---|
+| `package.json` | `node_modules/` | `yarn install` または `npm install` |
+| `Gemfile` | `vendor/bundle/` または `Gemfile.lock` | `bundle install` |
+| `go.mod` | `vendor/` | `go mod download` |
+| `requirements.txt` / `pyproject.toml` | `.venv/` | `pip install -r requirements.txt` 等 |
+
+依存管理ファイルが存在するのに対応する依存ディレクトリが存在しない場合、必要なコマンドをユーザーに提示して実行を促す。
+
+**重要**:
+- Claudeは依存インストールを勝手に実行しない
+- セットアップが必要な場合はコマンドを提示し、ユーザーの応答を待ってからステップ1に進む
+- セットアップ不要の場合（依存管理ファイルなし・依存ディレクトリ存在済み）は何も表示せずそのままステップ1に進む
 
 ---
 
