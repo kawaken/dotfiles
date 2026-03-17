@@ -1,0 +1,12 @@
+local base_dir=${0:A:h}
+local gw_dir="${base_dir}/../../gw"
+
+if [ -d "$gw_dir/rc" ]; then
+  for file in "${gw_dir}/rc"/*; do
+    source "$file"
+  done
+fi
+
+if [ -d "$gw_dir/bin" ]; then
+  export PATH="${gw_dir}/bin:$PATH"
+fi
