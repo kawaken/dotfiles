@@ -20,6 +20,15 @@ if echo "$COMMAND" | grep -qE 'cd\s+.*&&|cd\s+.*;'; then
   exit 2
 fi
 
+# cd にフルパスを使用するのをブロック（同一ワークスペース内は相対パスで移動すべき）
+if echo "$COMMAND" | grep -qE '\bcd\s+/'; then
+  CD_DEST=$(echo "$COMMAND" | grep -oE 'cd[[:space:]]+/[^[:space:]]+' | head -1 | sed 's/cd[[:space:]]*//')
+  if [[ -n "$CD_DEST" && "$CD_DEST" == "${PWD}"* ]]; then
+    echo "Blocked: 同じワークスペース内での cd はフルパスではなく相対パスを使ってください。" >&2
+    exit 2
+  fi
+fi
+
 # jq の長いインラインフィルターをブロック（30文字超は jq -f を使うべき）
 if echo "$COMMAND" | grep -qE '\bjq\b' && ! echo "$COMMAND" | grep -qE '\bjq\s+(-f|--from-file)\b'; then
   JQ_FILTER=$(echo "$COMMAND" | grep -oE "jq\s+(-[a-zA-Z]\s+)*'[^']*'" | head -1 | grep -oE "'[^']*'" | tr -d "'")
