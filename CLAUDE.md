@@ -13,7 +13,14 @@ This is a personal dotfiles repository containing shell configurations, Git alia
   - `git/.gitconfig`: Main Git configuration with aliases and delta integration
   - `git/bin/`: Custom Git commands (git-* scripts)
   - `git/rc/`: zsh functions sourced by the git plugin
-- **claude/commands/**: Custom Claude Code commands
+- **claude/**: Claude Code設定（`~/.claude/` からシンボリックリンクで参照）
+  - `CLAUDE.md`: グローバル指示ファイル（→ `~/.claude/CLAUDE.md`）
+  - `commands/`: カスタムコマンド（→ `~/.claude/commands`）
+  - `skills/`: スキル定義（→ `~/.claude/skills`）
+    - 各スキルは `skills/<name>/SKILL.md` の構造
+  - `hooks/`: フックスクリプト（settings.jsonから絶対パスで参照）
+  - `statusline.sh`: ステータスライン表示スクリプト（settings.jsonから絶対パスで参照）
+  - `README.md`: セットアップ手順
 - **ghostty/**: Terminal emulator configuration
 
 ## Code Conventions
