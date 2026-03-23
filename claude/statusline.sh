@@ -58,11 +58,16 @@ if git rev-parse --is-inside-work-tree &>/dev/null; then
     branch_color=$C_ORANGE
   fi
 
-  # ファイル状態
-  staged=$(git diff --staged --name-only 2>/dev/null | wc -l | tr -d ' ')
-  modified=$(git diff --name-only 2>/dev/null | wc -l | tr -d ' ')
-  untracked=$(git ls-files --others --exclude-standard 2>/dev/null | wc -l | tr -d ' ')
-  conflicted=$(git diff --name-only --diff-filter=U 2>/dev/null | wc -l | tr -d ' ')
+  # ファイル状態（zshプロンプトと同じ git status --porcelain ベース）
+  read staged modified untracked conflicted <<< $(
+    git status --porcelain 2>/dev/null | awk '{
+      x = substr($0,1,1); y = substr($0,2,1)
+      if (x=="U"||y=="U"||(x=="A"&&y=="A")||(x=="D"&&y=="D")) c++
+      else if (x!=" "&&x!="?") s++
+      if (y!=" "&&x!="?"&&y!="U") m++
+      if (x=="?") u++
+    } END { print s+0, m+0, u+0, c+0 }'
+  )
 
   # git status（括弧の外）
   git_status=""
