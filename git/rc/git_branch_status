@@ -94,6 +94,12 @@ function get_git_branch_status() {
     _git_email_cache_dir="$PWD"
   fi
   email="$_git_email_cache"
+
+  if [[ "$PWD" != "$_git_ignored_index_cache_dir" ]]; then
+    _git_ignored_index_cache=$(git ls-files -v 2>/dev/null | grep -c '^[hS]')
+    _git_ignored_index_cache_dir="$PWD"
+  fi
+  local ignored_index="$_git_ignored_index_cache"
   if [[ -n "$email" ]]; then
     domain="${email##*@}"
     domain="%F{magenta}${domain:0:2}%f"
@@ -119,6 +125,9 @@ function get_git_branch_status() {
   fi
   if (( untracked > 0 )); then
     file_status+="%F{yellow}?${untracked}%f"
+  fi
+  if (( ignored_index > 0 )); then
+    file_status+="%F{cyan}~${ignored_index}%f"
   fi
 
   if [[ -n "$file_status" ]]; then
