@@ -85,7 +85,7 @@ if git rev-parse --is-inside-work-tree &>/dev/null; then
   fi
 
   read staged modified untracked conflicted <<< $(
-    git status --porcelain 2>/dev/null | awk '{
+    git --no-optional-locks status --porcelain 2>/dev/null | awk '{
       x = substr($0,1,1); y = substr($0,2,1)
       if (x=="U"||y=="U"||(x=="A"&&y=="A")||(x=="D"&&y=="D")) c++
       else if (x!=" "&&x!="?") s++

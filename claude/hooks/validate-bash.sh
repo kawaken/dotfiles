@@ -26,6 +26,12 @@ if echo "$COMMAND" | grep -qE 'cd\s+.*&&|cd\s+.*;'; then
   exit 2
 fi
 
+# git 書き込みコマンドのチェインをブロック（各 git 操作は単独のBash呼び出しで実行すべき）
+if echo "$COMMAND" | grep -qE 'git\s+(add|commit|push|reset|rebase|merge|rm|mv|stash).*&&.*git'; then
+  echo "Blocked: git の書き込み操作を && でチェインしないでください。各 git コマンドは別々のBash呼び出しで実行してください。" >&2
+  exit 2
+fi
+
 # cd にフルパスを使用するのをブロック（同一ワークスペース内は相対パスで移動すべき）
 if echo "$COMMAND" | grep -qE '\bcd\s+/'; then
   CD_DEST=$(echo "$COMMAND" | grep -oE 'cd[[:space:]]+/[^[:space:]]+' | head -1 | sed 's/cd[[:space:]]*//')
