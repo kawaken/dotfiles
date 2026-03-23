@@ -34,7 +34,7 @@ pct_block() {
 }
 
 # モデル名
-model=$(echo "$input" | jq -r '.model.display_name // "unknown"')
+model=$(echo "$input" | jq -r '.model.display_name // "unknown" | split(" (")[0]')
 
 # コンテキスト使用率
 context_size=$(echo "$input" | jq -r '.context_window.context_window_size // 0')
@@ -124,7 +124,7 @@ fi
 # 出力: repo [branch] status :: [model] ctx:▃ 5h:▅ 7d:▂ / todo
 output=""
 [[ -n "$git_info" ]] && output+="${git_info}"
-output+=" :: [${model}] ${gauge}"
+output+=" [${model}] ${gauge}"
 [[ -n "$todo_display" ]] && output+=" / ${todo_display}"
 
 printf '%s' "$output"
