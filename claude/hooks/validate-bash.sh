@@ -2,6 +2,12 @@
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command')
 
+# $() コマンド置換をブロック（複数のBashステップに分割すべき）
+if echo "$COMMAND" | grep -qE '\$\('; then
+  echo "Blocked: \$() コマンド置換を使わないでください。コマンドを複数のBashステップに分割してください。" >&2
+  exit 2
+fi
+
 # 連続したクォート文字をブロック（'" や "' は複雑なクォーティングの兆候）
 if [[ "$COMMAND" == *"'\""* ]] || [[ "$COMMAND" == *"\"'"* ]]; then
   echo "Blocked: 連続したクォート文字 ('\" or \"') を検出しました。クォーティングを見直し、複雑なフィルターは別ファイルに書いてください。" >&2
