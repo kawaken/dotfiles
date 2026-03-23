@@ -47,6 +47,18 @@ if echo "$COMMAND" | grep -qE '^/'; then
   exit 2
 fi
 
+# python3 -m json.tool をブロックし jq empty を案内
+if echo "$COMMAND" | grep -qE 'python3?\s+-m\s+json\.tool'; then
+  echo "Blocked: JSON検証には jq empty を使ってください（例: jq empty file.json）。" >&2
+  exit 2
+fi
+
+# コマンド引数にホームディレクトリの絶対パスが含まれる場合をブロック
+if echo "$COMMAND" | grep -qE '/Users/[a-zA-Z0-9_]+/'; then
+  echo "Blocked: コマンド引数にフルパスを使わないでください。cd でディレクトリ移動してから相対パスで実行してください。" >&2
+  exit 2
+fi
+
 # 作業ディレクトリ指定オプション + 絶対パスをブロック（git -C, yarn --cwd, npm --prefix 等）
 if echo "$COMMAND" | grep -qE '(-C|--cwd|--prefix|--directory)\s+/'; then
   echo "Blocked: -C / --cwd / --prefix 等のオプションでフルパスを指定しないでください。cd でディレクトリ移動してから実行してください。" >&2
