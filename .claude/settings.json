@@ -4,7 +4,8 @@
       "WebFetch(domain:ghostty.org)",
       "Bash(ls:*)",
       "Bash(rg:*)",
-      "Bash(gh issue view:*)"
+      "Bash(gh issue view:*)",
+      "Read(~/.claude/**)"
     ],
     "deny": []
   }
