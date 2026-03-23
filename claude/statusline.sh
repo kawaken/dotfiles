@@ -10,10 +10,33 @@ C_GREEN=$'\e[32m'        # staged (+), ahead (⇡)
 C_RED=$'\e[31m'          # modified (*), behind (⇣), conflicted (!)
 C_YELLOW=$'\e[33m'       # untracked (?)
 
+# TrueColor グラデーション（緑→黄→赤）
+pct_color() {
+  local pct=$1
+  local r g
+  if [[ $pct -le 50 ]]; then
+    r=$((pct * 5))
+    g=200
+  else
+    r=255
+    g=$(( (100 - pct) * 4 ))
+  fi
+  printf '\e[38;2;%d;%d;0m' $r $g
+}
+
+# ブロック文字ゲージ
+pct_block() {
+  local pct=$1
+  local blocks=( ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ )
+  local idx=$(( pct * 8 / 100 ))
+  [[ $idx -gt 7 ]] && idx=7
+  echo "${blocks[$((idx + 1))]}"
+}
+
 # モデル名
 model=$(echo "$input" | jq -r '.model.display_name // "unknown"')
 
-# コンテキスト使用率（current_usage を使用 - auto compactと同じ基準）
+# コンテキスト使用率
 context_size=$(echo "$input" | jq -r '.context_window.context_window_size // 0')
 current_usage=$(echo "$input" | jq -r '.context_window.current_usage // {}')
 current_tokens=$(echo "$current_usage" | jq -r '(.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)')
@@ -22,6 +45,10 @@ if [[ $context_size -gt 0 ]]; then
 else
   context_pct=0
 fi
+
+# rate_limits（5時間・7日ウィンドウ）
+rl_5h_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty | if . then floor else empty end')
+rl_7d_pct=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty | if . then floor else empty end')
 
 # TODO情報（transcript_pathからTodoWriteの最新を取得）
 todo_display=""
@@ -46,7 +73,6 @@ if git rev-parse --is-inside-work-tree &>/dev/null; then
   repo_name=$(basename "$(git rev-parse --show-toplevel)")
   branch=$(git branch --show-current 2>/dev/null || echo "detached")
 
-  # upstream確認とahead/behind
   upstream_info=""
   if git rev-parse --verify "@{upstream}" &>/dev/null; then
     branch_color=$C_BLUE
@@ -58,7 +84,6 @@ if git rev-parse --is-inside-work-tree &>/dev/null; then
     branch_color=$C_ORANGE
   fi
 
-  # ファイル状態（zshプロンプトと同じ git status --porcelain ベース）
   read staged modified untracked conflicted <<< $(
     git status --porcelain 2>/dev/null | awk '{
       x = substr($0,1,1); y = substr($0,2,1)
@@ -69,31 +94,37 @@ if git rev-parse --is-inside-work-tree &>/dev/null; then
     } END { print s+0, m+0, u+0, c+0 }'
   )
 
-  # git status（括弧の外）
   git_status=""
   [[ $conflicted -gt 0 ]] && git_status+="${C_RED}!$conflicted${C_RESET}"
   [[ $staged -gt 0 ]] && git_status+="${C_GREEN}+$staged${C_RESET}"
   [[ $modified -gt 0 ]] && git_status+="${C_RED}*$modified${C_RESET}"
   [[ $untracked -gt 0 ]] && git_status+="${C_YELLOW}?$untracked${C_RESET}"
 
-  # フォーマット: repo [branch:ahead:behind] status
   git_info="${C_YELLOW}${repo_name}${C_RESET} ${C_WHITE}[${C_RESET}${branch_color}${branch}${C_RESET}${upstream_info}${C_WHITE}]${C_RESET}"
   [[ -n "$git_status" ]] && git_info+=" ${git_status}"
 fi
 
-# コンテキスト使用量の色（閾値で変更）
-if [[ $context_pct -ge 80 ]]; then
-  context_color=$C_RED
-elif [[ $context_pct -ge 50 ]]; then
-  context_color=$C_YELLOW
-else
-  context_color=$C_WHITE
+# ゲージ表示（TrueColor + ブロック文字）
+ctx_color=$(pct_color $context_pct)
+ctx_block=$(pct_block $context_pct)
+gauge="C:${ctx_color}${ctx_block}${C_RESET}"
+
+if [[ -n "$rl_5h_pct" ]]; then
+  fh_color=$(pct_color $rl_5h_pct)
+  fh_block=$(pct_block $rl_5h_pct)
+  gauge+=" 5:${fh_color}${fh_block}${C_RESET}"
 fi
 
-# 出力を構築: dotfiles [main] ?1 :: [Opus 4.5] 23% / taskname (n/m)
+if [[ -n "$rl_7d_pct" ]]; then
+  sd_color=$(pct_color $rl_7d_pct)
+  sd_block=$(pct_block $rl_7d_pct)
+  gauge+=" 7:${sd_color}${sd_block}${C_RESET}"
+fi
+
+# 出力: repo [branch] status :: [model] ctx:▃ 5h:▅ 7d:▂ / todo
 output=""
 [[ -n "$git_info" ]] && output+="${git_info}"
-output+=" :: [${model}] ${context_color}${context_pct}%${C_RESET}"
+output+=" :: [${model}] ${gauge}"
 [[ -n "$todo_display" ]] && output+=" / ${todo_display}"
 
 printf '%s' "$output"
