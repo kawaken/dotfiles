@@ -1,11 +1,12 @@
 #!/usr/bin/env zsh
+zmodload zsh/datetime
 # キーバインド関連の設定
 
 # Ctrl+Qを2回連続で押したら終了
 typeset -g __quit_timestamp=0
 
 function _quick_quit() {
-  local current_time=$(date +%s)
+  local current_time=$EPOCHSECONDS
   local time_diff=$((current_time - __quit_timestamp))
   
   # 1秒以内に再度押された場合は終了

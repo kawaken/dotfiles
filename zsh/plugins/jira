@@ -1,3 +1,5 @@
+zmodload zsh/datetime
+zmodload zsh/stat
 # JIRA API呼び出し共通ライブラリ
 
 # 共通のデータファイルパス
@@ -131,10 +133,10 @@ jira_fetch() {
 _jira_is_cache_old() {
   [[ ! -f "$_JIRA_DATA_FILE" ]] && return 0
   
-  local file_time=$(date -r "$_JIRA_DATA_FILE" +%s 2>/dev/null)
-  [[ -z "$file_time" ]] && return 0
-  
-  local current_time=$(date +%s)
+  local file_time
+  file_time=$(zstat +mtime "$_JIRA_DATA_FILE" 2>/dev/null) || return 0
+
+  local current_time=$EPOCHSECONDS
   local threshold=1800
   local age=$((current_time - file_time))
   
