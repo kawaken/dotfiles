@@ -36,6 +36,12 @@ This is a personal dotfiles repository containing shell configurations, Git alia
 - **Minimize output**: Avoid unnecessary messages and verbose output; keep comments to essential minimum
 - **Avoid redundant implementations**: Do not add unnecessary code or duplicate existing functionality
 
+### Bash Tool Usage (Claude Code)
+- Bash is for commands with no dedicated tool equivalent: `git`, `gh`, `file`, `chmod`, `mkdir`, `make`, `docker`, etc.
+- Do NOT use Bash for: file listing (`ls` → Glob), file reading (`cat` → Read), text search (`grep` → Grep), file editing (`sed` → Edit)
+- Do NOT use pipe chains to process file data (`ls | xargs`, `ls | wc -l`, `cmd | sort | uniq`)
+- Do NOT use `sh -c` or `bash -c` for subshell execution; split into separate Bash calls
+
 ### Plugin Structure
 - New plugins go in `zsh/plugins/` as individual files
 - Plugin names use underscores (e.g., `plugin_name`)

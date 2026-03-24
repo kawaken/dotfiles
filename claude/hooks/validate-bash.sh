@@ -71,9 +71,9 @@ if echo "$COMMAND" | grep -qE '^\s*(grep|rg|egrep|fgrep)\b'; then
   echo "Blocked: grep/rg は Grep ツールを使ってください。" >&2
   exit 2
 fi
-# find → Glob ツール
-if echo "$COMMAND" | grep -qE '^\s*find\b'; then
-  echo "Blocked: find は Glob ツールを使ってください。" >&2
+# find / ls → Glob ツール
+if echo "$COMMAND" | grep -qE '^\s*(find|ls)\b'; then
+  echo "Blocked: find/ls は Glob ツールを使ってください。" >&2
   exit 2
 fi
 # cat / head / tail（ファイル読み取り）→ Read ツール
@@ -94,6 +94,17 @@ fi
 # パイプ経由の head / tail もブロック（例: some_cmd | head -5）
 if echo "$COMMAND" | grep -qE '\|\s*(head|tail)\b'; then
   echo "Blocked: パイプでの head/tail は Read ツールまたは head_limit パラメータを使ってください。" >&2
+  exit 2
+fi
+
+# パイプ経由のテキスト加工コマンドをブロック（専用ツールの結果をClaude側で処理すべき）
+if echo "$COMMAND" | grep -qE '\|\s*(xargs|wc|sort|uniq|cut|tr)\b'; then
+  echo "Blocked: パイプでの xargs/wc/sort/uniq/cut/tr は避けてください。専用ツール（Glob/Grep/Read）で取得した結果をClaude側で処理してください。" >&2
+  exit 2
+fi
+# sh -c / bash -c のサブシェル実行をブロック（コマンドを個別のBash呼び出しに分割すべき）
+if echo "$COMMAND" | grep -qE '\b(sh|bash)\s+-c\b'; then
+  echo "Blocked: sh -c / bash -c は避けてください。コマンドを個別のBash呼び出しに分割してください。" >&2
   exit 2
 fi
 
