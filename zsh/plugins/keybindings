@@ -20,6 +20,10 @@ function _quick_quit() {
   zle -M "Press Ctrl+Q again to quit"
 }
 
+function _noop() { true }
+
 # ZLEウィジェットとして登録
 zle -N _quick_quit
 bindkey '^Q' _quick_quit
+zle -N _noop
+bindkey '^D' _noop
