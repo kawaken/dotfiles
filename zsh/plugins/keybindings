@@ -15,6 +15,7 @@ function _quick_quit() {
   
   # 今回の時刻を記録して、メッセージ表示
   __quit_timestamp=$current_time
+  suppress_reset_prompt 2
   zle -M "Press Ctrl+Q again to quit"
 }
 

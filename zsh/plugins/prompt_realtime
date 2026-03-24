@@ -1,6 +1,8 @@
 #!/usr/bin/env zsh
 
+zmodload zsh/datetime
 typeset -g _terminal_focused=true
+typeset -g _suppress_reset_prompt_until=0
 
 function _terminal_focus_in() {
   _terminal_focused=true
@@ -32,9 +34,13 @@ function _cleanup_focus_reporting() {
 }
 add-zsh-hook zshexit _cleanup_focus_reporting
 
+function suppress_reset_prompt() {
+  _suppress_reset_prompt_until=$(( EPOCHSECONDS + ${1:-3} ))
+}
+
 TMOUT=1
 TRAPALRM() {
-  if [[ "$_terminal_focused" == true ]]; then
+  if [[ "$_terminal_focused" == true ]] && (( EPOCHSECONDS >= _suppress_reset_prompt_until )); then
     zle reset-prompt
   fi
 }
