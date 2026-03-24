@@ -1,0 +1,40 @@
+#!/usr/bin/env zsh
+
+typeset -g _terminal_focused=true
+
+function _terminal_focus_in() {
+  _terminal_focused=true
+  zle reset-prompt
+}
+
+function _terminal_focus_out() {
+  _terminal_focused=false
+}
+
+zle -N _terminal_focus_in
+zle -N _terminal_focus_out
+bindkey '\e[I' _terminal_focus_in
+bindkey '\e[O' _terminal_focus_out
+
+function _enable_focus_reporting() {
+  printf '\e[?1004h'
+}
+
+function _disable_focus_reporting() {
+  printf '\e[?1004l'
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _enable_focus_reporting
+
+function _cleanup_focus_reporting() {
+  _disable_focus_reporting
+}
+add-zsh-hook zshexit _cleanup_focus_reporting
+
+TMOUT=1
+TRAPALRM() {
+  if [[ "$_terminal_focused" == true ]]; then
+    zle reset-prompt
+  fi
+}
