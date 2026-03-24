@@ -65,6 +65,38 @@ if echo "$COMMAND" | grep -qE 'python3?\s+-m\s+json\.tool'; then
   exit 2
 fi
 
+# 専用ツールで代替可能なコマンドをブロック（Bash ではなく Grep/Glob/Read/Edit ツールを使うべき）
+# grep / rg → Grep ツール
+if echo "$COMMAND" | grep -qE '^\s*(grep|rg|egrep|fgrep)\b'; then
+  echo "Blocked: grep/rg は Grep ツールを使ってください。" >&2
+  exit 2
+fi
+# find → Glob ツール
+if echo "$COMMAND" | grep -qE '^\s*find\b'; then
+  echo "Blocked: find は Glob ツールを使ってください。" >&2
+  exit 2
+fi
+# cat / head / tail（ファイル読み取り）→ Read ツール
+if echo "$COMMAND" | grep -qE '^\s*(cat|head|tail)\b'; then
+  echo "Blocked: cat/head/tail は Read ツールを使ってください。" >&2
+  exit 2
+fi
+# sed / awk（ファイル編集）→ Edit ツール
+if echo "$COMMAND" | grep -qE '^\s*(sed|awk)\b'; then
+  echo "Blocked: sed/awk は Edit ツールを使ってください。" >&2
+  exit 2
+fi
+# パイプ経由の grep / rg もブロック（例: some_cmd | grep pattern）
+if echo "$COMMAND" | grep -qE '\|\s*(grep|rg|egrep|fgrep)\b'; then
+  echo "Blocked: パイプでの grep/rg は Grep ツールを使ってください。" >&2
+  exit 2
+fi
+# パイプ経由の head / tail もブロック（例: some_cmd | head -5）
+if echo "$COMMAND" | grep -qE '\|\s*(head|tail)\b'; then
+  echo "Blocked: パイプでの head/tail は Read ツールまたは head_limit パラメータを使ってください。" >&2
+  exit 2
+fi
+
 # コマンド引数にホームディレクトリの絶対パスが含まれる場合をブロック
 if echo "$COMMAND" | grep -qE '/Users/[a-zA-Z0-9_]+/'; then
   echo "Blocked: コマンド引数にフルパスを使わないでください。cd でディレクトリ移動してから相対パスで実行してください。" >&2
