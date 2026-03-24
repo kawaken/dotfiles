@@ -38,7 +38,7 @@ function suppress_reset_prompt() {
   _suppress_reset_prompt_until=$(( EPOCHSECONDS + ${1:-3} ))
 }
 
-TMOUT=1
+TMOUT=10
 TRAPALRM() {
   if [[ "$_terminal_focused" == true ]] && (( EPOCHSECONDS >= _suppress_reset_prompt_until )); then
     zle reset-prompt
