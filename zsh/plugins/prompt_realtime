@@ -18,27 +18,20 @@ zle -N _terminal_focus_out
 bindkey '\e[I' _terminal_focus_in
 bindkey '\e[O' _terminal_focus_out
 
-function _enable_focus_reporting() {
-  printf '\e[?1004h'
-}
+function _enable_focus_reporting() { printf '\e[?1004h' }
+function _disable_focus_reporting() { printf '\e[?1004l' }
 
-function _disable_focus_reporting() {
-  printf '\e[?1004l'
-}
-
+# ZLE起動時に有効化、コマンド実行中は無効化
+zle -N zle-line-init _enable_focus_reporting
 autoload -Uz add-zsh-hook
-add-zsh-hook precmd _enable_focus_reporting
-
-function _cleanup_focus_reporting() {
-  _disable_focus_reporting
-}
-add-zsh-hook zshexit _cleanup_focus_reporting
+add-zsh-hook preexec _disable_focus_reporting
+add-zsh-hook zshexit _disable_focus_reporting
 
 function suppress_reset_prompt() {
   _suppress_reset_prompt_until=$(( EPOCHSECONDS + ${1:-3} ))
 }
 
-TMOUT=10
+TMOUT=1
 TRAPALRM() {
   if [[ "$_terminal_focused" == true ]] && (( EPOCHSECONDS >= _suppress_reset_prompt_until )); then
     zle reset-prompt
