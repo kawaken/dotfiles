@@ -1,0 +1,68 @@
+#!/usr/bin/env zsh
+
+typeset -g _async_git_result=""
+typeset -g _async_git_pid=0
+typeset -g _async_git_fd=""
+typeset -gA _async_git_cache
+
+function _async_git_kill() {
+  if (( _async_git_pid > 0 )); then
+    kill "$_async_git_pid" 2>/dev/null
+    _async_git_pid=0
+  fi
+
+  if [[ -n "$_async_git_fd" ]]; then
+    zle -F "$_async_git_fd" 2>/dev/null
+    exec {_async_git_fd}<&- 2>/dev/null
+    _async_git_fd=""
+  fi
+}
+
+function _async_git_callback() {
+  local fd="$1"
+  local result=""
+
+  if [[ -n "$fd" ]]; then
+    while IFS= read -r -u "$fd" line; do
+      if [[ -n "$result" ]]; then
+        result+=$'\n'"$line"
+      else
+        result="$line"
+      fi
+    done
+
+    zle -F "$fd" 2>/dev/null
+    exec {fd}<&- 2>/dev/null
+  fi
+
+  _async_git_fd=""
+  _async_git_pid=0
+
+  if [[ -n "$result" ]]; then
+    _async_git_cache[$_async_git_pwd]=$'\n'"$result"
+  fi
+  _async_git_result="${_async_git_cache[$_async_git_pwd]}"
+
+  zle reset-prompt 2>/dev/null
+}
+
+function _async_git_start() {
+  _async_git_kill
+
+  if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+    _async_git_result=""
+    return
+  fi
+
+  _async_git_pwd="$PWD"
+
+  if (( ${+_async_git_cache[$PWD]} )); then
+    _async_git_result="${_async_git_cache[$PWD]}"
+  else
+    _async_git_result=""
+  fi
+
+  exec {_async_git_fd}< <(get_git_branch_status)
+  _async_git_pid=$!
+  zle -F "$_async_git_fd" _async_git_callback
+}

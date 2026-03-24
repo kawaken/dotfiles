@@ -90,8 +90,8 @@ function _update_shlvl() {
 function _update_prompt() {
   # PWDを黄色で
   local shorten_path="%F{yellow}$(_shorten_path)%f"
-  # git branch statusのメッセージ
-  local git_branch_status_msg=$(_update_git_branch_status_msg)
+  # 非同期git statusワーカー起動
+  _async_git_start
   # shellの深さ
   local shlvl=$(_update_shlvl)
   # 直前実行したコマンドの結果
@@ -102,7 +102,7 @@ function _update_prompt() {
   local work_mode=$(_update_workon)
 
   PROMPT="
-${shorten_path}${git_branch_status_msg} ${work_mode}
+${shorten_path}\${_async_git_result} ${work_mode}
 ${sep} ${prev_result}"
   RPROMPT="%D{%Y-%m-%d %H:%M:%S}"
 }
