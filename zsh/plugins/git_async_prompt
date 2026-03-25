@@ -59,7 +59,13 @@ function _async_git_start() {
   if (( ${+_async_git_cache[$PWD]} )); then
     _async_git_result="${_async_git_cache[$PWD]}"
   else
-    _async_git_result=""
+    local branch
+    branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+    if [[ -n "$branch" ]]; then
+      _async_git_result=$'\n'"%F{white}[%f%F{69}${branch}%f%F{white}]%f"
+    else
+      _async_git_result=""
+    fi
   fi
 
   exec {_async_git_fd}< <(get_git_branch_status)
