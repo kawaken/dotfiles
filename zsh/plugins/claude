@@ -1,8 +1,20 @@
 #!/usr/bin/env zsh
 
+function reset-keyboard-protocol() {
+  stty -echo 2>/dev/null
+  printf '\e[?u' > /dev/tty
+  local response
+  read -rs -t 1 -d 'u' response < /dev/tty
+  stty echo 2>/dev/null
+  local flags="${response##*\?}"
+  if [[ "$flags" != "0" ]]; then
+    printf '\e[>0u' 2>/dev/null
+  fi
+}
+
 function claude() {
   command claude "$@"
-  printf '\e[<u' 2>/dev/null
+  reset-keyboard-protocol
 }
 
 alias cl='claude'
