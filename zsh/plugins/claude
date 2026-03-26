@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+
+function claude() {
+  command claude "$@"
+  printf '\e[<u' 2>/dev/null
+}
+
+alias cl='claude'
