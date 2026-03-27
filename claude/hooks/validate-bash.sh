@@ -9,6 +9,12 @@ if [[ $LINE_COUNT -gt 7 ]]; then
   exit 2
 fi
 
+# /tmp/ への書き込みをブロック（./tmp/ を使うべき）
+if echo "$COMMAND" | grep -qE '/tmp/'; then
+  echo "Blocked: /tmp/ へのアクセスは禁止です。./tmp/ を使ってください（なければ mkdir -p ./tmp/ で作成）。" >&2
+  exit 2
+fi
+
 # $() コマンド置換をブロック（複数のBashステップに分割すべき）
 if echo "$COMMAND" | grep -qE '\$\('; then
   echo "Blocked: \$() コマンド置換を使わないでください。コマンドを複数のBashステップに分割してください。" >&2
