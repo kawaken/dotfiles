@@ -1,6 +1,13 @@
 #!/usr/bin/env zsh
 INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command')
+COMMAND=$(printf '%s\n' "$INPUT" | jq -r '.tool_input.command')
+
+# コマンドが長すぎる場合をブロック（7行超はスクリプトファイルに分離すべき）
+LINE_COUNT=$(echo "$COMMAND" | wc -l | tr -d ' ')
+if [[ $LINE_COUNT -gt 7 ]]; then
+  echo "Blocked: コマンドが長すぎます（${LINE_COUNT}行）。スクリプトファイルに書いてから実行してください。" >&2
+  exit 2
+fi
 
 # $() コマンド置換をブロック（複数のBashステップに分割すべき）
 if echo "$COMMAND" | grep -qE '\$\('; then
