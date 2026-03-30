@@ -104,7 +104,7 @@ function _update_prompt() {
   PROMPT="
 ${shorten_path}\${_async_git_result} ${work_mode}
 ${sep} ${prev_result}"
-  RPROMPT="%D{%Y-%m-%d %H:%M:%S}"
+
 }
 add-zsh-hook precmd _update_prompt
 
