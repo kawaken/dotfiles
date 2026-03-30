@@ -92,6 +92,8 @@ function _update_prompt() {
   local shorten_path="%F{yellow}$(_shorten_path)%f"
   # 非同期git statusワーカー起動
   _async_git_start
+  # 非同期PR情報取得
+  _async_pr_start
   # shellの深さ
   local shlvl=$(_update_shlvl)
   # 直前実行したコマンドの結果
@@ -104,6 +106,7 @@ function _update_prompt() {
   PROMPT="
 ${shorten_path}\${_async_git_result} ${work_mode}
 ${sep} ${prev_result}"
+  RPROMPT='${_async_pr_result}'
 
 }
 add-zsh-hook precmd _update_prompt

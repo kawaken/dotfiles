@@ -1,0 +1,167 @@
+#!/usr/bin/env zsh
+
+zmodload zsh/datetime
+
+typeset -g _async_pr_result=""
+typeset -g _async_pr_pid=0
+typeset -g _async_pr_fd=""
+typeset -gA _pr_cache
+typeset -gA _pr_push_time
+typeset -gA _pr_last_check
+
+_pr_fetch_info() {
+  command -v gh &>/dev/null || return
+
+  local pr_json pr_num is_draft pr_url
+  pr_json=$(gh pr view --json number,isDraft,url -q '"\(.number)\t\(.isDraft)\t\(.url)"' 2>/dev/null) || return
+  [[ -z "$pr_json" ]] && return
+
+  pr_num="${pr_json%%	*}"
+  local rest="${pr_json#*	}"
+  is_draft="${rest%%	*}"
+  pr_url="${rest#*	}"
+
+  if [[ "$is_draft" = "true" ]]; then
+    echo "${pr_num}:draft:${pr_url}"
+    return
+  fi
+
+  local ci
+  ci=$(gh pr checks --json state -q 'if length == 0 then "none" elif any(.[]; .state == "FAILURE") then "failure" elif all(.[]; .state == "SUCCESS") then "success" elif all(.[]; .state == "SUCCESS" or .state == "SKIPPED" or .state == "NEUTRAL") then "skipped" else "pending" end' 2>/dev/null)
+  [[ -z "$ci" ]] && ci="none"
+
+  echo "${pr_num}:${ci}:${pr_url}"
+}
+
+_pr_format() {
+  local pr_num="$1" ci="$2" pr_url="$3"
+  local link_start="%{\e]8;;${pr_url}\a%}"
+  local link_end="%{\e]8;;\a%}"
+  if [[ "$ci" = "draft" ]]; then
+    print -n "${link_start}%F{244}PR:#${pr_num}(draft)%f${link_end}"
+    return
+  fi
+  local color="white"
+  case "$ci" in
+    success) color="green" ;;
+    failure) color="red" ;;
+    pending) color="yellow" ;;
+    skipped) color="cyan" ;;
+  esac
+  print -n "${link_start}%F{${color}}PR:#${pr_num}%f${link_end}"
+}
+
+_async_pr_kill() {
+  if (( _async_pr_pid > 0 )); then
+    kill "$_async_pr_pid" 2>/dev/null
+    _async_pr_pid=0
+  fi
+  if [[ -n "$_async_pr_fd" ]]; then
+    zle -F "$_async_pr_fd" 2>/dev/null
+    exec {_async_pr_fd}<&- 2>/dev/null
+    _async_pr_fd=""
+  fi
+}
+
+_async_pr_callback() {
+  local fd="$1"
+  local result=""
+
+  if [[ -n "$fd" ]]; then
+    IFS= read -r -u "$fd" result
+    zle -F "$fd" 2>/dev/null
+    exec {fd}<&- 2>/dev/null
+  fi
+
+  _async_pr_fd=""
+  _async_pr_pid=0
+
+  local branch
+  branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  [[ -z "$branch" ]] && return
+
+  _pr_last_check[$branch]=$EPOCHSECONDS
+
+  if [[ -n "$result" ]]; then
+    _pr_cache[$branch]="$result"
+    local pr_num="${result%%:*}"
+    local rest="${result#*:}"
+    local ci="${rest%%:*}"
+    local pr_url="${rest#*:}"
+    _async_pr_result="$(_pr_format "$pr_num" "$ci" "$pr_url")"
+  else
+    _pr_cache[$branch]=""
+    _async_pr_result=""
+  fi
+
+  zle reset-prompt 2>/dev/null
+}
+
+_async_pr_start() {
+  _async_pr_kill
+
+  if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+    _async_pr_result=""
+    return
+  fi
+
+  local branch
+  branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  if [[ -z "$branch" || "$branch" = "HEAD" ]]; then
+    _async_pr_result=""
+    return
+  fi
+
+  local now=$EPOCHSECONDS
+  local should_check=0
+
+  if (( ${+_pr_push_time[$branch]} )); then
+    local push_age=$(( now - _pr_push_time[$branch] ))
+    if (( push_age < 300 )); then
+      # push後5分以内: 60秒間隔でチェック
+      if (( ! ${+_pr_last_check[$branch]} )) || (( now - _pr_last_check[$branch] >= 60 )); then
+        should_check=1
+      fi
+    else
+      # push後5分超: 最終チェック1回
+      if (( ! ${+_pr_last_check[$branch]} )) || (( _pr_last_check[$branch] < _pr_push_time[$branch] + 300 )); then
+        should_check=1
+      fi
+      unset "_pr_push_time[$branch]"
+    fi
+  elif (( ! ${+_pr_cache[$branch]} )); then
+    # 初回: キャッシュなし
+    should_check=1
+  fi
+
+  # キャッシュがあれば即時表示
+  if (( ${+_pr_cache[$branch]} )); then
+    local cached="${_pr_cache[$branch]}"
+    if [[ -n "$cached" ]]; then
+      local pr_num="${cached%%:*}"
+      local rest="${cached#*:}"
+      local ci="${rest%%:*}"
+      local pr_url="${rest#*:}"
+      _async_pr_result="$(_pr_format "$pr_num" "$ci" "$pr_url")"
+    else
+      _async_pr_result=""
+    fi
+  fi
+
+  (( ! should_check )) && return
+
+  exec {_async_pr_fd}< <(_pr_fetch_info)
+  _async_pr_pid=$!
+  zle -F "$_async_pr_fd" _async_pr_callback
+}
+
+_pr_detect_push() {
+  [[ "$1" = "git push"* || "$1" = *" git push"* ]] || return
+  local branch
+  branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || return
+  _pr_push_time[$branch]=$EPOCHSECONDS
+  unset "_pr_cache[$branch]"
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook preexec _pr_detect_push
