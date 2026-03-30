@@ -11,12 +11,13 @@ if [[ -z "$TRANSCRIPT_PATH" || ! -f "$TRANSCRIPT_PATH" ]]; then
   exit 0
 fi
 
-USER_COUNT=$(grep -cE '"role"\s*:\s*"user"' "$TRANSCRIPT_PATH" 2>/dev/null)
+SCRIPT_DIR=$(dirname "$0")
+USER_COUNT=$(jq -s -f "$SCRIPT_DIR/retro-reminder-count.jq" "$TRANSCRIPT_PATH" 2>/dev/null)
 if [[ -z "$USER_COUNT" ]]; then
   USER_COUNT=0
 fi
 
-if [[ $USER_COUNT -ge 20 && $((USER_COUNT % 20)) -eq 0 ]]; then
+if [[ $USER_COUNT -ge 20 && $((USER_COUNT % 5)) -eq 0 ]]; then
   printf '{"decision":"block","reason":"セッションが長くなってきたで（ユーザーメッセージ: %d回）。作業の区切りで /retro を実行して振り返りしよう。"}\n' "$USER_COUNT"
 fi
 
