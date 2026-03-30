@@ -1,59 +1,29 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+dotfilesリポジトリ。zsh設定、Git設定、カスタムツール、Claude Code設定を管理する。
 
-## Architecture Overview
+## 構成
 
-This is a personal dotfiles repository containing shell configurations, Git aliases, and custom tools. Key components:
+- **zsh/**: zshの設定とプラグインシステム
+- **git/**: Git設定、カスタムコマンド（git-*）、zsh関数
+- **gw/**: Git Worktreeヘルパー（サブモジュール）
+- **claude/**: Claude Code設定（~/.claude/ へシンボリックリンク）
+- **ghostty/**: ターミナル設定
 
-- **zsh/**: Shell configuration with modular plugin system
-  - `zsh/_zshenv`: Main environment setup that sets ZDOTDIR to load plugins
-  - `zsh/plugins/`: Individual plugin files loaded automatically
-- **git/**: Git configuration and custom commands
-  - `git/.gitconfig`: Main Git configuration with aliases and delta integration
-  - `git/bin/`: Custom Git commands (git-* scripts)
-  - `git/rc/`: zsh functions sourced by the git plugin
-- **claude/**: Claude Code設定（`~/.claude/` からシンボリックリンクで参照）
-  - `CLAUDE.md`: グローバル指示ファイル（→ `~/.claude/CLAUDE.md`）
-  - `commands/`: カスタムコマンド（→ `~/.claude/commands`）
-  - `skills/`: スキル定義（→ `~/.claude/skills`）
-    - 各スキルは `skills/<name>/SKILL.md` の構造
-  - `hooks/`: フックスクリプト（settings.jsonから絶対パスで参照）
-  - `statusline.sh`: ステータスライン表示スクリプト（settings.jsonから絶対パスで参照）
-  - `README.md`: セットアップ手順
-- **ghostty/**: Terminal emulator configuration
+## 規約
 
-## Code Conventions
+### シェルスクリプト
+- zshを使う（`#!/usr/bin/env zsh`）。bashは使わない
+- Perl不可
+- `while read` パイプ、`while` ループを避ける
+- 検索は `rg` を使う
+- `status` を変数名にしない（zshの予約変数）
+- `local` 宣言はループの外で行い、ループ内では代入のみ
+- 不要な出力・コメント・冗長な実装を避ける
 
-### Shell Scripting
-- Use zsh, not bash (all scripts should start with `#!/usr/bin/env zsh`)
-- No Perl usage
-- Avoid PIPE with `while read` combinations
-- Minimize `while` loop usage
-- Use ripgrep (`rg`) for search operations instead of `find`/`grep`
-- **Avoid reserved variables**: Do not use `status` as a variable name (it's a read-only special variable in zsh that holds the exit status of the last command)
-- **No `local` inside loops**: zsh's `local`/`typeset` prints the current value when re-declaring an existing local variable. Always declare `local` before the loop and assign inside it
-- **Minimize output**: Avoid unnecessary messages and verbose output; keep comments to essential minimum
-- **Avoid redundant implementations**: Do not add unnecessary code or duplicate existing functionality
+### プラグイン追加
+- `zsh/plugins/` に個別ファイルで追加。名前はアンダースコア区切り
+- Git関連関数は `git/rc/` に配置（gitプラグインが自動読み込み）
 
-### Bash Tool Usage (Claude Code)
-- Bash is for commands with no dedicated tool equivalent: `git`, `gh`, `file`, `chmod`, `mkdir`, `make`, `docker`, etc.
-- Do NOT use Bash for: file listing (`ls` → Glob), file reading (`cat` → Read), text search (`grep` → Grep), file editing (`sed` → Edit)
-- Do NOT use pipe chains to process file data (`ls | xargs`, `ls | wc -l`, `cmd | sort | uniq`)
-- Do NOT use `sh -c` or `bash -c` for subshell execution; split into separate Bash calls
-
-### Plugin Structure
-- New plugins go in `zsh/plugins/` as individual files
-- Plugin names use underscores (e.g., `plugin_name`)
-- Git-related functions go in `git/rc/` and are auto-sourced by git plugin
-
-### Custom Git Commands
-- Place in `git/bin/` with `git-` prefix
-- Make executable and use zsh shebang
-- Follow existing naming patterns
-
-### Git Command Execution
-- Do NOT chain commands with `&&` when running git in a different directory
-- Run each step as a separate Bash call: first `pwd` to check current location, then `cd <directory>`, then `git subcommand`
-- Do NOT use `-C`, `--cwd`, `--prefix`, or `--directory` options with absolute paths (e.g., `git -C /path/to/repo`)
-- Do NOT execute commands using absolute paths (e.g., `/path/to/bin/rails`); use `cd` first, then run with relative path
+### カスタムGitコマンド
+- `git/bin/` に `git-` プレフィクスで配置。zsh shebang、実行権限付与
