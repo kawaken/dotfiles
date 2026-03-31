@@ -24,13 +24,17 @@ pct_color() {
   printf '\e[38;2;%d;%d;0m' $r $g
 }
 
-# ブロック文字ゲージ
-pct_block() {
+# ゲージ: 0-80%はブロック1文字、80%超は2桁数値
+pct_gauge() {
   local pct=$1
-  local blocks=( ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ )
-  local idx=$(( pct * 8 / 100 ))
-  [[ $idx -gt 7 ]] && idx=7
-  echo "${blocks[$((idx + 1))]}"
+  if [[ $pct -gt 80 ]]; then
+    echo "$pct"
+  else
+    local blocks=( ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ )
+    local idx=$(( pct * 8 / 100 ))
+    [[ $idx -gt 7 ]] && idx=7
+    echo "${blocks[$((idx + 1))]}"
+  fi
 }
 
 # モデル名
@@ -109,21 +113,21 @@ if git rev-parse --is-inside-work-tree &>/dev/null; then
   [[ -n "$git_status" ]] && git_info+=" ${git_status}"
 fi
 
-# ゲージ表示（TrueColor + ブロック文字）
+# ゲージ表示（TrueColor + ブロック文字 + ブレイル）
 ctx_color=$(pct_color $context_pct)
-ctx_block=$(pct_block $context_pct)
-gauge="C:${ctx_color}${ctx_block}${C_RESET}"
+ctx_g=$(pct_gauge $context_pct)
+gauge="C:${ctx_color}${ctx_g}${C_RESET}"
 
 if [[ -n "$rl_5h_pct" ]]; then
   fh_color=$(pct_color $rl_5h_pct)
-  fh_block=$(pct_block $rl_5h_pct)
-  gauge+=" 5:${fh_color}${fh_block}${C_RESET}"
+  fh_g=$(pct_gauge $rl_5h_pct)
+  gauge+=" 5:${fh_color}${fh_g}${C_RESET}"
 fi
 
 if [[ -n "$rl_7d_pct" ]]; then
   sd_color=$(pct_color $rl_7d_pct)
-  sd_block=$(pct_block $rl_7d_pct)
-  gauge+=" 7:${sd_color}${sd_block}${C_RESET}"
+  sd_g=$(pct_gauge $rl_7d_pct)
+  gauge+=" 7:${sd_color}${sd_g}${C_RESET}"
 fi
 
 # 出力: repo [branch] status :: [model] ctx:▃ 5h:▅ 7d:▂ / todo
