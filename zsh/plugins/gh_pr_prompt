@@ -13,13 +13,25 @@ _pr_fetch_info() {
   command -v gh &>/dev/null || return
 
   local pr_json pr_num is_draft pr_url
-  pr_json=$(gh pr view --json number,isDraft,url -q '"\(.number)\t\(.isDraft)\t\(.url)"' 2>/dev/null) || return
+  local pr_state
+  pr_json=$(gh pr view --json number,isDraft,url,state -q '"\(.number)\t\(.isDraft)\t\(.url)\t\(.state)"' 2>/dev/null) || return
   [[ -z "$pr_json" ]] && return
 
   pr_num="${pr_json%%	*}"
   local rest="${pr_json#*	}"
   is_draft="${rest%%	*}"
-  pr_url="${rest#*	}"
+  rest="${rest#*	}"
+  pr_url="${rest%%	*}"
+  pr_state="${rest#*	}"
+
+  if [[ "$pr_state" = "MERGED" ]]; then
+    echo "${pr_num}:merged:${pr_url}"
+    return
+  fi
+  if [[ "$pr_state" = "CLOSED" ]]; then
+    echo "${pr_num}:closed:${pr_url}"
+    return
+  fi
 
   if [[ "$is_draft" = "true" ]]; then
     echo "${pr_num}:draft:${pr_url}"
@@ -37,6 +49,10 @@ _pr_format() {
   local pr_num="$1" ci="$2" pr_url="$3"
   local link_start="%{\e]8;;${pr_url}\a%}"
   local link_end="%{\e]8;;\a%}"
+  if [[ "$ci" = "merged" || "$ci" = "closed" ]]; then
+    print -n "${link_start}%F{244}%{\e[9m%}PR:#${pr_num}%{\e[29m%}%f${link_end}"
+    return
+  fi
   if [[ "$ci" = "draft" ]]; then
     print -n "${link_start}%F{244}PR:#${pr_num}(draft)%f${link_end}"
     return
@@ -46,7 +62,7 @@ _pr_format() {
     success) color="green" ;;
     failure) color="red" ;;
     pending) color="yellow" ;;
-    skipped) color="cyan" ;;
+    skipped) color="65" ;;
   esac
   print -n "${link_start}%F{${color}}PR:#${pr_num}%f${link_end}"
 }
