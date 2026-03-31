@@ -35,6 +35,11 @@ pct_block() {
 
 # モデル名
 model=$(echo "$input" | jq -r '.model.display_name // "unknown" | split(" (")[0]')
+case $model in
+  Haiku*) model="Hi" ;;
+  Sonnet*) model="So" ;;
+  Opus*) model="Op" ;;
+esac
 
 # コンテキスト使用率
 context_size=$(echo "$input" | jq -r '.context_window.context_window_size // 0')
