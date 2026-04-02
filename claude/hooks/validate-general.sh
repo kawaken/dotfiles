@@ -57,12 +57,6 @@ if echo "$COMMAND" | grep -qE '\|\s*(grep|rg|egrep|fgrep)\b'; then
   exit 2
 fi
 
-# パイプ経由の head / tail もブロック（例: some_cmd | head -5）
-if echo "$COMMAND" | grep -qE '\|\s*(head|tail)\b'; then
-  echo "Blocked: パイプでの head/tail は Read ツールまたは head_limit パラメータを使ってください。" >&2
-  exit 2
-fi
-
 # パイプ経由のテキスト加工コマンドをブロック（専用ツールの結果をClaude側で処理すべき）
 if echo "$COMMAND" | grep -qE '\|\s*(xargs|wc|sort|uniq|cut|tr)\b'; then
   echo "Blocked: パイプでの xargs/wc/sort/uniq/cut/tr は避けてください。専用ツール（Glob/Grep/Read）で取得した結果をClaude側で処理してください。" >&2
