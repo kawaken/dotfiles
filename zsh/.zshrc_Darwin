@@ -10,3 +10,8 @@ compinit -u
 for d in /opt/homebrew/opt/*/libexec/gnubin; do
   export PATH=$d:$PATH
 done
+
+# ~/.local/bin (Claude Code etc.)
+if [ -d "$HOME/.local/bin" ]; then
+  export PATH="$HOME/.local/bin:$PATH"
+fi

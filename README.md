@@ -11,15 +11,6 @@
 
 ### Homebrew でインストールする
 
-良く使うコマンド類(Mac のみ)
-
-```
-brew install binutils findutils
-brew install findutils
-brew install gnu-indent gnu-sed gnu-tar gnu-which
-brew install diffutils coreutils moreutils
-```
-
 Git と GitHub CLI
 
 ```
@@ -32,6 +23,15 @@ gh auth login
 WSL の場合はターミナルからはブラウザーが開かないので、
 デバイスコードをコピーしておいて直接 Windows 側のブラウザーでログインした後コードを貼り付ける。
 
+良く使うコマンド類(Mac のみ)
+
+```
+brew install binutils findutils
+brew install gnu-indent gnu-sed gnu-tar gnu-which
+brew install diffutils coreutils moreutils
+brew install fzf delta jq
+```
+
 プログラミング言語
 
 ```
@@ -41,11 +41,15 @@ brew install go node zig
 ## install
 
 ```
-# gh コマンドの設定済み内容を待避、後からincludeされる
-mv .gitconfig .gitconfig.local
-
 cd $HOME
+
+# 既存の .gitconfig があれば待避（後から include される）
+[[ -f .gitconfig ]] && mv .gitconfig .gitconfig.local
+
 gh repo clone kawaken/dotfiles -- --recurse-submodules
+
+# サブモジュールの初期化を忘れた場合
+# cd dotfiles && git submodule update --init --recursive
 
 # gitの設定
 mkdir -p .config/git
@@ -59,11 +63,7 @@ git config --file ~/.gitconfig.local user.email "yourmail"
 ln -s dotfiles/zsh/_zshenv .zshenv
 
 # fzfの設定
-brew install fzf
 echo 'source <(fzf --zsh)' >> .zshrc_local
-
-## delta
-brew install delta
 
 # ghosttyの設定
 mkdir -p .config/ghostty
@@ -74,49 +74,14 @@ mkdir -p .claude
 ln -s ~/dotfiles/claude/CLAUDE.md ~/.claude/CLAUDE.md
 ln -s ~/dotfiles/claude/commands ~/.claude/commands
 ln -s ~/dotfiles/claude/skills ~/.claude/skills
+
+# プロジェクトディレクトリ（Go風パス構成）
+mkdir -p ~/projects/src/github.com/kawaken
+mkdir -p ~/projects/src/github.com/<org>
 ```
 
-### Claude Code Hooks
+### Claude Code の設定
 
-Bashコマンドのバリデーション（cd チェイン防止等）を行うフック。
+Hooks（Bashバリデーション等）とステータスラインの設定は `claude/` 配下のスクリプトを参照し `~/.claude/settings.json` に設定する。
 
 依存: `jq`
-
-`~/.claude/settings.json` に以下を追加:
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/dotfiles/claude/hooks/validate-bash.sh"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-### Claude Code ステータスライン
-
-gitリポジトリ情報、モデル名、コンテキスト使用率、TODO進捗をステータスラインに表示するスクリプト。
-
-表示例: `dotfiles [main] :: [Sonnet 4.6] 23%`
-
-依存: `jq`
-
-`~/.claude/settings.json` に以下を追加:
-
-```json
-{
-  "statusLine": {
-    "type": "command",
-    "command": "~/dotfiles/claude/statusline.sh"
-  }
-}
-```
