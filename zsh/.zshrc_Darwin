@@ -1,10 +1,7 @@
-# completionを追加
-if [ -f /opt/homebrew/bin/brew ]; then
-  fpath=($(/opt/homebrew/bin/brew --prefix)/share/zsh/site-functions $fpath)
+# completionを追加（compinit は .zshrc_local で実行）
+if [ -d /opt/homebrew/share/zsh/site-functions ]; then
+  fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
 fi
-
-autoload -U compinit
-compinit -u
 
 # append gnubin to PATH
 for d in /opt/homebrew/opt/*/libexec/gnubin; do

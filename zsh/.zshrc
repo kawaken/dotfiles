@@ -64,13 +64,23 @@ function _source() {
 # OS依存のファイル
 _source $ZDOTDIR/.zshrc_$(uname)
 
+# 端末依存のファイル
+_source $HOME/.zshrc_local
+
+# compinit（全fpath追加後に1回だけ。1日以内の .zcompdump はスキャン省略）
+autoload -Uz compinit
+zmodload zsh/stat
+local dump=${ZDOTDIR:-~}/.zcompdump
+if [[ -f "$dump" ]] && (( EPOCHSECONDS - $(zstat +mtime "$dump") < 86400 )); then
+  compinit -C
+else
+  compinit
+fi
+
 # source plugins
 for file in $ZDOTDIR/plugins/*(.); do
   _source $file
 done
-
-# 端末依存のファイル
-_source $HOME/.zshrc_local
 
 # hook を有効にする
 autoload -Uz add-zsh-hook
@@ -113,9 +123,6 @@ add-zsh-hook precmd _update_prompt
 
 # ZDOTDIRを前提にしているので、HOMEのrcファイルも読み込む
 _source $HOME/.zshrc
-
-# progit
-[ -f $HOMEBREW_PREFIX/share/forgit/forgit.plugin.zsh ] && source $HOMEBREW_PREFIX/share/forgit/forgit.plugin.zsh
 
 # 最後に実行する必要がある
 source_zsh-syntax-highlighting
