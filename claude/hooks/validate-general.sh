@@ -10,7 +10,7 @@ if [[ $LINE_COUNT -gt 7 ]]; then
 fi
 
 # /tmp/ へのアクセスをブロック（./tmp/ を使うべき）
-if echo "$COMMAND" | grep -qE '/tmp/'; then
+if echo "$COMMAND" | grep -qE '(^|[[:space:]>|<])/tmp/'; then
   echo "Blocked: /tmp/ へのアクセスは禁止です。./tmp/ を使ってください（なければ mkdir -p ./tmp/ で作成）。" >&2
   exit 2
 fi
@@ -48,12 +48,6 @@ fi
 # コマンド引数にホームディレクトリの絶対パスが含まれる場合をブロック（cd は validate-cd-git.sh で個別チェック）
 if [[ "$COMMAND" != cd\ * ]] && echo "$COMMAND" | grep -qE '/Users/[a-zA-Z0-9_]+/'; then
   echo "Blocked: コマンド引数にフルパスを使わないでください。cd でディレクトリ移動してから相対パスで実行してください。" >&2
-  exit 2
-fi
-
-# パイプ経由の grep / rg もブロック（例: some_cmd | grep pattern）
-if echo "$COMMAND" | grep -qE '\|\s*(grep|rg|egrep|fgrep)\b'; then
-  echo "Blocked: パイプでの grep/rg は Grep ツールを使ってください。" >&2
   exit 2
 fi
 
