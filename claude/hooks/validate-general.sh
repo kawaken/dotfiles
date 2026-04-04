@@ -45,8 +45,8 @@ if echo "$COMMAND" | grep -qE '^/'; then
   exit 2
 fi
 
-# コマンド引数にホームディレクトリの絶対パスが含まれる場合をブロック
-if echo "$COMMAND" | grep -qE '/Users/[a-zA-Z0-9_]+/'; then
+# コマンド引数にホームディレクトリの絶対パスが含まれる場合をブロック（cd は validate-cd-git.sh で個別チェック）
+if [[ "$COMMAND" != cd\ * ]] && echo "$COMMAND" | grep -qE '/Users/[a-zA-Z0-9_]+/'; then
   echo "Blocked: コマンド引数にフルパスを使わないでください。cd でディレクトリ移動してから相対パスで実行してください。" >&2
   exit 2
 fi
