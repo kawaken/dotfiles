@@ -43,9 +43,6 @@ brew install go node zig
 ```
 cd $HOME
 
-# 既存の .gitconfig があれば待避（後から include される）
-[[ -f .gitconfig ]] && mv .gitconfig .gitconfig.local
-
 gh repo clone kawaken/dotfiles -- --recurse-submodules
 
 # サブモジュールの初期化を忘れた場合
@@ -54,10 +51,11 @@ gh repo clone kawaken/dotfiles -- --recurse-submodules
 # gitの設定
 mkdir -p .config/git
 ln -s dotfiles/git/ignore-global .config/git/ignore
-ln -s dotfiles/git/.gitconfig .gitconfig
+# dotfilesで管理している設定を参照させる
+printf '[include]\n  path = ~/dotfiles/git/.gitconfig\n' > .gitconfig
 
-git config --file ~/.gitconfig.local user.name "yourname"
-git config --file ~/.gitconfig.local user.email "yourmail"
+git config user.name "yourname"
+git config user.email "yourmail"
 
 # zshの設定
 ln -s dotfiles/zsh/_zshenv .zshenv
