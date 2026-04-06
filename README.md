@@ -32,6 +32,12 @@ brew install diffutils coreutils moreutils
 brew install fzf delta jq
 ```
 
+フォント
+
+```
+brew install --cask font-hackgen
+```
+
 プログラミング言語
 
 ```
@@ -72,6 +78,11 @@ mkdir -p .claude
 ln -s ~/dotfiles/claude/CLAUDE.md ~/.claude/CLAUDE.md
 ln -s ~/dotfiles/claude/commands ~/.claude/commands
 ln -s ~/dotfiles/claude/skills ~/.claude/skills
+
+# dotfilesリポジトリ用のメールアドレスを設定（git/.gitconfig-me を参照）
+cd dotfiles
+git config user.email "$(git config -f git/.gitconfig-me user.email)"
+cd ~
 
 # プロジェクトディレクトリ（Go風パス構成）
 mkdir -p ~/projects/src/github.com/kawaken
