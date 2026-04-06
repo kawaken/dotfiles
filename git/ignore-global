@@ -8,3 +8,5 @@ secrethub.env
 .gw.sh
 .gw-*
 .gw/
+
+**/.claude/settings.local.json
