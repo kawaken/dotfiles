@@ -9,9 +9,10 @@ if [[ $LINE_COUNT -gt 7 ]]; then
   exit 2
 fi
 
-# /tmp/ へのアクセスをブロック（./tmp/ を使うべき）
+# /tmp/ へのアクセスをブロック（リポジトリルートの tmp/ を使うべき）
 if echo "$COMMAND" | grep -qE '(^|[[:space:]>|<])/tmp/'; then
-  echo "Blocked: /tmp/ へのアクセスは禁止です。./tmp/ を使ってください（なければ mkdir -p ./tmp/ で作成）。" >&2
+  REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+  echo "Blocked: /tmp/ へのアクセスは禁止です。${REPO_ROOT}/tmp/ を使ってください（なければ mkdir -p ${REPO_ROOT}/tmp/ で作成）。" >&2
   exit 2
 fi
 
