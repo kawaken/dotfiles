@@ -19,9 +19,18 @@ Claude Code が `~/.claude/` から読み込むため、シンボリックリン
 - `~/.claude/commands/` → `dotfiles/claude/commands/`
 - `~/.claude/skills/` → `dotfiles/claude/skills/`
 
-## settings.json への追記が必要なもの
+## settings.json
 
-`~/.claude/settings.json` に絶対パスで設定を追記する（README.md の install セクション参照）:
+`claude/settings.base.json` がベーステンプレート。permissions、hooks、statusLine を含む。
 
-- `hooks`: `claude/hooks/` 配下のスクリプト
-- `statusLine`: `claude/statusline.sh`
+セットアップ時に `~/.claude/settings.json` へ反映する:
+
+```
+# 新規: そのままコピー
+cp ~/dotfiles/claude/settings.base.json ~/.claude/settings.json
+
+# 既存: ベースの内容をマージ（ベース側が優先）
+jq -s '.[0] * .[1]' ~/.claude/settings.json ~/dotfiles/claude/settings.base.json > ~/.claude/settings.json.tmp && mv ~/.claude/settings.json.tmp ~/.claude/settings.json
+```
+
+プロジェクト固有の設定（MCP、プラグイン等）は各プロジェクトの `.claude/settings.local.json` で管理する。

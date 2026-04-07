@@ -91,6 +91,14 @@ mkdir -p ~/projects/src/github.com/<org>
 
 ### Claude Code の設定
 
-Hooks（Bashバリデーション等）とステータスラインの設定は `claude/` 配下のスクリプトを参照し `~/.claude/settings.json` に設定する。
+`claude/settings.base.json` を `~/.claude/settings.json` に反映する（permissions、hooks、statusLine を含む）。
+
+```
+# 新規
+cp ~/dotfiles/claude/settings.base.json ~/.claude/settings.json
+
+# 既存（ベース側優先でマージ）
+jq -s '.[0] * .[1]' ~/.claude/settings.json ~/dotfiles/claude/settings.base.json > ~/.claude/settings.json.tmp && mv ~/.claude/settings.json.tmp ~/.claude/settings.json
+```
 
 依存: `jq`

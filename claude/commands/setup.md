@@ -13,5 +13,5 @@
 
 - 既に適用済みの手順はスキップする
 - `user.name` / `user.email` など個人情報が必要な手順はユーザーに入力を求める
-- `statusLine` の設定は `~/.claude/settings.json` に追記する。パスは実際の dotfiles の絶対パスを使うこと
+- `~/.claude/settings.json` は `claude/settings.base.json` をベースにする。新規ならコピー、既存なら `jq -s '.[0] * .[1]'` でマージ（ベース側優先）
 - 既存ファイルを上書き・削除する操作は必ず確認を取ること
