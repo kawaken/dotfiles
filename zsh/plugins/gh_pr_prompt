@@ -74,7 +74,7 @@ _async_pr_kill() {
   fi
   if [[ -n "$_async_pr_fd" ]]; then
     zle -F "$_async_pr_fd" 2>/dev/null
-    exec {_async_pr_fd}<&- 2>/dev/null
+    exec {_async_pr_fd}<&-
     _async_pr_fd=""
   fi
 }
@@ -86,7 +86,7 @@ _async_pr_callback() {
   if [[ -n "$fd" ]]; then
     IFS= read -r -u "$fd" result
     zle -F "$fd" 2>/dev/null
-    exec {fd}<&- 2>/dev/null
+    exec {fd}<&-
   fi
 
   _async_pr_fd=""
