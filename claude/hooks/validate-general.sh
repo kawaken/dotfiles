@@ -10,11 +10,11 @@ if [[ $LINE_COUNT -gt 7 ]]; then
 fi
 
 # /tmp/ へのアクセスをブロック（リポジトリルートの tmp/ を使うべき）
-if echo "$COMMAND" | grep -qE '(^|[[:space:]>|<])/tmp/'; then
-  REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-  echo "Blocked: /tmp/ へのアクセスは禁止です。${REPO_ROOT}/tmp/ を使ってください（なければ mkdir -p ${REPO_ROOT}/tmp/ で作成）。" >&2
-  exit 2
-fi
+# if echo "$COMMAND" | grep -qE '(^|[[:space:]>|<])/tmp/'; then
+#   REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+#   echo "Blocked: /tmp/ へのアクセスは禁止です。${REPO_ROOT}/tmp/ を使ってください（なければ mkdir -p ${REPO_ROOT}/tmp/ で作成）。" >&2
+#   exit 2
+# fi
 
 # $() コマンド置換をブロック（複数のBashステップに分割すべき）
 if echo "$COMMAND" | grep -qE '\$\('; then
@@ -41,16 +41,16 @@ if echo "$COMMAND" | grep -qE '\b(sh|bash)\s+-c\b'; then
 fi
 
 # コマンド自体がフルパス（/ で始まる）での実行をブロック（cd してから実行すべき）
-if echo "$COMMAND" | grep -qE '^/'; then
-  echo "Blocked: コマンドをフルパスで実行しないでください。cd でディレクトリ移動してから実行してください。" >&2
-  exit 2
-fi
+# if echo "$COMMAND" | grep -qE '^/'; then
+#   echo "Blocked: コマンドをフルパスで実行しないでください。cd でディレクトリ移動してから実行してください。" >&2
+#   exit 2
+# fi
 
 # コマンド引数にホームディレクトリの絶対パスが含まれる場合をブロック（cd は validate-cd-git.sh で個別チェック）
-if [[ "$COMMAND" != cd\ * ]] && echo "$COMMAND" | grep -qE '/Users/[a-zA-Z0-9_]+/'; then
-  echo "Blocked: コマンド引数にフルパスを使わないでください。cd でディレクトリ移動してから相対パスで実行してください。" >&2
-  exit 2
-fi
+# if [[ "$COMMAND" != cd\ * ]] && echo "$COMMAND" | grep -qE '/Users/[a-zA-Z0-9_]+/'; then
+#   echo "Blocked: コマンド引数にフルパスを使わないでください。cd でディレクトリ移動してから相対パスで実行してください。" >&2
+#   exit 2
+# fi
 
 # パイプ経由のテキスト加工コマンドをブロック（専用ツールの結果をClaude側で処理すべき）
 if echo "$COMMAND" | grep -qE '\|\s*(xargs|wc|sort|uniq|cut|tr)\b'; then

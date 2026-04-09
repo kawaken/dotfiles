@@ -15,6 +15,7 @@
       "Bash(history:*)",
       "Bash(git:*)",
       "Bash(gh:*)",
+      "Bash(jq:*)",
       "Bash(npm view:*)",
       "Read(./**)",
       "WebFetch(domain:github.com)",
