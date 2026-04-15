@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+"""Chromeのcookies DBから指定hostのクッキー値を復号して標準出力に出す。
+
+usage:
+    chrome-cookie <host> <cookie-name>   # 復号した値を出力
+    chrome-cookie <host>                 # そのhostに紐づくクッキー名を一覧
+
+env:
+    CHROME_PROFILE  Chromeプロファイル名 (default: "Profile 1")
+"""
+
+import ctypes
+import ctypes.util
+import hashlib
+import os
+import shutil
+import sqlite3
+import subprocess
+import sys
+import tempfile
+
+CHROME_PROFILE = os.environ.get("CHROME_PROFILE", "Profile 1")
+COOKIES_PATH = os.path.expanduser(
+    f"~/Library/Application Support/Google/Chrome/{CHROME_PROFILE}/Cookies"
+)
+SALT = b"saltysalt"
+ITERATIONS = 1003
+KEY_LENGTH = 16
+IV = b" " * 16
+
+
+def die(msg, code=1):
+    print(msg, file=sys.stderr)
+    sys.exit(code)
+
+
+def get_safe_storage_password():
+    r = subprocess.run(
+        ["security", "find-generic-password", "-s", "Chrome Safe Storage", "-w"],
+        capture_output=True, text=True,
+    )
+    if r.returncode != 0:
+        die(f"Keychainからパスワード取得失敗: {r.stderr.strip()}")
+    return r.stdout.strip().encode()
+
+
+def derive_key(password):
+    return hashlib.pbkdf2_hmac("sha1", password, SALT, ITERATIONS, KEY_LENGTH)
+
+
+def aes_cbc_decrypt(key, iv, data):
+    libname = ctypes.util.find_library("System")
+    if not libname:
+        die("libSystemが見つからない (macOS専用)")
+    lib = ctypes.CDLL(libname)
+    lib.CCCrypt.argtypes = [
+        ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32,
+        ctypes.c_void_p, ctypes.c_size_t,
+        ctypes.c_void_p,
+        ctypes.c_void_p, ctypes.c_size_t,
+        ctypes.c_void_p, ctypes.c_size_t,
+        ctypes.POINTER(ctypes.c_size_t),
+    ]
+    lib.CCCrypt.restype = ctypes.c_int32
+
+    out = ctypes.create_string_buffer(len(data) + 16)
+    out_len = ctypes.c_size_t(0)
+    status = lib.CCCrypt(
+        1,  # kCCDecrypt
+        0,  # kCCAlgorithmAES128
+        1,  # kCCOptionPKCS7Padding
+        key, len(key),
+        iv,
+        data, len(data),
+        out, len(out),
+        ctypes.byref(out_len),
+    )
+    if status != 0:
+        die(f"AES復号失敗 (status={status})")
+    return out.raw[:out_len.value]
+
+
+def copy_cookies_db():
+    if not os.path.exists(COOKIES_PATH):
+        die(f"Cookies DBが見つからない: {COOKIES_PATH}")
+    tmpdir = tempfile.mkdtemp(prefix="chrome-cookie-")
+    dst = os.path.join(tmpdir, "Cookies")
+    shutil.copy2(COOKIES_PATH, dst)
+    for suffix in ("-wal", "-shm"):
+        src = COOKIES_PATH + suffix
+        if os.path.exists(src):
+            shutil.copy2(src, dst + suffix)
+    return tmpdir, dst
+
+
+def fetch_encrypted(db_path, host, name):
+    conn = sqlite3.connect(db_path)
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT host_key, encrypted_value FROM cookies WHERE (host_key = ? OR host_key = ?) AND name = ?",
+            (host, "." + host, name),
+        )
+        row = cur.fetchone()
+        if not row:
+            die(f"クッキー未発見: host={host}, name={name}")
+        return row[0], row[1]
+    finally:
+        conn.close()
+
+
+def list_cookies(db_path, host):
+    conn = sqlite3.connect(db_path)
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT name FROM cookies WHERE host_key = ? OR host_key = ? ORDER BY name",
+            (host, "." + host),
+        )
+        return [r[0] for r in cur.fetchall()]
+    finally:
+        conn.close()
+
+
+def decrypt_chrome_cookie(encrypted, key, host_key):
+    if encrypted[:3] != b"v10":
+        die(f"未対応の暗号化形式: prefix={encrypted[:3]!r}")
+    raw = aes_cbc_decrypt(key, IV, encrypted[3:])
+    # Chrome 24+ では先頭32バイトに SHA256(host_key) が付く (改ざん検知用)
+    if raw[:32] == hashlib.sha256(host_key.encode()).digest():
+        raw = raw[32:]
+    return raw.decode("utf-8")
+
+
+def main():
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
+        die(__doc__.strip(), code=2)
+    host = sys.argv[1]
+
+    tmpdir, db_path = copy_cookies_db()
+    try:
+        if len(sys.argv) == 2:
+            for n in list_cookies(db_path, host):
+                print(n)
+        else:
+            host_key, encrypted = fetch_encrypted(db_path, host, sys.argv[2])
+            password = get_safe_storage_password()
+            key = derive_key(password)
+            sys.stdout.write(decrypt_chrome_cookie(encrypted, key, host_key))
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+if __name__ == "__main__":
+    main()
