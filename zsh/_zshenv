@@ -6,3 +6,4 @@ export PATH=/opt/homebrew/bin:$PATH
 
 # cd; ln -s dotfiles/zsh/_zshenv .zshenv
 
+. "$HOME/.cargo/env"
