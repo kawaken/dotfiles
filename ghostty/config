@@ -1,8 +1,9 @@
 shell-integration-features = no-cursor
 
-theme = Monokai Pro Spectrum
-selection-foreground = #94b09f
-selection-background = #406667
+theme = Belafonte Day
+background = #ded7c8
+# selection-foreground = #94b09f
+# selection-background = #406667
 font-size = 17
 font-family = HackGen
 
