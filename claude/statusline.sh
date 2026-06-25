@@ -37,13 +37,29 @@ pct_gauge() {
   fi
 }
 
-# モデル名
-model=$(echo "$input" | jq -r '.model.display_name // "unknown" | split(" (")[0]')
-case $model in
-  Haiku*) model="Hi" ;;
-  Sonnet*) model="So" ;;
-  Opus*) model="Op" ;;
+# モデル名: "Opus 4.8 (1M context)" → "Op4.8:1m"
+display_name=$(echo "$input" | jq -r '.model.display_name // "unknown"')
+model_base=${display_name%%" ("*}      # "Opus 4.8"
+family=${model_base%% *}               # "Opus"
+version=${model_base#* }               # "4.8"
+[[ "$version" == "$model_base" ]] && version=""
+
+case $family in
+  Haiku*) family="Hi" ;;
+  Sonnet*) family="So" ;;
+  Opus*) family="Op" ;;
 esac
+
+# コンテキスト種別（"(1M context)" などの括弧内を簡略表記）
+ctx_tag=""
+if [[ "$display_name" == *"("* ]]; then
+  ctx_paren=${display_name#*\(}         # "1M context)"
+  ctx_paren=${ctx_paren%%\)*}           # "1M context"
+  ctx_tag=${(L)ctx_paren%% *}           # "1m"
+fi
+
+model="${family}${version}"             # "op4.8"
+[[ -n "$ctx_tag" ]] && model+=":$ctx_tag" # "op4.8:1m"
 
 # コンテキスト使用率
 context_size=$(echo "$input" | jq -r '.context_window.context_window_size // 0')
