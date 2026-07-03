@@ -18,6 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working in any 
 ## コマンドの実行
 
 hookで多くのルールが機械的に強制されている。CLAUDE.mdでは意図のみ記載:
+- hookでブロックされたら理由を繰り返さず、黙って代替手段で再試行する
 - 専用ツール（Glob/Grep/Read/Edit）がある操作はBashを使わない
 - `cd` は単独実行。コマンドチェイン禁止
 - 同一ワークスペース内は相対パス
