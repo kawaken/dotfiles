@@ -1,5 +1,3 @@
-[include]
-  path = ~/dotfiles/git/delta
 [filter "lfs"]
   clean = git-lfs clean -- %f
   smudge = git-lfs smudge -- %f
@@ -10,7 +8,7 @@
 [push]
   default = current
 [core]
-  pager = delta
+  pager = hunk pager
   excludesFile = ~/dotfiles/git/ignore-global
   quotepath = false
 	fsmonitor = true
@@ -53,8 +51,6 @@
 
 [includeIf "gitdir:~/projects/src/github.com/kawaken/"]
   path = ~/dotfiles/git/.gitconfig-me
-[interactive]
-  diffFilter = delta --color-only
 [merge]
   conflictStyle = zdiff3
 [advice]
