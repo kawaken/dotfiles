@@ -58,16 +58,4 @@ if echo "$COMMAND" | grep -qE '\|\s*(xargs|wc|sort|uniq|cut|tr)\b'; then
   exit 2
 fi
 
-# jq の長いインラインフィルターをブロック（jq がコマンド中間に出る場合も対応）
-if echo "$COMMAND" | grep -qE '\bjq\b' && ! echo "$COMMAND" | grep -qE '\bjq\s+(-f|--from-file)\b'; then
-  JQ_FILTER=$(echo "$COMMAND" | grep -oE "jq\s+(-[a-zA-Z]\s+)*'[^']*'" | head -1 | grep -oE "'[^']*'" | tr -d "'")
-  if [[ -z "$JQ_FILTER" ]]; then
-    JQ_FILTER=$(echo "$COMMAND" | grep -oE 'jq\s+(-[a-zA-Z]\s+)*"[^"]*"' | head -1 | grep -oE '"[^"]*"' | tr -d '"')
-  fi
-  if [[ ${#JQ_FILTER} -gt 30 ]]; then
-    echo "Blocked: jq のフィルターが長すぎます（${#JQ_FILTER}文字）。.jq ファイルに書いて jq -f で実行してください。" >&2
-    exit 2
-  fi
-fi
-
 exit 0
