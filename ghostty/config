@@ -6,6 +6,7 @@ background = #ded7c8
 # selection-background = #406667
 font-size = 17
 font-family = HackGen
+adjust-cell-height = 20%
 
 cursor-style = block
 cursor-style-blink = false
