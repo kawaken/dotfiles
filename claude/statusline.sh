@@ -61,19 +61,15 @@ fi
 model="${family}${version}"             # "op4.8"
 [[ -n "$ctx_tag" ]] && model+=":$ctx_tag" # "op4.8:1m"
 
-# コンテキスト使用率
-context_size=$(echo "$input" | jq -r '.context_window.context_window_size // 0')
-current_usage=$(echo "$input" | jq -r '.context_window.current_usage // {}')
-current_tokens=$(echo "$current_usage" | jq -r '(.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)')
-if [[ $context_size -gt 0 ]]; then
-  context_pct=$((current_tokens * 100 / context_size))
-else
-  context_pct=0
-fi
+# コンテキスト使用率（事前計算済みの値を使用）
+context_pct=$(echo "$input" | jq -r '.context_window.used_percentage // 0 | floor')
 
 # rate_limits（5時間・7日ウィンドウ）
 rl_5h_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty | if . then floor else empty end')
 rl_7d_pct=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty | if . then floor else empty end')
+
+# セッション名（--name / /rename で設定した名前、なければAI生成タイトル）
+session_name=$(echo "$input" | jq -r '.session_name // empty')
 
 # TODO情報（transcript_pathからTodoWriteの最新を取得）
 todo_display=""
@@ -92,32 +88,61 @@ if [[ -n "$transcript_path" && -f "$transcript_path" ]]; then
   fi
 fi
 
-# gitリポジトリ情報（zshと同等のカラー・フォーマット）
-git_info=""
-if git rev-parse --is-inside-work-tree &>/dev/null; then
-  repo_name=$(basename "$(git rev-parse --show-toplevel)")
-  branch=$(git branch --show-current 2>/dev/null || echo "detached")
+# gitリポジトリ情報（session_idキーのキャッシュで重いgit呼び出しを間引く）
+session_id=$(echo "$input" | jq -r '.session_id // ""')
+worktree_name=$(echo "$input" | jq -r '.workspace.git_worktree // empty')
+cache_file="/tmp/claude-statusline-git-${session_id}"
+cache_ttl=5
 
+cache_stale() {
+  [[ ! -f "$cache_file" ]] && return 0
+  local mtime
+  mtime=$(stat -c %Y "$cache_file" 2>/dev/null || stat -f %m "$cache_file" 2>/dev/null || echo 0)
+  (( $(date +%s) - mtime > cache_ttl ))
+}
+
+if cache_stale; then
+  if git rev-parse --is-inside-work-tree &>/dev/null; then
+    repo_name=$(basename "$(git rev-parse --show-toplevel)")
+    branch=$(git branch --show-current 2>/dev/null || echo "detached")
+
+    has_upstream=0
+    ahead=0
+    behind=0
+    if git rev-parse --verify "@{upstream}" &>/dev/null; then
+      has_upstream=1
+      ahead=$(git rev-list --count "@{upstream}..HEAD" 2>/dev/null)
+      behind=$(git rev-list --count "HEAD..@{upstream}" 2>/dev/null)
+    fi
+
+    read staged modified untracked conflicted <<< $(
+      git --no-optional-locks status --porcelain 2>/dev/null | awk '{
+        x = substr($0,1,1); y = substr($0,2,1)
+        if (x=="U"||y=="U"||(x=="A"&&y=="A")||(x=="D"&&y=="D")) c++
+        else if (x!=" "&&x!="?") s++
+        if (y!=" "&&x!="?"&&y!="U") m++
+        if (x=="?") u++
+      } END { print s+0, m+0, u+0, c+0 }'
+    )
+
+    print -r -- "${repo_name}|${branch}|${has_upstream}|${ahead}|${behind}|${staged}|${modified}|${untracked}|${conflicted}" > "$cache_file"
+  else
+    print -r -- "" > "$cache_file"
+  fi
+fi
+
+git_info=""
+IFS='|' read repo_name branch has_upstream ahead behind staged modified untracked conflicted < "$cache_file"
+
+if [[ -n "$repo_name" ]]; then
   upstream_info=""
-  if git rev-parse --verify "@{upstream}" &>/dev/null; then
+  if [[ $has_upstream -eq 1 ]]; then
     branch_color=$C_BLUE
-    ahead=$(git rev-list "@{upstream}..HEAD" 2>/dev/null | wc -l | tr -d ' ')
-    behind=$(git rev-list "HEAD..@{upstream}" 2>/dev/null | wc -l | tr -d ' ')
     [[ $ahead -gt 0 ]] && upstream_info+=":${C_GREEN}⇡$ahead${C_RESET}"
     [[ $behind -gt 0 ]] && upstream_info+=":${C_RED}⇣$behind${C_RESET}"
   else
     branch_color=$C_ORANGE
   fi
-
-  read staged modified untracked conflicted <<< $(
-    git --no-optional-locks status --porcelain 2>/dev/null | awk '{
-      x = substr($0,1,1); y = substr($0,2,1)
-      if (x=="U"||y=="U"||(x=="A"&&y=="A")||(x=="D"&&y=="D")) c++
-      else if (x!=" "&&x!="?") s++
-      if (y!=" "&&x!="?"&&y!="U") m++
-      if (x=="?") u++
-    } END { print s+0, m+0, u+0, c+0 }'
-  )
 
   git_status=""
   [[ $conflicted -gt 0 ]] && git_status+="${C_RED}!$conflicted${C_RESET}"
@@ -125,7 +150,10 @@ if git rev-parse --is-inside-work-tree &>/dev/null; then
   [[ $modified -gt 0 ]] && git_status+="${C_RED}*$modified${C_RESET}"
   [[ $untracked -gt 0 ]] && git_status+="${C_YELLOW}?$untracked${C_RESET}"
 
-  git_info="${C_YELLOW}${repo_name}${C_RESET} ${C_WHITE}[${C_RESET}${branch_color}${branch}${C_RESET}${upstream_info}${C_WHITE}]${C_RESET}"
+  worktree_info=""
+  [[ -n "$worktree_name" ]] && worktree_info=" ${C_WHITE}(${C_RESET}${worktree_name}${C_WHITE})${C_RESET}"
+
+  git_info="${C_YELLOW}${repo_name}${C_RESET} ${C_WHITE}[${C_RESET}${branch_color}${branch}${C_RESET}${upstream_info}${C_WHITE}]${C_RESET}${worktree_info}"
   [[ -n "$git_status" ]] && git_info+=" ${git_status}"
 fi
 
@@ -146,10 +174,11 @@ if [[ -n "$rl_7d_pct" ]]; then
   gauge+=" 7:${sd_color}${sd_g}${C_RESET}"
 fi
 
-# 出力: repo [branch] status :: [model] ctx:▃ 5h:▅ 7d:▂ / todo
+# 出力: repo [branch] status :: [model] ctx:▃ 5h:▅ 7d:▂ · session_name / todo
 output=""
 [[ -n "$git_info" ]] && output+="${git_info}"
 output+=" [${model}] ${gauge}"
+[[ -n "$session_name" ]] && output+=" · ${session_name}"
 [[ -n "$todo_display" ]] && output+=" / ${todo_display}"
 
 printf '%s' "$output"
