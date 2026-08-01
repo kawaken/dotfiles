@@ -68,9 +68,6 @@ context_pct=$(echo "$input" | jq -r '.context_window.used_percentage // 0 | floo
 rl_5h_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty | if . then floor else empty end')
 rl_7d_pct=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty | if . then floor else empty end')
 
-# セッション名（--name / /rename で設定した名前、なければAI生成タイトル）
-session_name=$(echo "$input" | jq -r '.session_name // empty')
-
 # TODO情報（transcript_pathからTodoWriteの最新を取得）
 todo_display=""
 transcript_path=$(echo "$input" | jq -r '.transcript_path // ""')
@@ -174,11 +171,10 @@ if [[ -n "$rl_7d_pct" ]]; then
   gauge+=" 7:${sd_color}${sd_g}${C_RESET}"
 fi
 
-# 出力: repo [branch] status :: [model] ctx:▃ 5h:▅ 7d:▂ · session_name / todo
+# 出力: repo [branch] status :: [model] ctx:▃ 5h:▅ 7d:▂ / todo
 output=""
 [[ -n "$git_info" ]] && output+="${git_info}"
 output+=" [${model}] ${gauge}"
-[[ -n "$session_name" ]] && output+=" · ${session_name}"
 [[ -n "$todo_display" ]] && output+=" / ${todo_display}"
 
 printf '%s' "$output"
