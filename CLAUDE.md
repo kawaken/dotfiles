@@ -9,6 +9,7 @@ dotfilesリポジトリ。zsh設定、Git設定、カスタムツール、Claude
 - **gw/**: Git Worktreeヘルパー（サブモジュール）
 - **claude/**: Claude Code設定（~/.claude/ へシンボリックリンク）
 - **ghostty/**: ターミナル設定
+- **herdr/**: herdr（ターミナルワークスペース管理）の設定（~/.config/herdr/ へシンボリックリンク）
 
 ## 規約
 

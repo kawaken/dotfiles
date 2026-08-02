@@ -73,6 +73,11 @@ echo 'source <(fzf --zsh)' >> .zshrc_local
 mkdir -p .config/ghostty
 ln -s ~/{dotfiles,.config}/ghostty/config
 
+# herdrの設定
+mkdir -p .config/herdr
+ln -s ~/{dotfiles,.config}/herdr/config.toml
+ln -s ~/{dotfiles,.config}/herdr/sounds
+
 # Claudeの設定
 mkdir -p .claude
 ln -s ~/dotfiles/claude/CLAUDE.md ~/.claude/CLAUDE.md

@@ -1,0 +1,12 @@
+#!/usr/bin/env zsh
+
+[[ -n "$HERDR_PANE_ID" ]] || return
+
+_herdr_report_cwd() {
+  command -v herdr &>/dev/null || return
+  herdr pane report-metadata "$HERDR_PANE_ID" --source shell-cwd --token cwd="${PWD:t}" &>/dev/null
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook chpwd _herdr_report_cwd
+_herdr_report_cwd

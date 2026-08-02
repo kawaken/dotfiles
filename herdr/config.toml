@@ -1,0 +1,18 @@
+onboarding = false
+
+[ui.toast]
+delivery = "terminal"
+
+[ui.sidebar.agents]
+rows = [["state_icon", "$cwd", "tab"], ["terminal_title_stripped"]]
+
+[ui.sound]
+done_path = "/Users/kawaken/.config/herdr/sounds/done-quiet.mp3"
+request_path = "/Users/kawaken/.config/herdr/sounds/request-quiet.mp3"
+enabled = false
+
+[ui]
+show_agent_labels_on_pane_borders = true
+
+[experimental]
+switch_ascii_input_source_in_prefix = true
