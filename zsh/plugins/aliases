@@ -12,3 +12,6 @@ alias gi=git
 alias vs='code'
 alias vi=vim
 alias pwc='pwd | pbcopy'
+alias cl='claude'
+alias ca='claude agents'
+alias hr='herdr'

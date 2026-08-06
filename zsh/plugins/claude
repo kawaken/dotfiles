@@ -16,5 +16,3 @@ function claude() {
   command claude --enable-auto-mode "$@"
   reset-keyboard-protocol
 }
-
-alias cl='claude'
