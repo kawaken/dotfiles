@@ -13,6 +13,6 @@ function reset-keyboard-protocol() {
 }
 
 function claude() {
-  command claude --enable-auto-mode "$@"
+  command claude "$@"
   reset-keyboard-protocol
 }
