@@ -7,7 +7,6 @@ claude/
 ├── CLAUDE.md        # 共通指示（シンボリックリンク必要）
 ├── commands/        # カスタムコマンド（シンボリックリンク必要）
 ├── skills/          # スキル定義（シンボリックリンク必要）
-├── hooks/           # フックスクリプト（settings.json で絶対パス参照）
 └── statusline.sh    # ステータスライン表示スクリプト（settings.json で絶対パス参照）
 ```
 
@@ -21,7 +20,7 @@ Claude Code が `~/.claude/` から読み込むため、シンボリックリン
 
 ## settings.json
 
-`claude/settings.base.json` がベーステンプレート。permissions、hooks、statusLine を含む。
+`claude/settings.base.json` がベーステンプレート。permissions、statusLine を含む。
 
 セットアップ時に `~/.claude/settings.json` へ反映する:
 
