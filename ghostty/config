@@ -1,4 +1,5 @@
 shell-integration-features = no-cursor
+auto-update = off
 
 theme = Belafonte Day
 background = #ded7c8
