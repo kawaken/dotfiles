@@ -39,51 +39,6 @@
       "Bash(gh variable delete:*)"
     ]
   },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/dotfiles/claude/hooks/validate-write.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/dotfiles/claude/hooks/validate-general.sh"
-          },
-          {
-            "type": "command",
-            "command": "~/dotfiles/claude/hooks/validate-cd-git.sh"
-          },
-          {
-            "type": "command",
-            "command": "~/dotfiles/claude/hooks/validate-rails.sh"
-          },
-          {
-            "type": "command",
-            "command": "~/dotfiles/claude/hooks/validate-tool-use.sh"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/dotfiles/claude/hooks/retro-reminder.sh"
-          }
-        ]
-      }
-    ]
-  },
   "statusLine": {
     "type": "command",
     "command": "~/dotfiles/claude/statusline.sh"
