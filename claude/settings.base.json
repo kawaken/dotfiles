@@ -43,5 +43,6 @@
     "type": "command",
     "command": "~/dotfiles/claude/statusline.sh"
   },
-  "language": "Japanese"
+  "language": "Japanese",
+  "outputStyle": "Concise"
 }
