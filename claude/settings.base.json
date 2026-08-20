@@ -1,4 +1,6 @@
 {
+  "model": "opus",
+  "effortLevel": "xhigh",
   "permissions": {
     "allow": [
       "Bash(cd:*)",
@@ -11,6 +13,8 @@
       "Bash(rg:*)",
       "Bash(grep:*)",
       "Bash(cat:*)",
+      "Bash(tail:*)",
+      "Bash(head:*)",
       "Bash(sleep:*)",
       "Bash(history:*)",
       "Bash(git:*)",
@@ -18,8 +22,19 @@
       "Bash(jq:*)",
       "Bash(npm view:*)",
       "Read(./**)",
+      "Read(//tmp/**)",
+      "Edit(//tmp/**)",
+      "Read(//private/tmp/**)",
+      "Edit(//private/tmp/**)",
+      "Bash(cat /tmp/*)",
+      "Bash(ls /tmp*)",
+      "Bash(mv /tmp/*)",
+      "Bash(cp /tmp/*)",
+      "Bash(touch /tmp/*)",
+      "Bash(mkdir /tmp/*)",
       "WebFetch(domain:github.com)",
-      "WebSearch"
+      "WebSearch",
+      "Skill(update-config)"
     ],
     "deny": [
       "Bash(git push -f:*)",
@@ -37,6 +52,11 @@
       "Bash(gh org remove-member:*)",
       "Bash(gh repo remove-collaborator:*)",
       "Bash(gh variable delete:*)"
+    ],
+    "defaultMode": "auto",
+    "additionalDirectories": [
+      "/tmp",
+      "/private/tmp"
     ]
   },
   "statusLine": {
@@ -44,5 +64,7 @@
     "command": "~/dotfiles/claude/statusline.sh"
   },
   "language": "Japanese",
+  "tui": "fullscreen",
+  "theme": "auto",
   "outputStyle": "Concise"
 }
