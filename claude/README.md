@@ -25,7 +25,7 @@ Claude Code が `~/.claude/` から読み込むため、シンボリックリン
 MCP、組織名を含む設定等）は base に入れず、`~/.claude/settings.json` 側にだけ持つ。
 このリポジトリは公開されているため、後者を base に含めない点は特に重要。
 
-セットアップ時に `~/.claude/settings.json` へ反映する:
+セットアップ時に `~/.claude/settings.json` へ反映する。
 
 ```
 # 新規: そのままコピー
@@ -45,3 +45,14 @@ diff ~/.claude/settings.json ~/dotfiles/claude/settings.base.json
 - base にあるキー: base 側の値を採用する
 
 プロジェクト固有の設定（MCP、プラグイン等）は各プロジェクトの `.claude/settings.local.json` で管理する。
+
+## gw との連携
+
+`gw` に Claude Code / Codex のセッション状態を観測させる場合は、既存の hooks 設定を確認してから、`gw` が出力する設定を手動で追加する。`gw` は既存設定を自動変更しない。
+
+```sh
+gw guide agent-hook claude
+gw guide agent-hook codex
+```
+
+Claude Code の設定先は `~/.claude/settings.json`、Codex の設定先は `~/.codex/hooks.json` または `~/.codex/config.toml`。セッション状態は `~/.local/state/gw/sessions.json` に保存され、リポジトリ内には独自メタデータを書き込まない。

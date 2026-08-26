@@ -5,8 +5,5 @@ Thumbs.db
 .env
 secrethub.env
 .jira_enabled
-.gw.sh
-.gw-*
-.gw/
 
 **/.claude/settings.local.json

@@ -13,5 +13,5 @@
 
 - 既に適用済みの手順はスキップする
 - `user.name` / `user.email` など個人情報が必要な手順はユーザーに入力を求める
-- `~/.claude/settings.json` は `claude/settings.base.json` をベースにする。新規ならコピー、既存なら `jq -s '.[0] * .[1]'` でマージ（ベース側優先）
+- `~/.claude/settings.json` は `claude/settings.base.json` をベースにする。新規ならコピー、既存なら差分を確認して手動で反映する。配列は既存項目を残し、base側にしかない項目を追記する
 - 既存ファイルを上書き・削除する操作は必ず確認を取ること

@@ -54,6 +54,9 @@ gh repo clone kawaken/dotfiles -- --recurse-submodules
 # サブモジュールの初期化を忘れた場合
 # cd dotfiles && git submodule update --init --recursive
 
+# gwのインストール（Go 1.26以上）
+go install github.com/kawaken/gw/cmd/gw@latest
+
 # gitの設定
 mkdir -p .config/git
 ln -s dotfiles/git/ignore-global .config/git/ignore
@@ -96,7 +99,7 @@ mkdir -p ~/projects/src/github.com/<org>
 
 ### Claude Code の設定
 
-`claude/settings.base.json` を `~/.claude/settings.json` に反映する（permissions、hooks、statusLine を含む）。
+`claude/settings.base.json` を `~/.claude/settings.json` に反映する（permissions、statusLine などを含む）。
 
 ```
 # 新規
@@ -107,3 +110,21 @@ jq -s '.[0] * .[1]' ~/.claude/settings.json ~/dotfiles/claude/settings.base.json
 ```
 
 依存: `jq`
+
+### gw
+
+`gw` は Git worktree、GitHub の pull request、Claude Code / Codex のセッション状態を確認し、不要になった worktree の cleanup 候補を判定する CLI。worktree の作成やエージェントの起動は行わない。
+
+```sh
+gw list
+gw inspect <worktree>
+gw clean --dry-run
+gw clean
+```
+
+GitHub の pull request 情報を取得するため、`gh auth login` を済ませておく。エージェント連携を有効にする場合は、既存設定を確認したうえで次のコマンドが出力する hook を手動で追加する。
+
+```sh
+gw guide agent-hook claude
+gw guide agent-hook codex
+```
