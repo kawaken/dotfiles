@@ -87,6 +87,7 @@ ln -s ~/dotfiles/claude/CLAUDE.md ~/.claude/CLAUDE.md
 ln -s ~/dotfiles/claude/CLAUDE.md ~/.codex/AGENTS.md
 ln -s ~/dotfiles/claude/commands ~/.claude/commands
 ln -s ~/dotfiles/claude/skills ~/.claude/skills
+ln -s ~/dotfiles/claude/themes ~/.claude/themes
 
 # dotfilesリポジトリ用のメールアドレスを設定（git/.gitconfig-me を参照）
 cd dotfiles

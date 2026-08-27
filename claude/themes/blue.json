@@ -1,0 +1,8 @@
+{
+  "name": "Blue",
+  "base": "light",
+  "overrides": {
+    "promptBorder": "rgb(0,102,204)",
+    "promptBorderShimmer": "rgb(30,132,234)"
+  }
+}

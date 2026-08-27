@@ -65,6 +65,6 @@
   },
   "language": "Japanese",
   "tui": "fullscreen",
-  "theme": "auto",
+  "theme": "custom:blue",
   "outputStyle": "Concise"
 }

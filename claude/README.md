@@ -7,6 +7,7 @@ claude/
 ├── CLAUDE.md        # Claude Code / Codex のユーザー共通指示（シンボリックリンク必要）
 ├── commands/        # カスタムコマンド（シンボリックリンク必要）
 ├── skills/          # スキル定義（シンボリックリンク必要）
+├── themes/          # カスタムテーマ（シンボリックリンク必要）
 └── statusline.sh    # ステータスライン表示スクリプト（settings.json で絶対パス参照）
 ```
 
@@ -25,10 +26,14 @@ Claude Code はユーザー指示を `~/.claude/CLAUDE.md` から、Codex はグ
 
 ## シンボリックリンクが必要なもの
 
-Claude Code 固有のコマンドとスキルを `~/.claude/` から読み込むため、シンボリックリンクが必要:
+Claude Code 固有のコマンド、スキル、テーマを `~/.claude/` から読み込むため、シンボリックリンクが必要:
 
 - `~/.claude/commands/` → `dotfiles/claude/commands/`
 - `~/.claude/skills/` → `dotfiles/claude/skills/`
+- `~/.claude/themes/` → `dotfiles/claude/themes/`
+
+テーマは `settings.json` の `theme` に `custom:<ファイル名>` の形式で指定する。
+`themes/blue.json` なら `"theme": "custom:blue"`。
 
 ## settings.json
 
