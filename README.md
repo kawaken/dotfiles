@@ -81,9 +81,10 @@ mkdir -p .config/herdr
 ln -s ~/{dotfiles,.config}/herdr/config.toml
 ln -s ~/{dotfiles,.config}/herdr/sounds
 
-# Claudeの設定
-mkdir -p .claude
+# Claude Code / Codex のユーザー共通指示
+mkdir -p ~/.claude ~/.codex
 ln -s ~/dotfiles/claude/CLAUDE.md ~/.claude/CLAUDE.md
+ln -s ~/dotfiles/claude/CLAUDE.md ~/.codex/AGENTS.md
 ln -s ~/dotfiles/claude/commands ~/.claude/commands
 ln -s ~/dotfiles/claude/skills ~/.claude/skills
 
@@ -97,7 +98,11 @@ mkdir -p ~/projects/src/github.com/kawaken
 mkdir -p ~/projects/src/github.com/<org>
 ```
 
-### Claude Code の設定
+### Claude Code / Codex の設定
+
+`claude/CLAUDE.md` は Claude Code と Codex のユーザー共通指示の正本。
+Claude Code は `~/.claude/CLAUDE.md`、Codex は `~/.codex/AGENTS.md` から同じファイルを読む。
+Claude Code 固有の設定は、共通指示に混ぜず `~/.claude/` 側で管理する。
 
 `claude/settings.base.json` を `~/.claude/settings.json` に反映する（permissions、statusLine などを含む）。
 

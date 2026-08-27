@@ -1,20 +1,32 @@
-# Claude Code 設定
+# Claude Code / Codex 設定
 
 ## ディレクトリ構成
 
 ```
 claude/
-├── CLAUDE.md        # 共通指示（シンボリックリンク必要）
+├── CLAUDE.md        # Claude Code / Codex のユーザー共通指示（シンボリックリンク必要）
 ├── commands/        # カスタムコマンド（シンボリックリンク必要）
 ├── skills/          # スキル定義（シンボリックリンク必要）
 └── statusline.sh    # ステータスライン表示スクリプト（settings.json で絶対パス参照）
 ```
 
-## シンボリックリンクが必要なもの
+## ユーザー共通指示
 
-Claude Code が `~/.claude/` から読み込むため、シンボリックリンクが必要:
+`CLAUDE.md` を共通の正本として、各ツールの標準ファイル名から同じ実体へリンクする。
 
 - `~/.claude/CLAUDE.md` → `dotfiles/claude/CLAUDE.md`
+- `~/.codex/AGENTS.md` → `dotfiles/claude/CLAUDE.md`
+
+Claude Code はユーザー指示を `~/.claude/CLAUDE.md` から、Codex はグローバル指示を
+`~/.codex/AGENTS.md` から読み込む。ファイル名はツールごとに異なるが、内容の重複は持たない。
+
+このファイルには両ツールで解釈できる指示だけを置く。Claude Code のコマンド、スキル、設定などは
+それぞれの専用ファイルで管理する。
+
+## シンボリックリンクが必要なもの
+
+Claude Code 固有のコマンドとスキルを `~/.claude/` から読み込むため、シンボリックリンクが必要:
+
 - `~/.claude/commands/` → `dotfiles/claude/commands/`
 - `~/.claude/skills/` → `dotfiles/claude/skills/`
 

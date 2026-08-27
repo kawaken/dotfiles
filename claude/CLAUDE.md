@@ -1,6 +1,6 @@
-# ユーザーメモリ
+# ユーザー共通指示
 
-This file provides guidance to Claude Code (claude.ai/code) when working in any repository.
+このファイルは Claude Code と Codex で共有する、ユーザーレベルの指示。
 
 ## コミュニケーション
 
@@ -14,12 +14,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working in any 
 
 - Web検索は最後の手段。公式リファレンスやリポジトリのコードを優先
 - 依存ライブラリの情報は公式ドキュメントやソースコードで確認
-
-## Planモード
-
-- 終了時は承認後の実行内容を事前に宣言してからExitPlanModeを呼ぶ
-  - 実行なし: 「Planモードを終了し次の指示を待ちます」+ allowedPrompts空配列
-  - 実行あり: 「次に〇〇を行います」と明示
 
 ## 作業の進め方
 
@@ -44,7 +38,3 @@ This file provides guidance to Claude Code (claude.ai/code) when working in any 
 - 長い回答はセクション構成を先に明示（3-5セクション、各500文字以内）
 - 詳細はユーザーが求めた場合のみ提供
 - いきなり長文コードを全体提示しない
-
-## ローカル設定
-
-- @~/.claude/CLAUDE.local.md
