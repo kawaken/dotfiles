@@ -108,14 +108,16 @@ Claude Code 固有の設定は、共通指示に混ぜず `~/.claude/` 側で管
 `claude/settings.base.json` を `~/.claude/settings.json` に反映する（permissions、statusLine などを含む）。
 
 ```
-# 新規
+# 新規: そのままコピー
 cp ~/dotfiles/claude/settings.base.json ~/.claude/settings.json
 
-# 既存（ベース側優先でマージ）
-jq -s '.[0] * .[1]' ~/.claude/settings.json ~/dotfiles/claude/settings.base.json > ~/.claude/settings.json.tmp && mv ~/.claude/settings.json.tmp ~/.claude/settings.json
+# 既存: 差分を確認して手動で反映する
+diff ~/.claude/settings.json ~/dotfiles/claude/settings.base.json
 ```
 
-依存: `jq`
+`jq -s '.[0] * .[1]'` のような機械的マージは使わない。`*` 演算子は配列
+（`permissions.allow`/`deny` など）を丸ごと後勝ちで上書きし、既存側にだけ追加していた
+許可項目が消える。反映のルールは `claude/README.md` を参照。
 
 ### gw
 
