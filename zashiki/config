@@ -18,5 +18,5 @@ confirm-close-surface = false
 scrollback-limit = 100000000
 keybind = shift+enter=text:\n
 
-config-file = ?~/.config/ghostty/local
+config-file = ?~/.config/zashiki/local
 

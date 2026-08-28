@@ -72,9 +72,9 @@ ln -s dotfiles/zsh/_zshenv .zshenv
 # fzfの設定
 echo 'source <(fzf --zsh)' >> .zshrc_local
 
-# ghosttyの設定
-mkdir -p .config/ghostty
-ln -s ~/{dotfiles,.config}/ghostty/config
+# zashikiの設定
+mkdir -p .config/zashiki
+ln -s ~/{dotfiles,.config}/zashiki/config
 
 # herdrの設定
 mkdir -p .config/herdr
