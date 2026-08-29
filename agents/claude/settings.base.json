@@ -61,7 +61,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "~/dotfiles/claude/statusline.sh"
+    "command": "~/dotfiles/agents/claude/statusline.sh"
   },
   "language": "Japanese",
   "tui": "fullscreen",

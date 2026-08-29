@@ -1,0 +1,7 @@
+interface:
+  display_name: "YOLO Personal Ship"
+  short_description: "個人リポジトリをPR・CI・AutoMergeまで一気に出荷"
+  default_prompt: "Use $yolo to commit the current changes, open a PR, enable AutoMerge, and handle fixable CI failures until it merges."
+
+policy:
+  allow_implicit_invocation: false
