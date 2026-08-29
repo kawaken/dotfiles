@@ -82,12 +82,30 @@ ln -s ~/{dotfiles,.config}/herdr/config.toml
 ln -s ~/{dotfiles,.config}/herdr/sounds
 
 # Claude Code / Codex のユーザー共通指示
-mkdir -p ~/.claude ~/.codex
-ln -s ~/dotfiles/claude/CLAUDE.md ~/.claude/CLAUDE.md
-ln -s ~/dotfiles/claude/CLAUDE.md ~/.codex/AGENTS.md
-ln -s ~/dotfiles/claude/commands ~/.claude/commands
-ln -s ~/dotfiles/claude/skills ~/.claude/skills
-ln -s ~/dotfiles/claude/themes ~/.claude/themes
+mkdir -p ~/.claude ~/.claude/skills ~/.codex ~/.codex/skills
+ln -s ~/dotfiles/agents/AGENTS.md ~/.claude/CLAUDE.md
+ln -s ~/dotfiles/agents/AGENTS.md ~/.codex/AGENTS.md
+ln -s ~/dotfiles/agents/claude/commands ~/.claude/commands
+ln -s ~/dotfiles/agents/claude/themes ~/.claude/themes
+
+for skill_dir in ~/dotfiles/agents/skills/*; do
+  [[ -f "$skill_dir/SKILL.md" ]] || continue
+  skill_name=${skill_dir:t}
+  ln -s "$skill_dir" ~/.claude/skills/"$skill_name"
+  ln -s "$skill_dir" ~/.codex/skills/"$skill_name"
+done
+
+for skill_dir in ~/dotfiles/agents/claude/skills/*(N); do
+  [[ -f "$skill_dir/SKILL.md" ]] || continue
+  skill_name=${skill_dir:t}
+  ln -s "$skill_dir" ~/.claude/skills/"$skill_name"
+done
+
+for skill_dir in ~/dotfiles/agents/codex/skills/*; do
+  [[ -f "$skill_dir/SKILL.md" ]] || continue
+  skill_name=${skill_dir:t}
+  ln -s "$skill_dir" ~/.codex/skills/"$skill_name"
+done
 
 # dotfilesリポジトリ用のメールアドレスを設定（git/.gitconfig-me を参照）
 cd dotfiles
@@ -101,23 +119,26 @@ mkdir -p ~/projects/src/github.com/<org>
 
 ### Claude Code / Codex の設定
 
-`claude/CLAUDE.md` は Claude Code と Codex のユーザー共通指示の正本。
+`agents/AGENTS.md` は Claude Code と Codex のユーザー共通指示の正本。
 Claude Code は `~/.claude/CLAUDE.md`、Codex は `~/.codex/AGENTS.md` から同じファイルを読む。
-Claude Code 固有の設定は、共通指示に混ぜず `~/.claude/` 側で管理する。
+Claude Code 固有の設定は、共通指示に混ぜず `agents/claude/` 側で管理する。
 
-`claude/settings.base.json` を `~/.claude/settings.json` に反映する（permissions、statusLine などを含む）。
+`agents/claude/settings.base.json` を `~/.claude/settings.json` に反映する（permissions、statusLine などを含む）。
+
+個人リポジトリで変更をAutoMergeまで一気に進める場合は、Codexでは明示的に
+`$yolo` を呼び出す。このスキルは自動発火しない。
 
 ```
 # 新規: そのままコピー
-cp ~/dotfiles/claude/settings.base.json ~/.claude/settings.json
+cp ~/dotfiles/agents/claude/settings.base.json ~/.claude/settings.json
 
 # 既存: 差分を確認して手動で反映する
-diff ~/.claude/settings.json ~/dotfiles/claude/settings.base.json
+diff ~/.claude/settings.json ~/dotfiles/agents/claude/settings.base.json
 ```
 
 `jq -s '.[0] * .[1]'` のような機械的マージは使わない。`*` 演算子は配列
 （`permissions.allow`/`deny` など）を丸ごと後勝ちで上書きし、既存側にだけ追加していた
-許可項目が消える。反映のルールは `claude/README.md` を参照。
+許可項目が消える。反映のルールは `agents/README.md` を参照。
 
 ### gw
 

@@ -12,7 +12,7 @@ setopt errexit
 DOTFILES_DIR="${0:A:h:h}"
 FACETS_DIR="$HOME/.claude/usage-data/facets"
 FRICTION_LOG="$HOME/.claude/friction-log.md"
-SKILL_FILE="$DOTFILES_DIR/claude/skills/improve/SKILL.md"
+SKILL_FILE="$DOTFILES_DIR/agents/claude/skills/improve/SKILL.md"
 DAYS=7
 
 while [[ $# -gt 0 ]]; do
@@ -88,7 +88,7 @@ main() {
   git checkout -b "$branch" 2>/dev/null || git checkout "$branch"
 
   # 分析結果をファイルに書く
-  local outfile="claude/improve-$(date +%Y%m%d).md"
+  local outfile="agents/claude/improve-$(date +%Y%m%d).md"
   printf "# 改善提案 %s\n\n%s\n" "$(date +%Y-%m-%d)" "$analysis" > "$outfile"
   echo "分析結果: $outfile"
 
