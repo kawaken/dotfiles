@@ -19,6 +19,7 @@ Claude Code と Codex で共有する、ユーザーレベルの指示。ツー�
 ## Git Worktree
 
 - 1タスク = 1ブランチ = 1 worktree。タスクやエージェント間で共有しない
+- ブランチ名には `codex/` や `kawaken/` のようなプリフィクス・名前空間を付けず、`agents-md` や `fix-ogp` のような短く説明的なフラットな名前にする
 - 作業開始時に、primary checkoutかタスク用worktreeかを確認する
 - すでにタスク用worktreeにいる場合はそこを使い、新しいworktreeを作ったり入れ子にしたりしない
 - primary checkoutでは作業を始めず、リポジトリの手順に従って専用ブランチとworktreeを用意する

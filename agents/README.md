@@ -77,34 +77,54 @@ diff ~/.claude/settings.json ~/dotfiles/agents/claude/settings.base.json
 
 ## セットアップ用リンク
 
-既存のリンクや設定を確認し、必要なものだけ作成する。以前の構成で `~/.claude/skills/` 全体を
-`dotfiles/claude/skills/` にリンクしていた場合は、参照先を確認してからそのリンクを外し、下記の
-スキル単位のリンクへ移行する。共有スキルはスキル単位でリンクする:
+既存のリンクや設定を確認し、必要なものだけ作成する。以前の構成で `~/.claude/skills/` または
+`~/.codex/skills/` 全体を旧ディレクトリへリンクしていた場合は、参照先を `readlink` で確認してから
+そのディレクトリリンクだけを外し、下記のスキル単位のリンクへ移行する。実ファイルや実ディレクトリは
+削除しない。共有スキルはスキル単位でリンクする:
 
 ```
+# 旧構成のディレクトリ全体リンクを使っている場合だけ、参照先を確認してから外す
+if [[ -L ~/.claude/skills ]]; then
+  readlink ~/.claude/skills
+  unlink ~/.claude/skills
+fi
+if [[ -L ~/.codex/skills ]]; then
+  readlink ~/.codex/skills
+  unlink ~/.codex/skills
+fi
+
+link_if_safe() {
+  local source=$1 target=$2
+  if [[ -e "$target" && ! -L "$target" ]]; then
+    echo "skip: $target exists and is not a symbolic link"
+    return
+  fi
+  ln -sfn "$source" "$target"
+}
+
 mkdir -p ~/.claude ~/.claude/skills ~/.codex ~/.codex/skills
-ln -s ~/dotfiles/agents/AGENTS.md ~/.claude/CLAUDE.md
-ln -s ~/dotfiles/agents/AGENTS.md ~/.codex/AGENTS.md
-ln -s ~/dotfiles/agents/claude/commands ~/.claude/commands
-ln -s ~/dotfiles/agents/claude/themes ~/.claude/themes
+link_if_safe ~/dotfiles/agents/AGENTS.md ~/.claude/CLAUDE.md
+link_if_safe ~/dotfiles/agents/AGENTS.md ~/.codex/AGENTS.md
+link_if_safe ~/dotfiles/agents/claude/commands ~/.claude/commands
+link_if_safe ~/dotfiles/agents/claude/themes ~/.claude/themes
 
 for skill_dir in ~/dotfiles/agents/skills/*; do
   [[ -f "$skill_dir/SKILL.md" ]] || continue
   skill_name=${skill_dir:t}
-  ln -s "$skill_dir" ~/.claude/skills/"$skill_name"
-  ln -s "$skill_dir" ~/.codex/skills/"$skill_name"
+  link_if_safe "$skill_dir" ~/.claude/skills/"$skill_name"
+  link_if_safe "$skill_dir" ~/.codex/skills/"$skill_name"
 done
 
 for skill_dir in ~/dotfiles/agents/claude/skills/*(N); do
   [[ -f "$skill_dir/SKILL.md" ]] || continue
   skill_name=${skill_dir:t}
-  ln -s "$skill_dir" ~/.claude/skills/"$skill_name"
+  link_if_safe "$skill_dir" ~/.claude/skills/"$skill_name"
 done
 
-for skill_dir in ~/dotfiles/agents/codex/skills/*; do
+for skill_dir in ~/dotfiles/agents/codex/skills/*(N); do
   [[ -f "$skill_dir/SKILL.md" ]] || continue
   skill_name=${skill_dir:t}
-  ln -s "$skill_dir" ~/.codex/skills/"$skill_name"
+  link_if_safe "$skill_dir" ~/.codex/skills/"$skill_name"
 done
 ```
 
