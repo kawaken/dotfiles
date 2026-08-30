@@ -21,7 +21,8 @@ Claude Code と Codex で共有する、ユーザーレベルの指示。ツー�
 - 1タスク = 1ブランチ = 1 worktree。タスクやエージェント間で共有しない
 - ブランチ名には `codex/` や `kawaken/` のようなプリフィクス・名前空間を付けず、`agents-md` や `fix-ogp` のような短く説明的なフラットな名前にする
 - 作業開始時に、primary checkoutかタスク用worktreeかを確認する
-- すでにタスク用worktreeにいる場合はそこを使い、新しいworktreeを作ったり入れ子にしたりしない。ツールがdetached HEADでworktreeを用意していた場合は、リモートのmainをfetchして、その最新のmainを起点に作業ブランチを作ってから作業する
+- detached HEADのタスク用worktreeにいる場合は、`git status`で状態を確認したら、ファイルの閲覧・編集・テスト・依存関係のインストールなど他の作業より先にブランチを作る。リモートのmainをfetchし、その最新の`origin/main`を起点に`git switch -c <branch-name> origin/main`を実行する。ブランチを作れない場合は作業を続けず、既存の変更を捨てずに報告する
+- すでにブランチのあるタスク用worktreeにいる場合はそこを使い、新しいworktreeを作ったり入れ子にしたりしない
 - primary checkoutから新しい作業を始める場合は、そこでは作業せず、専用worktreeを作る前にリモートのmainをfetchし、ローカルのmainを`--ff-only`で最新化してから、そのmainを起点に専用ブランチとworktreeを用意する。未コミット変更や分岐などで更新できない場合は、既存の変更を捨てずに報告する
 - 作業用worktreeを用意した後は、mainなどの基準ブランチや他セッションのworktree・変更を操作しない
 - 編集・テスト・依存関係のインストールは、割り当てられたworktree内で完結する
