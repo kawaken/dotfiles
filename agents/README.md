@@ -36,6 +36,23 @@ Claude Code はユーザー指示を `~/.claude/CLAUDE.md` から、Codex はグ
 `agents/codex/skills/` に置く。`SKILL.md` は Agent Skills の形式に合わせ、共有スキルでは特定ツールの
 API名やツール名を前提にしない。
 
+## Codex 専用設定
+
+Codex remote-control を `workspace-write` で使う場合、worktree のソースファイルは書き込めても、Git の
+メタデータ（`fetch` や `commit` が更新する `.git` 以下）が別の場所にあるため、`Permission denied` になる
+ことがある。これは Git の所有権や worktree の配置ではなく、sandbox の書き込み境界によるもの。
+
+この症状が出た場合は、マシン側の `~/.codex/config.toml` に `[sandbox_workspace_write].writable_roots` を
+設定する必要がある。設定はマシン固有のパスを含むため、このリポジトリでは管理しない。設定の仕様と
+注意点は、公式の [Configuration Reference](https://learn.chatgpt.com/docs/config-file/config-reference)、
+[Advanced Configuration](https://learn.chatgpt.com/docs/config-file/config-advanced)、
+[Git worktrees](https://learn.chatgpt.com/docs/environments/git-worktrees) を参照して設定する。
+
+`Worktree root` はソース用 worktree の配置場所を変える設定であり、Git メタデータの書き込み権限とは別。
+`approval_policy = "never"` も承認確認を省くだけで sandbox 境界は変えない。`danger-full-access` より、必要な
+リポジトリの `.git` だけを `writable_roots` に追加する方法を優先する。設定を変更した後は、remote-control
+daemon の再起動とアプリからの再接続が必要。
+
 ## Claude Code 専用設定
 
 Claude Code 固有のコマンド、テーマ、statusline、設定を `~/.claude/` から読み込む:
