@@ -34,3 +34,7 @@ Claude Code と Codex で共有する、ユーザーレベルの指示。ツー�
 
 - まず結論を伝え、必要な詳細だけ説明する
 - 長いコードは全体を提示せず、変更箇所を中心に説明する
+
+## Markdownプレビュー
+
+- Markdownのプレビューを求められたら `zashiki +markdown-preview <path>` で開く。Obsidianなど他のアプリは使わない
