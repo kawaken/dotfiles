@@ -1,0 +1,5 @@
+# mise のツールを shims で PATH に足す（起動時に1回だけ）
+# このあと homebrew_path が Homebrew を先頭に戻す
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh --shims)"
+fi
