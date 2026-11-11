@@ -6,7 +6,7 @@ dotfilesリポジトリ。zsh設定、Git設定、カスタムツール、エー
 
 - **zsh/**: zshの設定とプラグインシステム
 - **git/**: Git設定、カスタムコマンド（git-*）、zsh関数
-- **gw**: Git worktreeの状態観測・cleanupツール（Goで導入）
+- **gw**: Git worktreeの作成・状態観測・lock・cleanupツール（Goで導入）
 - **agents/**: Claude Code / Codex のユーザー共通指示と各ツールの設定（各ユーザーディレクトリへシンボリックリンク）
 - **zashiki/**: ターミナル設定（Ghosttyフォークの Zashiki 用）
 - **herdr/**: herdr（ターミナルワークスペース管理）の設定（~/.config/herdr/ へシンボリックリンク）

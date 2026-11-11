@@ -154,4 +154,6 @@ gw guide agent-hook claude
 gw guide agent-hook codex
 ```
 
-Claude Code の設定先は `~/.claude/settings.json`、Codex の設定先は `~/.codex/hooks.json` または `~/.codex/config.toml`。セッション状態は `~/.local/state/gw/sessions.json` に保存され、リポジトリ内には独自メタデータを書き込まない。
+外部ツールからエージェントのCLIを起動する場合は、`GW_MANAGED=1` を付けて起動し、実行中に `gw lock <worktree> --pid <pid>`、終了時に `gw unlock <worktree>` を実行する。生きたlockがあるworktreeはcleanup対象にならない。詳細は `gw guide lock` を参照。
+
+Claude Code の設定先は `~/.claude/settings.json`、Codex の設定先は `~/.codex/hooks.json` または `~/.codex/config.toml`。セッション状態は `~/.local/state/gw/sessions.json`、プロセスlockは同じディレクトリの `locks/` に保存され、リポジトリ内には独自メタデータを書き込まない。
