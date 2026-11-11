@@ -98,11 +98,15 @@ mkdir -p ~/projects/src/github.com/<org>
 
 ### gw
 
-`gw` は Git worktree、GitHub の pull request、Claude Code / Codex のセッション状態を確認し、不要になった worktree の cleanup 候補を判定する CLI。worktree の作成やエージェントの起動は行わない。
+`gw` は Git worktree の作成・状態確認・実行中プロセスのlock・cleanup、GitHub の pull request、Claude Code / Codex のセッション状態を扱う CLI。エージェントの起動は行わない。
 
 ```sh
 gw list
+gw list --time
 gw inspect <worktree>
+gw new [<name>]
+gw lock <worktree> --pid <pid>
+gw unlock <worktree>
 gw clean --dry-run
 gw clean
 ```
@@ -113,3 +117,9 @@ GitHub の pull request 情報を取得するため、`gh auth login` を済ま�
 gw guide agent-hook claude
 gw guide agent-hook codex
 ```
+
+外部ツールからエージェントを起動する場合は、`GW_MANAGED=1` を付けたうえで、起動中に `gw lock <worktree> --pid <pid>`、終了時に `gw unlock <worktree>` を実行する。生きたlockがあるworktreeはcleanup対象にならない。
+
+JSON連携では `gw list --json` / `gw inspect --json` / `gw refresh --json` / `gw clean --json` の `schema_version` が `3`。`worktrees[].github.status` は `found`（PRあり）、`not_found`（PRなし）、`unknown`（確認不能なworktree）、`unavailable`（GitHub連携の利用不可・取得失敗）を表し、取得元は `sources.github`、取得エラーは `errors` に入る。
+`worktrees[].lock`、`git.uncommitted`、`git.unpushed`、`github.pr.head_oid` が追加され、agentの `lifecycle` には `managed` がある。`gw new --json` は `name`、`path`、`branch`、`base`、`created` を返す。`clean --json` は `planned` / `removed` / `skipped` を含み、`removed` もパスの配列ではなく削除内容を含むオブジェクトの配列になった。`gw list --time --json` では `git.updated_at` も出力される。
+旧キャッシュの `available` は、PRの有無に応じて `found` または `not_found` に読み替えられる。
