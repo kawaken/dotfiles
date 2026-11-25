@@ -4,6 +4,5 @@ Thumbs.db
 .pjrc
 .env
 secrethub.env
-.jira_enabled
 
 **/.claude/settings.local.json

@@ -51,7 +51,9 @@
       "Bash(gh gist delete:*)",
       "Bash(gh org remove-member:*)",
       "Bash(gh repo remove-collaborator:*)",
-      "Bash(gh variable delete:*)"
+      "Bash(gh variable delete:*)",
+      "Bash(find /)",
+      "Bash(find / *)"
     ],
     "defaultMode": "auto",
     "additionalDirectories": [
