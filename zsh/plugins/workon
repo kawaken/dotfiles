@@ -1,4 +1,5 @@
 export PROJECT_DIR=$HOME/projects
+export PATH=$PROJECT_DIR/bin:$PATH
 
 export __wkon
 function _update_workon() {
