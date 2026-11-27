@@ -68,5 +68,6 @@
   "language": "Japanese",
   "tui": "fullscreen",
   "theme": "custom:blue",
-  "outputStyle": "reply-style"
+  "outputStyle": "reply-style",
+  "promptSuggestionEnabled": false
 }
