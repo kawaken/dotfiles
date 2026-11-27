@@ -8,6 +8,7 @@ agents/
 ├── skills/               # Claude Code / Codex の共有スキル
 ├── claude/               # Claude Code 専用
 │   ├── commands/         # カスタムコマンド
+│   ├── output-styles/    # 返答の形を決める Output Style
 │   ├── settings.base.json
 │   ├── statusline.sh
 │   └── themes/           # カスタムテーマ
@@ -26,6 +27,11 @@ Claude Code はユーザー指示を `~/.claude/CLAUDE.md` から、Codex はグ
 
 このファイルには両ツールで解釈できる指示だけを置く。Claude Code / Codex の固有設定はそれぞれの
 専用ディレクトリで管理する。
+
+使用者とのやりとりに関する指示は、役割で置き場所を分ける。同じ内容を2か所に書かない。
+
+- `AGENTS.md`: 使用者とどう進めるか。両ツールに効く
+- `claude/output-styles/`: 1回の返答をどう書くか。Claude Code にだけ効く
 
 ## スキル
 
@@ -55,14 +61,19 @@ daemon の再起動とアプリからの再接続が必要。
 
 ## Claude Code 専用設定
 
-Claude Code 固有のコマンド、テーマ、statusline、設定を `~/.claude/` から読み込む:
+Claude Code 固有のコマンド、Output Style、テーマ、statusline、設定を `~/.claude/` から読み込む:
 
 - `~/.claude/commands/` → `dotfiles/agents/claude/commands/`
+- `~/.claude/output-styles/` → `dotfiles/agents/claude/output-styles/`
 - `~/.claude/skills/` → 共有スキルと `dotfiles/agents/claude/skills/` の各スキル
 - `~/.claude/themes/` → `dotfiles/agents/claude/themes/`
 
 テーマは `settings.json` の `theme` に `custom:<ファイル名>` の形式で指定する。
 `themes/blue.json` なら `"theme": "custom:blue"`。
+
+Output Style は `settings.json` の `outputStyle` にファイル名（拡張子なし）を指定する。
+`output-styles/reply-style.md` なら `"outputStyle": "reply-style"`。ファイルを追加・変更した後は
+Claude Code の再起動が必要。
 
 ### settings.json
 
@@ -123,6 +134,7 @@ mkdir -p ~/.claude ~/.claude/skills ~/.codex ~/.codex/skills
 link_if_safe ~/dotfiles/agents/AGENTS.md ~/.claude/CLAUDE.md
 link_if_safe ~/dotfiles/agents/AGENTS.md ~/.codex/AGENTS.md
 link_if_safe ~/dotfiles/agents/claude/commands ~/.claude/commands
+link_if_safe ~/dotfiles/agents/claude/output-styles ~/.claude/output-styles
 link_if_safe ~/dotfiles/agents/claude/themes ~/.claude/themes
 
 for skill_dir in ~/dotfiles/agents/skills/*; do
